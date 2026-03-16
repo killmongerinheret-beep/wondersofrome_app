@@ -6,17 +6,18 @@ import { ExploreScreen } from './src/screens/ExploreScreen';
 import { MyToursScreen } from './src/screens/MyToursScreen';
 import { WalletScreen } from './src/screens/WalletScreen';
 import { ConciergeScreen } from './src/screens/ConciergeScreen';
+import { ShopScreen } from './src/screens/ShopScreen';
+import { CartProvider, useCart } from './src/context/CartContext';
 import { useGeofencing } from './src/hooks/useGeofencing';
 import * as Notifications from 'expo-notifications';
 import { BlurView } from 'expo-blur';
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, View, Text } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Mapbox from '@rnmapbox/maps';
 import { getMapboxAccessToken } from './src/config/mapbox';
 
 const Tab = createBottomTabNavigator();
 
-// Configure notifications
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -27,61 +28,96 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export default function App() {
+function ShopTabIcon({ focused, color, size }: { focused: boolean; color: string; size: number }) {
+  const { totalItems } = useCart();
+  return (
+    <View>
+      <Ionicons name={focused ? 'bag' : 'bag-outline'} size={size} color={color} />
+      {totalItems > 0 && (
+        <View style={styles.tabBadge}>
+          <Text style={styles.tabBadgeText}>{totalItems > 9 ? '9+' : totalItems}</Text>
+        </View>
+      )}
+    </View>
+  );
+}
+
+function AppTabs() {
   const { startGeofencing } = useGeofencing();
 
-  useEffect(() => {
-    startGeofencing();
-  }, []);
+  useEffect(() => { startGeofencing(); }, []);
 
   useEffect(() => {
     const token = getMapboxAccessToken();
-    if (token) {
-      Mapbox.setAccessToken(token);
-    }
+    if (token) Mapbox.setAccessToken(token);
   }, []);
 
   return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          if (route.name === 'Shop') return <ShopTabIcon focused={focused} color={color} size={size} />;
+          const icons: Record<string, [string, string]> = {
+            Explore: ['map', 'map-outline'],
+            'My Tours': ['ticket', 'ticket-outline'],
+            Wallet: ['wallet', 'wallet-outline'],
+            Concierge: ['chatbubble-ellipses', 'chatbubble-ellipses-outline'],
+          };
+          const [active, inactive] = icons[route.name] ?? ['ellipse', 'ellipse-outline'];
+          return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: '#007AFF',
+        tabBarInactiveTintColor: '#8E8E93',
+        headerShown: false,
+        tabBarStyle: {
+          position: 'absolute',
+          borderTopWidth: 0,
+          elevation: 0,
+          height: Platform.OS === 'ios' ? 88 : 60,
+        },
+        tabBarBackground: () => (
+          <BlurView tint="light" intensity={80} style={StyleSheet.absoluteFill} />
+        ),
+      })}
+      initialRouteName="Explore"
+    >
+      <Tab.Screen name="Explore" component={ExploreScreen} />
+      <Tab.Screen name="My Tours" component={MyToursScreen} />
+      <Tab.Screen name="Shop" component={ShopScreen} />
+      <Tab.Screen name="Wallet" component={WalletScreen} />
+      <Tab.Screen name="Concierge" component={ConciergeScreen} />
+    </Tab.Navigator>
+  );
+}
+
+export default function App() {
+  return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            tabBarIcon: ({ focused, color, size }) => {
-              let iconName;
-
-              if (route.name === 'Explore') {
-                iconName = focused ? 'map' : 'map-outline';
-              } else if (route.name === 'My Tours') {
-                iconName = focused ? 'cloud-done' : 'cloud-outline';
-              } else if (route.name === 'Wallet') {
-                iconName = focused ? 'wallet' : 'wallet-outline';
-              } else if (route.name === 'Concierge') {
-                iconName = focused ? 'chatbubble-ellipses' : 'chatbubble-ellipses-outline';
-              }
-
-              return <Ionicons name={iconName as any} size={size} color={color} />;
-            },
-            tabBarActiveTintColor: '#007AFF',
-            tabBarInactiveTintColor: '#8E8E93',
-            headerShown: false,
-            tabBarStyle: {
-              position: 'absolute',
-              borderTopWidth: 0,
-              elevation: 0,
-              height: Platform.OS === 'ios' ? 88 : 60,
-            },
-            tabBarBackground: () => (
-              <BlurView tint="light" intensity={80} style={StyleSheet.absoluteFill} />
-            ),
-          })}
-          initialRouteName="Explore"
-        >
-          <Tab.Screen name="Explore" component={ExploreScreen} />
-          <Tab.Screen name="My Tours" component={MyToursScreen} />
-          <Tab.Screen name="Wallet" component={WalletScreen} />
-          <Tab.Screen name="Concierge" component={ConciergeScreen} />
-        </Tab.Navigator>
-      </NavigationContainer>
+      <CartProvider>
+        <NavigationContainer>
+          <AppTabs />
+        </NavigationContainer>
+      </CartProvider>
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -8,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#FF3B30',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  tabBadgeText: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '900',
+  },
+});

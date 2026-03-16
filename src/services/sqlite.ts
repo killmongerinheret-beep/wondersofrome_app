@@ -49,6 +49,12 @@ const initDatabase = async (db: SQLite.SQLiteDatabase) => {
         last_played_variant TEXT,
         last_position INTEGER DEFAULT 0
       );
+
+      CREATE TABLE IF NOT EXISTS cached_sights (
+        id TEXT PRIMARY KEY,
+        data TEXT NOT NULL,
+        cached_at INTEGER NOT NULL
+      );
     `);
     console.log('Database initialized');
   } catch (error) {
@@ -98,4 +104,32 @@ export const updateProgress = async (sightId: string, completed: boolean, lastPl
     'INSERT OR REPLACE INTO progress (sight_id, completed, last_played_variant, last_position) VALUES (?, ?, ?, ?)',
     [sightId, completed ? 1 : 0, lastPlayedVariant, lastPosition]
   );
+};
+
+// ── Sight cache ──────────────────────────────────────────────────────────────
+
+const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6 hours
+
+export const saveCachedSights = async (sights: unknown[]): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM cached_sights');
+  await db.runAsync(
+    'INSERT INTO cached_sights (id, data, cached_at) VALUES (?, ?, ?)',
+    ['all', JSON.stringify(sights), Date.now()]
+  );
+};
+
+export const getCachedSights = async <T>(): Promise<T[] | null> => {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{ data: string; cached_at: number }>(
+    'SELECT data, cached_at FROM cached_sights WHERE id = ?',
+    ['all']
+  );
+  if (!row) return null;
+  if (Date.now() - row.cached_at > CACHE_TTL_MS) return null;
+  try {
+    return JSON.parse(row.data) as T[];
+  } catch {
+    return null;
+  }
 };

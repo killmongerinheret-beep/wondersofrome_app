@@ -1,39 +1,32 @@
-import { useState } from 'react';
-import { playAudioForSight, stopAudio } from '../services/audio';
+import { useEffect, useState } from 'react';
+import {
+  subscribePlayer,
+  playAudioForSight,
+  pauseAudio,
+  resumeAudio,
+  seekAudio,
+  stopAudio,
+  getPlayerState,
+  PlayerState,
+} from '../services/audio';
 
 export const useAudioPlayer = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentSightId, setCurrentSightId] = useState<string | null>(null);
-  const [currentVariant, setCurrentVariant] = useState<string | null>(null);
+  const [playerState, setPlayerState] = useState<PlayerState>(getPlayerState());
 
-  const play = async (sightId: string, variant: string = 'quick') => {
-    try {
-      await playAudioForSight(sightId, variant);
-      setIsPlaying(true);
-      setCurrentSightId(sightId);
-      setCurrentVariant(variant);
-    } catch (error) {
-      console.error('Error in useAudioPlayer play:', error);
-      setIsPlaying(false);
-    }
-  };
+  useEffect(() => {
+    const unsub = subscribePlayer(setPlayerState);
+    return unsub;
+  }, []);
 
-  const stop = async () => {
-    try {
-      await stopAudio();
-      setIsPlaying(false);
-      setCurrentSightId(null);
-      setCurrentVariant(null);
-    } catch (error) {
-      console.error('Error in useAudioPlayer stop:', error);
-    }
-  };
+  const play = (sightId: string, variant = 'quick', remoteUrl?: string, onProgress?: (p: number) => void) =>
+    playAudioForSight(sightId, variant, remoteUrl, onProgress);
 
   return {
-    isPlaying,
-    currentSightId,
-    currentVariant,
+    ...playerState,
     play,
-    stop,
+    pause: pauseAudio,
+    resume: resumeAudio,
+    seek: seekAudio,
+    stop: stopAudio,
   };
 };

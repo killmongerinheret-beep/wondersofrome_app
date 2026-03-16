@@ -3,19 +3,19 @@ import { View, StyleSheet, FlatList, Text, StatusBar, TouchableOpacity } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useOfflineContent } from '../hooks/useOfflineContent';
 import { SightCard } from '../components/SightCard';
-import sights from '../data/sights.json';
+import { useSights } from '../hooks/useSights';
 import { Sight } from '../types';
 
 export const HomeScreen: React.FC = () => {
   const { downloadedSights, downloadProgress, downloadSight } = useOfflineContent();
+  const { sights, loading, source } = useSights();
   const [language, setLanguage] = useState<'en' | 'it'>('en');
   const [packFilter, setPackFilter] = useState<'essential' | 'all'>('essential');
 
   const visibleSights = useMemo(() => {
-    const allSights = sights as Sight[];
-    if (packFilter === 'all') return allSights;
-    return allSights.filter((s) => (s.pack ?? 'full') === 'essential');
-  }, [packFilter]);
+    if (packFilter === 'all') return sights;
+    return sights.filter((s) => (s.pack ?? 'full') === 'essential');
+  }, [packFilter, sights]);
 
   const renderItem = ({ item }: { item: Sight }) => (
     <SightCard

@@ -13,10 +13,14 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import sightsJson from '../data/sights.json';
 import { Sight } from '../types';
-import { playAudioForSight } from '../services/audio';
 import { getMapboxAccessToken } from '../config/mapbox';
+import { useSights } from '../hooks/useSights';
+import { AudioPlayer } from '../components/AudioPlayer';
+import { Linking, Modal } from 'react-native';
+import { DownloadPackScreen } from './DownloadPackScreen';
+
+import { useNavigation } from '@react-navigation/native';
 
 type ExploreFilter = 'all' | 'museum' | 'religious' | 'other' | 'piazza';
 
@@ -40,6 +44,7 @@ const distanceMeters = (a: { lat: number; lng: number }, b: { lat: number; lng: 
 
 export const ExploreScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const cameraRef = useRef<Mapbox.Camera>(null);
   const drawerHeight = 320;
   const drawerTranslate = useRef(new Animated.Value(drawerHeight)).current;
@@ -48,8 +53,9 @@ export const ExploreScreen: React.FC = () => {
   const [filter, setFilter] = useState<ExploreFilter>('all');
   const [selectedSightId, setSelectedSightId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [showDownloadPack, setShowDownloadPack] = useState(false);
 
-  const sights = useMemo(() => sightsJson as Sight[], []);
+  const { sights } = useSights();
 
   const filteredSights = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -111,10 +117,12 @@ export const ExploreScreen: React.FC = () => {
 
   const accessToken = useMemo(() => getMapboxAccessToken(), []);
 
-  const handlePlay = async () => {
-    if (!selectedSight) return;
+  const handleBookNow = async () => {
+    if (!selectedSight?.linkedTour) return;
+    const domain = selectedSight.linkedTour.site?.domain ?? 'https://ticketsinrome.com';
+    const url = `${domain}/tour/${selectedSight.linkedTour.slug}`;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    await playAudioForSight(selectedSight.id, 'quick');
+    await Linking.openURL(url);
   };
 
   if (!accessToken) {
@@ -158,6 +166,34 @@ export const ExploreScreen: React.FC = () => {
           </Mapbox.PointAnnotation>
         ))}
       </Mapbox.MapView>
+
+      {/* Download pack button — top right */}
+      <View style={[styles.downloadBtnWrap, { top: insets.top + 12 }]}>
+        <TouchableOpacity
+          onPress={() => setShowDownloadPack(true)}
+          activeOpacity={0.85}
+          style={styles.downloadBtn}
+        >
+          <BlurView intensity={80} tint="dark" style={styles.downloadBtnBlur}>
+            <Ionicons name="cloud-download-outline" size={18} color="#fff" />
+          </BlurView>
+        </TouchableOpacity>
+      </View>
+
+      {/* Shop nearby pill — floats above search bar */}
+      <View style={[styles.shopPillWrap, { bottom: Math.max(16, insets.bottom + 12) + 130 }]}>
+        <TouchableOpacity
+          onPress={() => navigation?.navigate?.('Shop' as never)}
+          activeOpacity={0.9}
+          style={styles.shopPill}
+        >
+          <BlurView intensity={80} tint="dark" style={styles.shopPillBlur}>
+            <Ionicons name="bag-handle-outline" size={16} color="#fff" />
+            <Text style={styles.shopPillText}>Shop Tours & Souvenirs</Text>
+            <Ionicons name="chevron-up" size={14} color="rgba(255,255,255,0.7)" />
+          </BlurView>
+        </TouchableOpacity>
+      </View>
 
       <View style={[styles.bottomControls, { paddingBottom: Math.max(16, insets.bottom + 12) }]}>
         <BlurView intensity={80} tint="light" style={styles.controlsCard}>
@@ -206,6 +242,11 @@ export const ExploreScreen: React.FC = () => {
         </BlurView>
       </View>
 
+      {/* Offline download modal */}
+      <Modal visible={showDownloadPack} animationType="slide" presentationStyle="fullScreen">
+        <DownloadPackScreen onClose={() => setShowDownloadPack(false)} />
+      </Modal>
+
       {selectedSight && (
         <Animated.View
           style={[
@@ -235,10 +276,16 @@ export const ExploreScreen: React.FC = () => {
             <View style={styles.drawerBody}>
               <Image source={{ uri: selectedSight.thumbnail }} style={styles.drawerImage} resizeMode="cover" />
 
-              <TouchableOpacity onPress={handlePlay} activeOpacity={0.9} style={styles.playButton}>
-                <Ionicons name="play" size={22} color="#0B0B0B" />
-                <Text style={styles.playText}>Play Audio</Text>
-              </TouchableOpacity>
+              <AudioPlayer sight={selectedSight} />
+
+              {selectedSight.linkedTour && (
+                <TouchableOpacity onPress={handleBookNow} activeOpacity={0.9} style={styles.bookButton}>
+                  <Ionicons name="ticket-outline" size={18} color="#fff" />
+                  <Text style={styles.bookText}>
+                    Book Tour{selectedSight.linkedTour.price ? ` · €${selectedSight.linkedTour.price}` : ''}
+                  </Text>
+                </TouchableOpacity>
+              )}
 
               <Text style={styles.drawerDescription} numberOfLines={3}>
                 {selectedSight.description}
@@ -423,24 +470,62 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: 'rgba(255,255,255,0.08)',
   },
-  playButton: {
-    height: 54,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: 10,
-  },
-  playText: {
-    color: '#0B0B0B',
-    fontSize: 16,
-    fontWeight: '900',
-  },
   drawerDescription: {
     color: 'rgba(255,255,255,0.9)',
     fontSize: 13,
     lineHeight: 18,
     fontWeight: '600',
+  },
+  bookButton: {
+    height: 46,
+    borderRadius: 16,
+    backgroundColor: '#007AFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  bookText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '900',
+  },
+  shopPillWrap: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+  },
+  shopPill: {
+    borderRadius: 999,
+    overflow: 'hidden',
+  },
+  shopPillBlur: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  shopPillText: {
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  downloadBtnWrap: {
+    position: 'absolute',
+    right: 16,
+  },
+  downloadBtn: {
+    borderRadius: 22,
+    overflow: 'hidden',
+  },
+  downloadBtnBlur: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
 });

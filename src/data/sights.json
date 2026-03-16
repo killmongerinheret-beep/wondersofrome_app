@@ -17,9 +17,23 @@
       "Carry water—there is little shade around the monument."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/colosseum-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/colosseum-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/colosseum-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/colosseum-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/colosseum-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/colosseum-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -40,9 +54,23 @@
       "Arrive early to avoid the longest security lines."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/vatican-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/vatican-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/vatican-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/vatican-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/vatican-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/vatican-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -63,9 +91,23 @@
       "Keep your phone and wallet secure in busy times."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/trevi-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/trevi-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/trevi-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/trevi-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/trevi-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/trevi-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -86,9 +128,23 @@
       "A quick stop, but worth it even on busy days."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/pantheon-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/pantheon-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/pantheon-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/pantheon-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/pantheon-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/pantheon-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -109,9 +165,23 @@
       "Pair it with the Colosseum on the same day."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/forum-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/forum-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/forum-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/forum-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/forum-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/forum-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -132,9 +202,23 @@
       "Rules change: avoid sitting where it’s not allowed."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/spanish-steps-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/spanish-steps-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/spanish-steps-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/spanish-steps-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/spanish-steps-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/spanish-steps-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -155,9 +239,23 @@
       "Great place for a quick gelato break."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/piazza-navona-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/piazza-navona-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/piazza-navona-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/piazza-navona-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/piazza-navona-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/piazza-navona-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -178,9 +276,23 @@
       "Bring a light jacket—wind can be strong on top."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/castel-santangelo-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/castel-santangelo-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/castel-santangelo-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/castel-santangelo-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/castel-santangelo-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/castel-santangelo-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -201,9 +313,23 @@
       "Go early for shorter security queues."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/st-peters-basilica-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/st-peters-basilica-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/st-peters-basilica-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/st-peters-basilica-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/st-peters-basilica-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/st-peters-basilica-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -224,9 +350,23 @@
       "Pick a few highlights instead of trying to see everything."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/vatican-museums-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/vatican-museums-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/vatican-museums-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/vatican-museums-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/vatican-museums-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/vatican-museums-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -247,9 +387,23 @@
       "Arrive a little early; entry is timed."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/borghese-gallery-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/borghese-gallery-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/borghese-gallery-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/borghese-gallery-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/borghese-gallery-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/borghese-gallery-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -257,8 +411,8 @@
     "name": "Villa Borghese Gardens",
     "name_it": "Villa Borghese",
     "pack": "full",
-    "lat": 41.9140,
-    "lng": 12.4860,
+    "lat": 41.914,
+    "lng": 12.486,
     "radius": 20,
     "category": "other",
     "has_tips": true,
@@ -270,9 +424,23 @@
       "Rent a bike to cover more ground."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/villa-borghese-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/villa-borghese-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/villa-borghese-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/villa-borghese-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/villa-borghese-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/villa-borghese-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -293,9 +461,23 @@
       "Take your time—this museum rewards slow looking."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/capitoline-museums-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/capitoline-museums-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/capitoline-museums-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/capitoline-museums-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/capitoline-museums-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/capitoline-museums-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -304,7 +486,7 @@
     "name_it": "Vittoriano (Altare della Patria)",
     "pack": "full",
     "lat": 41.8946,
-    "lng": 12.4830,
+    "lng": 12.483,
     "radius": 20,
     "category": "other",
     "has_tips": true,
@@ -316,9 +498,23 @@
       "Best photos with a wide-angle lens."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/vittoriano-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/vittoriano-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/vittoriano-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/vittoriano-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/vittoriano-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/vittoriano-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -339,9 +535,23 @@
       "Good starting point for a stroll into the center."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/piazza-del-popolo-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/piazza-del-popolo-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/piazza-del-popolo-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/piazza-del-popolo-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/piazza-del-popolo-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/piazza-del-popolo-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -362,9 +572,23 @@
       "Great stop between Aventine Hill and the Forum."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/circus-maximus-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/circus-maximus-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/circus-maximus-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/circus-maximus-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/circus-maximus-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/circus-maximus-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -385,9 +609,23 @@
       "Look for mosaic floors and massive brick walls."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/baths-caracalla-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/baths-caracalla-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/baths-caracalla-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/baths-caracalla-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/baths-caracalla-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/baths-caracalla-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -408,9 +646,23 @@
       "Explore side streets for quieter corners."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/trastevere-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/trastevere-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/trastevere-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/trastevere-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/trastevere-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/trastevere-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -431,9 +683,23 @@
       "Bring sunscreen—many sections are exposed."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/appia-antica-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/appia-antica-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/appia-antica-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/appia-antica-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/appia-antica-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/appia-antica-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   },
   {
@@ -454,9 +720,23 @@
       "Join a guided visit; access is usually controlled."
     ],
     "audioFiles": {
-      "quick": { "url": "https://example.com/audio/catacombs-callixtus-quick.m4a", "duration": 120, "size": 1000000 },
-      "deep": { "url": "https://example.com/audio/catacombs-callixtus-deep.m4a", "duration": 600, "size": 5000000 },
-      "kids": { "url": "https://example.com/audio/catacombs-callixtus-kids.m4a", "duration": 180, "size": 1500000 }
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/catacombs-callixtus-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/catacombs-callixtus-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/catacombs-callixtus-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
     }
   }
 ]

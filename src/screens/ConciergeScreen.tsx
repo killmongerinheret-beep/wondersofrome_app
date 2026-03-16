@@ -26,35 +26,52 @@ export const ConciergeScreen: React.FC = () => {
     faqs: FAQ[];
   } | null>(null);
 
-  const offices = useMemo<Office[]>(
+  const defaultOffices = useMemo<Office[]>(
     () => [
       {
-        name: 'Rome Center Office',
-        address: 'Via del Corso 123, 00186 Roma',
-        hours: 'Daily • 09:00–19:00',
+        name: 'Wonders of Rome — Main Office',
+        address: 'Via della Conciliazione, 00193 Roma',
+        hours: 'Mon–Sun  09:00–19:00',
       },
       {
         name: 'Vatican Meeting Point',
         address: 'Piazza Pio XII, 00193 Roma',
-        hours: 'Daily • 08:00–12:00',
+        hours: 'Daily  08:00–13:00',
+      },
+      {
+        name: 'Colosseum Meeting Point',
+        address: 'Via Sacra, 00186 Roma (near Arch of Titus)',
+        hours: 'Daily  08:30–17:00',
       },
     ],
     []
   );
 
-  const faqs = useMemo<FAQ[]>(
+  const defaultFaqs = useMemo<FAQ[]>(
     () => [
       {
-        q: 'Can you reschedule my ticket?',
-        a: 'If your ticket provider supports rescheduling, we’ll handle it. Send your order ID in WhatsApp.',
+        q: 'How do I reschedule or cancel my booking?',
+        a: 'Message us on WhatsApp with your booking reference (last 6 digits of your confirmation email). We will sort it out fast.',
       },
       {
         q: 'Do I need internet for the audio guide?',
-        a: 'Once you download a tour in My Tours, playback works offline.',
+        a: 'Download your sights in the Explore tab first. After that, audio plays fully offline — no signal needed.',
       },
       {
-        q: 'What should I bring to churches?',
-        a: 'Cover shoulders and knees. A light scarf works perfectly in summer.',
+        q: 'What should I wear to churches and the Vatican?',
+        a: 'Shoulders and knees must be covered. A light scarf or sarong works perfectly in summer.',
+      },
+      {
+        q: 'Where do I meet my guide?',
+        a: 'Meeting point details are in your confirmation email. Arrive 10 minutes early and look for the Wonders of Rome sign.',
+      },
+      {
+        q: 'Can I bring children on the tours?',
+        a: 'Yes — most tours are family-friendly. The app has a Kids audio guide with myths and stories for younger visitors.',
+      },
+      {
+        q: 'What if it rains?',
+        a: 'Most tours run in light rain. In case of severe weather we will contact you to reschedule at no extra cost.',
       },
     ],
     []
@@ -85,16 +102,24 @@ export const ConciergeScreen: React.FC = () => {
   const handleWhatsApp = async () => {
     const url =
       remote?.agent?.whatsappUrl?.trim() ||
-      'https://wa.me/393000000000?text=Hi%20Marco%2C%20I%20need%20help%20with%20my%20Rome%20tour.';
+      'https://wa.me/39060608?text=Hi%2C%20I%20need%20help%20with%20my%20Wonders%20of%20Rome%20booking.';
     const supported = await Linking.canOpenURL(url);
     if (supported) {
       await Linking.openURL(url);
     }
   };
 
+  const handleWebsite = async () => {
+    await Linking.openURL('https://wondersofrome.com');
+  };
+
+  const handleEmail = async () => {
+    await Linking.openURL('mailto:info@wondersofrome.com');
+  };
+
   const displayAgent = remote?.agent && remote.agent.name ? remote.agent : null;
-  const displayOffices = remote?.offices && remote.offices.length > 0 ? remote.offices : offices;
-  const displayFaqs = remote?.faqs && remote.faqs.length > 0 ? remote.faqs : faqs;
+  const displayOffices = remote?.offices && remote.offices.length > 0 ? remote.offices : defaultOffices;
+  const displayFaqs = remote?.faqs && remote.faqs.length > 0 ? remote.faqs : defaultFaqs;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -104,6 +129,7 @@ export const ConciergeScreen: React.FC = () => {
           <Text style={styles.headerSubtitle}>Direct access to your agency</Text>
         </View>
 
+        {/* Agent / WhatsApp card */}
         <View style={styles.sectionWrap}>
           <BlurView intensity={80} tint="light" style={styles.agentCard}>
             <Image
@@ -115,8 +141,8 @@ export const ConciergeScreen: React.FC = () => {
               style={styles.agentAvatar}
             />
             <View style={styles.agentText}>
-              <Text style={styles.agentTitle}>{displayAgent?.name?.trim() || 'Chat with Marco'}</Text>
-              <Text style={styles.agentSubtitle}>{displayAgent?.subtitle?.trim() || 'Rome local • Fast replies'}</Text>
+              <Text style={styles.agentTitle}>{displayAgent?.name?.trim() || 'Wonders of Rome'}</Text>
+              <Text style={styles.agentSubtitle}>{displayAgent?.subtitle?.trim() || 'Rome experts  Fast replies'}</Text>
             </View>
             <TouchableOpacity onPress={handleWhatsApp} activeOpacity={0.9} style={styles.whatsAppButton}>
               <Ionicons name="logo-whatsapp" size={20} color="#fff" />
@@ -125,8 +151,29 @@ export const ConciergeScreen: React.FC = () => {
           </BlurView>
         </View>
 
+        {/* Quick contact row */}
+        <View style={styles.contactRow}>
+          <TouchableOpacity onPress={handleWebsite} activeOpacity={0.85} style={styles.contactBtn}>
+            <Ionicons name="globe-outline" size={18} color="#007AFF" />
+            <Text style={styles.contactBtnText}>Website</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleEmail} activeOpacity={0.85} style={styles.contactBtn}>
+            <Ionicons name="mail-outline" size={18} color="#007AFF" />
+            <Text style={styles.contactBtnText}>Email us</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => Linking.openURL('tel:+3906060608')}
+            activeOpacity={0.85}
+            style={styles.contactBtn}
+          >
+            <Ionicons name="call-outline" size={18} color="#007AFF" />
+            <Text style={styles.contactBtnText}>Call</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Offices */}
         <View style={styles.sectionWrap}>
-          <Text style={styles.sectionTitle}>Offices</Text>
+          <Text style={styles.sectionTitle}>Meeting Points</Text>
           {displayOffices.map((o) => (
             <BlurView key={o.name} intensity={70} tint="light" style={styles.officeCard}>
               <View style={styles.officeRow}>
@@ -139,6 +186,7 @@ export const ConciergeScreen: React.FC = () => {
           ))}
         </View>
 
+        {/* FAQ */}
         <View style={styles.sectionWrap}>
           <Text style={styles.sectionTitle}>FAQ</Text>
           {displayFaqs.map((f) => (
@@ -228,6 +276,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '900',
     color: '#fff',
+  },
+  contactRow: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
+  contactBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0,122,255,0.1)',
+  },
+  contactBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#007AFF',
   },
   officeCard: {
     borderRadius: 18,

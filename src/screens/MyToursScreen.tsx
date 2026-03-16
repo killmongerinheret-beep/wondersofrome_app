@@ -1,170 +1,149 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import sightsJson from '../data/sights.json';
-import { AudioVariant, Sight } from '../types';
-import { useOfflineContent } from '../hooks/useOfflineContent';
-import { clearAudioStorage, getAudioStorageUsage } from '../services/filesystem';
-import { getAllDownloads } from '../services/sqlite';
-import { File } from 'expo-file-system';
+import { getSupabase } from '../services/supabase';
+import { supabase } from '../services/supabase';
+import { getSiteId } from '../config/site';
 
-const formatBytes = (bytes: number) => {
-  if (!bytes || bytes < 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-  const base = 1024;
-  const exp = Math.min(Math.floor(Math.log(bytes) / Math.log(base)), units.length - 1);
-  const value = bytes / Math.pow(base, exp);
-  const digits = exp === 0 ? 0 : exp === 1 ? 0 : 1;
-  return `${value.toFixed(digits)} ${units[exp]}`;
+type Booking = {
+  id: string;
+  tour_title: string;
+  tour_slug: string | null;
+  date: string;
+  time: string;
+  guests: number;
+  adults: number;
+  students: number;
+  youths: number;
+  total_price: number;
+  customer_name: string;
+  status: 'pending' | 'paid' | 'cancelled' | string;
+  created_at: string;
+  site_id: string;
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  paid: '#34C759',
+  pending: '#FF9500',
+  cancelled: '#FF3B30',
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  paid: 'Confirmed',
+  pending: 'Pending',
+  cancelled: 'Cancelled',
+};
+
+const formatDate = (dateStr: string) => {
+  if (!dateStr) return '';
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch {
+    return dateStr;
+  }
 };
 
 export const MyToursScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const { downloadedSights, downloadProgress, downloadSight, checkDownloads } = useOfflineContent();
-  const sights = useMemo(() => sightsJson as Sight[], []);
+  const [email, setEmail] = useState('');
+  const [bookings, setBookings] = useState<Booking[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searched, setSearched] = useState(false);
 
-  const [refreshing, setRefreshing] = useState(false);
-  const [usedBytes, setUsedBytes] = useState(0);
-  const [totalBytes, setTotalBytes] = useState(0);
-
-  const loadStorage = useCallback(async () => {
-    const stats = await getAudioStorageUsage();
-    setUsedBytes(stats.usedBytes);
-    setTotalBytes(stats.totalBytes);
-  }, []);
-
-  const loadAll = useCallback(async () => {
-    await checkDownloads();
-    await loadStorage();
-  }, [checkDownloads, loadStorage]);
-
-  useFocusEffect(
-    useCallback(() => {
-      loadAll();
-    }, [loadAll])
-  );
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await loadAll();
-    } finally {
-      setRefreshing(false);
+  const fetchBookings = useCallback(async () => {
+    const trimmed = email.trim().toLowerCase();
+    if (!trimmed) return;
+    if (!supabase) {
+      setError('Supabase not configured.');
+      return;
     }
-  }, [loadAll]);
 
-  const handleClearSpace = async () => {
-    Alert.alert('Clear downloaded audio?', 'This will remove downloaded audio files from your device.', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Clear Space',
-        style: 'destructive',
-        onPress: async () => {
-          await clearAudioStorage();
-          await loadAll();
-        },
-      },
-    ]);
-  };
+    setLoading(true);
+    setError(null);
+    setSearched(true);
 
-  const tours = useMemo(() => {
-    const order = ['vatican', 'borghese-gallery', 'colosseum', 'trevi', 'pantheon', 'forum'];
-    const sorted = [...sights].sort((a, b) => {
-      const ia = order.indexOf(a.id);
-      const ib = order.indexOf(b.id);
-      if (ia === -1 && ib === -1) return a.name.localeCompare(b.name);
-      if (ia === -1) return 1;
-      if (ib === -1) return -1;
-      return ia - ib;
-    });
-    return sorted;
-  }, [sights]);
+    try {
+      const client = getSupabase();
+      const { data, error: fetchError } = await client
+        .from('bookings')
+        .select(
+          'id,tour_title,tour_slug,date,time,guests,adults,students,youths,total_price,customer_name,status,created_at,site_id'
+        )
+        .eq('customer_email', trimmed)
+        .order('created_at', { ascending: false });
 
-  const [sizeBySight, setSizeBySight] = useState<Record<string, number>>({});
+      if (fetchError) throw fetchError;
+      setBookings((data as Booking[]) ?? []);
+    } catch (e: any) {
+      setError(e?.message ?? 'Failed to load bookings.');
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [email]);
 
-  useFocusEffect(
-    useCallback(() => {
-      let cancelled = false;
-      (async () => {
-        const downloads = await getAllDownloads();
-        const next: Record<string, number> = {};
-        for (const d of downloads) {
-          try {
-            const f = new File(d.local_uri);
-            if (!f.exists) continue;
-            const info = f.info();
-            next[d.sight_id] = (next[d.sight_id] ?? 0) + (info.size ?? 0);
-          } catch {
-            continue;
-          }
-        }
-        if (!cancelled) setSizeBySight(next);
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }, [])
-  );
-
-  const percentUsed = totalBytes > 0 ? Math.min(1, usedBytes / totalBytes) : 0;
-
-  const renderItem = ({ item }: { item: Sight }) => {
-    const downloaded = !!downloadedSights[item.id];
-    const downloading = !!downloadProgress[item.id];
-    const title = item.id === 'vatican' ? 'Vatican City Pack' : item.name;
-    const sizeText = downloaded ? formatBytes(sizeBySight[item.id] ?? 0) : null;
-    const badgeText = downloaded ? 'Downloaded' : 'Download on Wi‑Fi';
-    const badgeStyle = downloaded ? styles.badgeGreen : styles.badgeGray;
-
-    const onPress = () => {
-      if (downloaded || downloading) return;
-      downloadSight(item.id);
-    };
+  const renderItem = ({ item }: { item: Booking }) => {
+    const statusColor = STATUS_COLORS[item.status] ?? '#8E8E93';
+    const statusLabel = STATUS_LABELS[item.status] ?? item.status;
+    const guestParts = [
+      item.adults ? `${item.adults} adult${item.adults !== 1 ? 's' : ''}` : null,
+      item.students ? `${item.students} student${item.students !== 1 ? 's' : ''}` : null,
+      item.youths ? `${item.youths} youth${item.youths !== 1 ? 's' : ''}` : null,
+    ].filter(Boolean);
+    const guestLabel = guestParts.length > 0 ? guestParts.join(', ') : `${item.guests} guests`;
 
     return (
-      <View style={styles.cardWrap}>
-        <BlurView intensity={80} tint="light" style={styles.card}>
-          <Image source={{ uri: item.thumbnail }} style={styles.cardImage} resizeMode="cover" />
-          <View style={styles.cardContent}>
-            <View style={styles.cardTopRow}>
-              <Text style={styles.cardTitle} numberOfLines={1}>
-                {title}
-              </Text>
-              <View style={[styles.badge, badgeStyle]}>
-                <Text style={styles.badgeText}>{downloading ? 'Downloading…' : badgeText}</Text>
-              </View>
-            </View>
-            <Text style={styles.cardSubtitle} numberOfLines={2}>
-              {item.description}
-            </Text>
-            <View style={styles.cardBottomRow}>
-              <View style={styles.metaPill}>
-                <Ionicons name="cloud-download-outline" size={14} color="rgba(17,17,17,0.7)" />
-                <Text style={styles.metaText}>
-                  {sizeText ? sizeText : downloading ? 'In progress' : 'Not downloaded'}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={onPress}
-                activeOpacity={0.9}
-                disabled={downloaded || downloading}
-                style={[styles.actionButton, (downloaded || downloading) && styles.actionButtonDisabled]}
-              >
-                <Ionicons
-                  name={downloaded ? 'checkmark' : downloading ? 'cloud-download' : 'arrow-down'}
-                  size={18}
-                  color={downloaded || downloading ? 'rgba(17,17,17,0.45)' : '#111'}
-                />
-                <Text style={[styles.actionText, (downloaded || downloading) && styles.actionTextDisabled]}>
-                  {downloaded ? 'Ready' : downloading ? 'Downloading' : 'Download'}
-                </Text>
-              </TouchableOpacity>
-            </View>
+      <View style={styles.card}>
+        {/* Status badge */}
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardTitle} numberOfLines={2}>
+            {item.tour_title}
+          </Text>
+          <View style={[styles.statusBadge, { backgroundColor: `${statusColor}22` }]}>
+            <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+            <Text style={[styles.statusText, { color: statusColor }]}>{statusLabel}</Text>
           </View>
-        </BlurView>
+        </View>
+
+        <View style={styles.metaGrid}>
+          <View style={styles.metaItem}>
+            <Ionicons name="calendar-outline" size={14} color="rgba(60,60,67,0.7)" />
+            <Text style={styles.metaText}>{formatDate(item.date)}</Text>
+          </View>
+          {item.time ? (
+            <View style={styles.metaItem}>
+              <Ionicons name="time-outline" size={14} color="rgba(60,60,67,0.7)" />
+              <Text style={styles.metaText}>{item.time}</Text>
+            </View>
+          ) : null}
+          <View style={styles.metaItem}>
+            <Ionicons name="people-outline" size={14} color="rgba(60,60,67,0.7)" />
+            <Text style={styles.metaText}>{guestLabel}</Text>
+          </View>
+          {item.total_price ? (
+            <View style={styles.metaItem}>
+              <Ionicons name="card-outline" size={14} color="rgba(60,60,67,0.7)" />
+              <Text style={styles.metaText}>€{Number(item.total_price).toFixed(2)}</Text>
+            </View>
+          ) : null}
+        </View>
+
+        <View style={styles.cardFooter}>
+          <Text style={styles.refText}>Ref: {item.id.slice(-8).toUpperCase()}</Text>
+          <Text style={styles.siteText}>{item.site_id === 'wondersofrome' ? 'Wonders of Rome' : 'Tickets in Rome'}</Text>
+        </View>
       </View>
     );
   };
@@ -173,217 +152,180 @@ export const MyToursScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={[styles.header, { paddingTop: 12 }]}>
         <Text style={styles.headerTitle}>My Tours</Text>
-        <Text style={styles.headerSubtitle}>Offline audio, ready when you are</Text>
+        <Text style={styles.headerSubtitle}>View your booked tours</Text>
       </View>
 
-      <View style={[styles.storageCardWrap, { paddingHorizontal: 16 }]}>
-        <BlurView intensity={80} tint="light" style={styles.storageCard}>
-          <View style={styles.storageTopRow}>
-            <View>
-              <Text style={styles.storageTitle}>Storage</Text>
-              <Text style={styles.storageSubtitle}>
-                {formatBytes(usedBytes)} used
-              </Text>
-            </View>
-            <TouchableOpacity onPress={handleClearSpace} activeOpacity={0.9} style={styles.clearSpaceButton}>
-              <Ionicons name="trash-outline" size={18} color="#fff" />
-              <Text style={styles.clearSpaceText}>Clear Space</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${Math.round(percentUsed * 100)}%` }]} />
-          </View>
-          <Text style={styles.progressHint}>
-            {totalBytes > 0 ? `${Math.round(percentUsed * 100)}% of device storage` : 'Storage info unavailable'}
-          </Text>
-        </BlurView>
+      {/* Email lookup */}
+      <View style={styles.lookupCard}>
+        <Text style={styles.lookupLabel}>Enter your booking email</Text>
+        <View style={styles.lookupRow}>
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            placeholder="email@example.com"
+            placeholderTextColor="rgba(60,60,67,0.45)"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            returnKeyType="search"
+            onSubmitEditing={fetchBookings}
+            style={styles.input}
+          />
+          <TouchableOpacity
+            onPress={fetchBookings}
+            activeOpacity={0.85}
+            disabled={loading || !email.trim()}
+            style={[styles.searchBtn, (loading || !email.trim()) && styles.searchBtnDisabled]}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Ionicons name="search" size={18} color="#fff" />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <FlatList
-        data={tours}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: Math.max(24, insets.bottom + 16), paddingTop: 14 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      />
+      {/* Error */}
+      {error && (
+        <View style={styles.errorWrap}>
+          <Ionicons name="alert-circle-outline" size={16} color="#FF3B30" />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
+      {/* Results */}
+      {bookings !== null && (
+        <FlatList
+          data={bookings}
+          keyExtractor={(b) => b.id}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: Math.max(24, insets.bottom + 16), paddingTop: 8 }}
+          ListEmptyComponent={
+            searched && !loading ? (
+              <View style={styles.emptyWrap}>
+                <Ionicons name="ticket-outline" size={48} color="rgba(60,60,67,0.3)" />
+                <Text style={styles.emptyTitle}>No bookings found</Text>
+                <Text style={styles.emptySubtitle}>
+                  No tours found for this email. Make sure you use the same email from checkout.
+                </Text>
+              </View>
+            ) : null
+          }
+        />
+      )}
+
+      {/* Initial state */}
+      {bookings === null && !loading && (
+        <View style={styles.emptyWrap}>
+          <Ionicons name="map-outline" size={56} color="rgba(60,60,67,0.25)" />
+          <Text style={styles.emptyTitle}>Find your bookings</Text>
+          <Text style={styles.emptySubtitle}>Enter the email you used when booking a tour.</Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  container: { flex: 1, backgroundColor: '#F2F2F7' },
+  header: { paddingHorizontal: 16, paddingBottom: 12 },
+  headerTitle: { fontSize: 34, fontWeight: '900', letterSpacing: 0.2, color: '#111' },
+  headerSubtitle: { marginTop: 2, fontSize: 14, fontWeight: '700', color: 'rgba(60,60,67,0.7)' },
+  lookupCard: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  lookupLabel: { fontSize: 13, fontWeight: '800', color: 'rgba(60,60,67,0.7)', marginBottom: 10 },
+  lookupRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  input: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  header: {
-    paddingHorizontal: 16,
-    paddingBottom: 10,
-  },
-  headerTitle: {
-    fontSize: 34,
-    fontWeight: '900',
-    letterSpacing: 0.2,
-    color: '#111',
-  },
-  headerSubtitle: {
-    marginTop: 2,
+    height: 46,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    backgroundColor: 'rgba(118,118,128,0.1)',
     fontSize: 14,
     fontWeight: '700',
-    color: 'rgba(60,60,67,0.7)',
-  },
-  storageCardWrap: {
-    paddingBottom: 10,
-  },
-  storageCard: {
-    borderRadius: 18,
-    overflow: 'hidden',
-    padding: 14,
-    backgroundColor: 'rgba(255,255,255,0.85)',
-  },
-  storageTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  storageTitle: {
-    fontSize: 16,
-    fontWeight: '900',
     color: '#111',
   },
-  storageSubtitle: {
-    marginTop: 2,
-    fontSize: 12,
-    fontWeight: '700',
-    color: 'rgba(60,60,67,0.7)',
+  searchBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: '#007AFF',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  clearSpaceButton: {
+  searchBtnDisabled: { backgroundColor: 'rgba(0,122,255,0.35)' },
+  errorWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#111',
-    paddingHorizontal: 12,
-    height: 34,
-    borderRadius: 12,
     gap: 8,
-  },
-  clearSpaceText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '900',
-  },
-  progressTrack: {
-    marginTop: 12,
-    height: 10,
-    borderRadius: 999,
-    backgroundColor: 'rgba(118,118,128,0.16)',
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 999,
-    backgroundColor: '#34C759',
-  },
-  progressHint: {
-    marginTop: 8,
-    fontSize: 12,
-    fontWeight: '700',
-    color: 'rgba(60,60,67,0.7)',
-  },
-  cardWrap: {
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
-  card: {
-    flexDirection: 'row',
-    borderRadius: 20,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.85)',
-  },
-  cardImage: {
-    width: 92,
-    height: 92,
-    backgroundColor: 'rgba(0,0,0,0.08)',
-  },
-  cardContent: {
-    flex: 1,
+    marginHorizontal: 16,
+    marginBottom: 10,
     padding: 12,
-    gap: 8,
+    backgroundColor: 'rgba(255,59,48,0.08)',
+    borderRadius: 12,
   },
-  cardTopRow: {
+  errorText: { flex: 1, fontSize: 13, fontWeight: '700', color: '#FF3B30' },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    gap: 10,
+  },
+  cardHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
     gap: 10,
   },
-  cardTitle: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '900',
-    color: '#111',
+  cardTitle: { flex: 1, fontSize: 15, fontWeight: '900', color: '#111', lineHeight: 20 },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
   },
-  badge: {
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  statusText: { fontSize: 11, fontWeight: '900' },
+  metaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: 'rgba(118,118,128,0.1)',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 999,
   },
-  badgeGreen: {
-    backgroundColor: 'rgba(52,199,89,0.16)',
-  },
-  badgeGray: {
-    backgroundColor: 'rgba(142,142,147,0.16)',
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: '#111',
-  },
-  cardSubtitle: {
-    fontSize: 12,
-    lineHeight: 17,
-    fontWeight: '700',
-    color: 'rgba(60,60,67,0.74)',
-  },
-  cardBottomRow: {
+  metaText: { fontSize: 12, fontWeight: '700', color: 'rgba(60,60,67,0.85)' },
+  cardFooter: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 10,
-  },
-  metaPill: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 10,
-    height: 30,
-    borderRadius: 999,
-    backgroundColor: 'rgba(118,118,128,0.16)',
+    paddingTop: 6,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(0,0,0,0.06)',
   },
-  metaText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: 'rgba(17,17,17,0.75)',
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    height: 34,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.06)',
-  },
-  actionButtonDisabled: {
-    backgroundColor: 'rgba(118,118,128,0.12)',
-  },
-  actionText: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: '#111',
-  },
-  actionTextDisabled: {
-    color: 'rgba(17,17,17,0.45)',
-  },
+  refText: { fontSize: 11, fontWeight: '800', color: 'rgba(60,60,67,0.5)', fontFamily: 'monospace' },
+  siteText: { fontSize: 11, fontWeight: '700', color: 'rgba(60,60,67,0.45)' },
+  emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: 60, paddingHorizontal: 32, gap: 12 },
+  emptyTitle: { fontSize: 18, fontWeight: '900', color: '#111', textAlign: 'center' },
+  emptySubtitle: { fontSize: 14, fontWeight: '600', color: 'rgba(60,60,67,0.6)', textAlign: 'center', lineHeight: 20 },
 });
-
