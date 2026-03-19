@@ -13,9 +13,9 @@ interface Props {
 }
 
 const VARIANTS: { key: AudioVariant; label: string; icon: keyof typeof Ionicons.glyphMap; duration: string }[] = [
-  { key: 'quick', label: 'Quick', icon: 'flash',  duration: '~2 min' },
-  { key: 'deep',  label: 'Deep',  icon: 'book',   duration: '~10 min' },
-  { key: 'kids',  label: 'Kids',  icon: 'happy',  duration: 'Myths' },
+  { key: 'quick', label: 'Quick', icon: 'flash', duration: '~2 min' },
+  { key: 'deep',  label: 'Deep',  icon: 'book',  duration: '~10 min' },
+  { key: 'kids',  label: 'Kids',  icon: 'happy', duration: 'Myths' },
 ];
 
 const LANGS: { code: AudioLang; flag: string; label: string }[] = [
@@ -54,7 +54,7 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
 
   const getTrack = (lang: AudioLang, v: AudioVariant) => sight.audioFiles?.[lang]?.[v];
   const hasAudio = (lang: AudioLang, v: AudioVariant) => !!getTrack(lang, v)?.url;
-  const langHasAny = (lang: AudioLang) => VARIANTS.some(v => hasAudio(lang, v.key));
+  const langHasAny = (lang: AudioLang) => VARIANTS.some((v) => hasAudio(lang, v.key));
 
   const handlePlayPause = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -92,7 +92,12 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
 
   return (
     <View style={styles.container}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.langRow}>
+      {/* Language picker */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.langRow}
+      >
         {LANGS.map((l) => {
           const active = activeLang === l.code;
           const available = langHasAny(l.code);
@@ -102,15 +107,22 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
               onPress={() => handleLangPress(l.code)}
               activeOpacity={0.8}
               disabled={!available}
-              style={[styles.langBtn, active && styles.langBtnActive, !available && styles.langBtnDisabled]}
+              style={[
+                styles.langBtn,
+                active && styles.langBtnActive,
+                !available && styles.langBtnDisabled,
+              ]}
             >
               <Text style={styles.langFlag}>{l.flag}</Text>
-              <Text style={[styles.langLabel, active && styles.langLabelActive]}>{l.label}</Text>
+              <Text style={[styles.langLabel, active && styles.langLabelActive]}>
+                {l.label}
+              </Text>
             </TouchableOpacity>
           );
         })}
       </ScrollView>
 
+      {/* Variant tabs */}
       <View style={styles.tabs}>
         {VARIANTS.map((v) => {
           const active = activeVariant === v.key;
@@ -120,14 +132,30 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
               key={v.key}
               onPress={() => handleVariantPress(v.key)}
               activeOpacity={0.8}
-              style={[styles.tab, active && styles.tabActive, !available && styles.tabDisabled]}
+              style={[
+                styles.tab,
+                active && styles.tabActive,
+                !available && styles.tabDisabled,
+              ]}
               disabled={!available}
             >
-              <Ionicons name={v.icon} size={14} color={active ? '#fff' : available ? '#007AFF' : '#555'} />
-              <Text style={[styles.tabLabel, active && styles.tabLabelActive, !available && styles.tabLabelDisabled]}>
+              <Ionicons
+                name={v.icon}
+                size={14}
+                color={active ? '#fff' : available ? '#007AFF' : '#555'}
+              />
+              <Text style={[
+                styles.tabLabel,
+                active && styles.tabLabelActive,
+                !available && styles.tabLabelDisabled,
+              ]}>
                 {v.label}
               </Text>
-              <Text style={[styles.tabDuration, active && styles.tabLabelActive, !available && styles.tabLabelDisabled]}>
+              <Text style={[
+                styles.tabDuration,
+                active && styles.tabLabelActive,
+                !available && styles.tabLabelDisabled,
+              ]}>
                 {v.duration}
               </Text>
             </TouchableOpacity>
@@ -135,6 +163,7 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
         })}
       </View>
 
+      {/* Play row */}
       <View style={styles.playRow}>
         <TouchableOpacity
           onPress={handlePlayPause}
@@ -145,13 +174,19 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
           {downloading ? (
             <ActivityIndicator color="#0B0B0B" size="small" />
           ) : (
-            <Ionicons name={isThisTrack && isPlaying ? 'pause' : 'play'} size={22} color="#0B0B0B" />
+            <Ionicons
+              name={isThisTrack && isPlaying ? 'pause' : 'play'}
+              size={22}
+              color="#0B0B0B"
+            />
           )}
           <Text style={styles.playBtnText}>
             {downloading
               ? `Downloading ${Math.round(downloadProgress * 100)}%`
-              : isThisTrack && isPlaying ? 'Pause'
-              : currentTrack?.url ? 'Play Audio'
+              : isThisTrack && isPlaying
+              ? 'Pause'
+              : currentTrack?.url
+              ? 'Play Audio'
               : 'No audio yet'}
           </Text>
         </TouchableOpacity>
@@ -163,6 +198,7 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
         )}
       </View>
 
+      {/* Progress bar */}
       {isThisTrack && durationMs > 0 && (
         <View style={styles.progressWrap}>
           <Text style={styles.timeLabel}>{fmt(positionMs)}</Text>
@@ -200,8 +236,12 @@ const styles = StyleSheet.create({
   langLabelActive: { color: '#fff' },
   tabs: { flexDirection: 'row', gap: 8 },
   tab: {
-    flex: 1, alignItems: 'center', paddingVertical: 8,
-    borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.12)', gap: 2,
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    gap: 2,
   },
   tabActive: { backgroundColor: '#007AFF' },
   tabDisabled: { opacity: 0.35 },
@@ -211,24 +251,39 @@ const styles = StyleSheet.create({
   tabDuration: { fontSize: 9, fontWeight: '600', color: 'rgba(255,255,255,0.55)' },
   playRow: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   playBtn: {
-    flex: 1, height: 52, borderRadius: 16, backgroundColor: '#fff',
-    alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 10,
+    flex: 1,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 10,
   },
   playBtnDisabled: { opacity: 0.4 },
   playBtnText: { color: '#0B0B0B', fontSize: 15, fontWeight: '900' },
   stopBtn: {
-    width: 44, height: 52, borderRadius: 16,
+    width: 44,
+    height: 52,
+    borderRadius: 16,
     backgroundColor: 'rgba(255,255,255,0.12)',
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   progressWrap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   progressTrack: {
-    flex: 1, height: 4, borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.2)', overflow: 'hidden',
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    overflow: 'hidden',
   },
   progressFill: { height: '100%', borderRadius: 2, backgroundColor: '#007AFF' },
   timeLabel: {
-    fontSize: 10, fontWeight: '700', color: 'rgba(255,255,255,0.6)',
-    minWidth: 32, textAlign: 'center',
+    fontSize: 10,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.6)',
+    minWidth: 32,
+    textAlign: 'center',
   },
 });
