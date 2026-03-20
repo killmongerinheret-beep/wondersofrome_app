@@ -12,9 +12,10 @@ interface Props {
   sight: Sight;
 }
 
-const VARIANTS: { key: AudioVariant; label: string; icon: keyof typeof Ionicons.glyphMap; duration: string }[] = [
+// Only show variants that have audio uploaded — deep/kids hidden until content is ready
+const ALL_VARIANTS: { key: AudioVariant; label: string; icon: keyof typeof Ionicons.glyphMap; duration: string }[] = [
   { key: 'quick', label: 'Quick', icon: 'flash', duration: '~2 min' },
-  { key: 'deep',  label: 'Deep',  icon: 'book',  duration: '~10 min' },
+  { key: 'deep',  label: 'Deep',  icon: 'book',  duration: '40–50 min' },
   { key: 'kids',  label: 'Kids',  icon: 'happy', duration: 'Myths' },
 ];
 
@@ -54,7 +55,12 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
 
   const getTrack = (lang: AudioLang, v: AudioVariant) => sight.audioFiles?.[lang]?.[v];
   const hasAudio = (lang: AudioLang, v: AudioVariant) => !!getTrack(lang, v)?.url;
-  const langHasAny = (lang: AudioLang) => VARIANTS.some((v) => hasAudio(lang, v.key));
+  const langHasAny = (lang: AudioLang) => ALL_VARIANTS.some((v) => hasAudio(lang, v.key));
+
+  // Only show variants that have at least one language with audio
+  const VARIANTS = ALL_VARIANTS.filter((v) =>
+    LANGS.some((l) => hasAudio(l.code, v.key))
+  );
 
   const handlePlayPause = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

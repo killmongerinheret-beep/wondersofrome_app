@@ -125,24 +125,30 @@ export const ConciergeScreen: React.FC = () => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={{ paddingBottom: Math.max(24, insets.bottom + 16) }}>
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Concierge</Text>
-          <Text style={styles.headerSubtitle}>Direct access to your agency</Text>
+          <View style={styles.headerLogoRow}>
+            <View style={styles.logoCircle}>
+              <Ionicons name="globe" size={22} color="#007AFF" />
+            </View>
+            <View>
+              <Text style={styles.headerTitle}>Concierge</Text>
+              <Text style={styles.headerSubtitle}>Wonders of Rome · Direct support</Text>
+            </View>
+          </View>
         </View>
 
         {/* Agent / WhatsApp card */}
         <View style={styles.sectionWrap}>
           <BlurView intensity={80} tint="light" style={styles.agentCard}>
-            <Image
-              source={{
-                uri:
-                  displayAgent?.avatarUrl?.trim() ||
-                  'https://images.unsplash.com/photo-1520975958225-9f0b21a1124e?auto=format&fit=crop&w=400&q=80',
-              }}
-              style={styles.agentAvatar}
-            />
+            {displayAgent?.avatarUrl?.trim() ? (
+              <Image source={{ uri: displayAgent.avatarUrl }} style={styles.agentAvatar} />
+            ) : (
+              <View style={[styles.agentAvatar, styles.agentAvatarFallback]}>
+                <Ionicons name="globe" size={26} color="#007AFF" />
+              </View>
+            )}
             <View style={styles.agentText}>
               <Text style={styles.agentTitle}>{displayAgent?.name?.trim() || 'Wonders of Rome'}</Text>
-              <Text style={styles.agentSubtitle}>{displayAgent?.subtitle?.trim() || 'Rome experts  Fast replies'}</Text>
+              <Text style={styles.agentSubtitle}>{displayAgent?.subtitle?.trim() || 'Rome experts  ·  Fast replies'}</Text>
             </View>
             <TouchableOpacity onPress={handleWhatsApp} activeOpacity={0.9} style={styles.whatsAppButton}>
               <Ionicons name="logo-whatsapp" size={20} color="#fff" />
@@ -210,6 +216,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 10,
   },
+  headerLogoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  logoCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(0,122,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   headerTitle: {
     fontSize: 34,
     fontWeight: '900',
@@ -218,7 +237,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     marginTop: 2,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: 'rgba(60,60,67,0.7)',
   },
@@ -248,6 +267,11 @@ const styles = StyleSheet.create({
     height: 54,
     borderRadius: 27,
     backgroundColor: 'rgba(0,0,0,0.08)',
+  },
+  agentAvatarFallback: {
+    backgroundColor: 'rgba(0,122,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   agentText: {
     flex: 1,

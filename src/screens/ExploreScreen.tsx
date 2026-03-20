@@ -26,8 +26,6 @@ import { DownloadPackScreen } from './DownloadPackScreen';
 import { AnimatedPressable } from '../ui/AnimatedPressable';
 import { Skeleton } from '../ui/Skeleton';
 
-import { useNavigation } from '@react-navigation/native';
-
 type ExploreFilter = 'all' | 'museum' | 'religious' | 'other' | 'piazza';
 
 const ROME_CENTER: [number, number] = [12.4922, 41.8902];
@@ -50,7 +48,6 @@ const distanceMeters = (a: { lat: number; lng: number }, b: { lat: number; lng: 
 
 export const ExploreScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
   const cameraRef = useRef<Mapbox.Camera>(null);
   const shapeSourceRef = useRef<any>(null);
   const windowHeight = Dimensions.get('window').height;
@@ -364,22 +361,6 @@ export const ExploreScreen: React.FC = () => {
         >
           <BlurView intensity={80} tint="dark" style={styles.downloadBtnBlur}>
             <Ionicons name="cloud-download-outline" size={18} color="#fff" />
-          </BlurView>
-        </AnimatedPressable>
-      </View>
-
-      {/* Shop nearby pill — floats above search bar */}
-      <View style={[styles.shopPillWrap, { bottom: Math.max(16, insets.bottom + 12) + 130 }]}>
-        <AnimatedPressable
-          onPress={() => navigation?.navigate?.('Shop' as never)}
-          haptics="light"
-          style={styles.shopPill}
-          pressedStyle={styles.shopPillPressed}
-        >
-          <BlurView intensity={80} tint="dark" style={styles.shopPillBlur}>
-            <Ionicons name="bag-handle-outline" size={16} color="#fff" />
-            <Text style={styles.shopPillText}>Shop Tours & Souvenirs</Text>
-            <Ionicons name="chevron-up" size={14} color="rgba(255,255,255,0.7)" />
           </BlurView>
         </AnimatedPressable>
       </View>
@@ -840,32 +821,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     fontWeight: '900',
-  },
-  shopPillWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-  },
-  shopPill: {
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  shopPillPressed: {
-    opacity: 0.92,
-  },
-  shopPillBlur: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  shopPillText: {
-    color: '#fff',
-    fontSize: 13,
-    fontWeight: '800',
   },
   downloadBtnWrap: {
     position: 'absolute',
