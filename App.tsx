@@ -3,8 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { ExploreScreen } from './src/screens/ExploreScreen';
-import { MyToursScreen } from './src/screens/MyToursScreen';
-import { WalletScreen } from './src/screens/WalletScreen';
+import { MyTicketsScreen } from './src/screens/MyTicketsScreen';
 import { ConciergeScreen } from './src/screens/ConciergeScreen';
 import { ShopScreen } from './src/screens/ShopScreen';
 import { CartProvider, useCart } from './src/context/CartContext';
@@ -60,8 +59,8 @@ function AppTabs() {
           if (route.name === 'Shop') return <ShopTabIcon focused={focused} color={color} size={size} />;
           const icons: Record<string, [string, string]> = {
             Explore: ['map', 'map-outline'],
-            'My Tours': ['ticket', 'ticket-outline'],
-            Wallet: ['wallet', 'wallet-outline'],
+            Tickets: ['ticket', 'ticket-outline'],
+            Shop: ['bag', 'bag-outline'],
             Concierge: ['chatbubble-ellipses', 'chatbubble-ellipses-outline'],
           };
           const [active, inactive] = icons[route.name] ?? ['ellipse', 'ellipse-outline'];
@@ -83,9 +82,8 @@ function AppTabs() {
       initialRouteName="Explore"
     >
       <Tab.Screen name="Explore" component={ExploreScreen} />
-      <Tab.Screen name="My Tours" component={MyToursScreen} />
+      <Tab.Screen name="Tickets" component={MyTicketsScreen} />
       <Tab.Screen name="Shop" component={ShopScreen} />
-      <Tab.Screen name="Wallet" component={WalletScreen} />
       <Tab.Screen name="Concierge" component={ConciergeScreen} />
     </Tab.Navigator>
   );
