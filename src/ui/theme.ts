@@ -1,0 +1,38 @@
+export const theme = {
+  colors: {
+    brand: '#007AFF',
+    bg: '#000000',
+    bgSoft: '#0B0B0B',
+    card: 'rgba(255,255,255,0.08)',
+    cardLight: 'rgba(255,255,255,0.85)',
+    text: '#111111',
+    textOnDark: '#FFFFFF',
+    textMuted: 'rgba(60,60,67,0.7)',
+    textMutedOnDark: 'rgba(255,255,255,0.72)',
+    danger: '#FF3B30',
+    success: '#34C759',
+    warning: '#FF9500',
+  },
+  radius: {
+    sm: 12,
+    md: 16,
+    lg: 20,
+    xl: 24,
+    pill: 999,
+  },
+  spacing: {
+    xs: 6,
+    sm: 10,
+    md: 14,
+    lg: 16,
+    xl: 20,
+    xxl: 24,
+  },
+  type: {
+    h1: { fontSize: 34, fontWeight: '900' as const, letterSpacing: 0.2 },
+    h2: { fontSize: 18, fontWeight: '900' as const },
+    body: { fontSize: 14, fontWeight: '700' as const },
+    caption: { fontSize: 12, fontWeight: '700' as const },
+  },
+};
+

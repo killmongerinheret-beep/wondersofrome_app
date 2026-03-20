@@ -15,6 +15,7 @@ import { StyleSheet, Platform, View, Text } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Mapbox from '@rnmapbox/maps';
 import { getMapboxAccessToken } from './src/config/mapbox';
+import { MiniPlayer } from './src/components/MiniPlayer';
 
 const Tab = createBottomTabNavigator();
 
@@ -96,6 +97,7 @@ export default function App() {
       <CartProvider>
         <NavigationContainer>
           <AppTabs />
+          <MiniPlayer />
         </NavigationContainer>
       </CartProvider>
     </SafeAreaProvider>

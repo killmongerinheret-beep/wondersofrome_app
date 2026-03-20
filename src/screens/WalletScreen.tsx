@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { FlatList, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FlatList, LayoutAnimation, Platform, StyleSheet, Text, TextInput, TouchableOpacity, UIManager, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect } from '@react-navigation/native';
@@ -8,6 +8,10 @@ import QRCode from 'react-native-qrcode-svg';
 import { fetchWalletTickets } from '../services/remoteContent';
 import { supabase } from '../services/supabase';
 import { getSiteId } from '../config/site';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 type Ticket = {
   id: string;
@@ -93,8 +97,10 @@ export const WalletScreen: React.FC = () => {
     setIsLoadingRemote(true);
     try {
       const tickets = await fetchWalletTickets(email);
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setRemoteTickets(tickets);
     } catch {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setRemoteTickets([]);
     } finally {
       setIsLoadingRemote(false);

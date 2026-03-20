@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
 import { downloadAudioPack, getLocalAudioUri } from '../services/filesystem';
 import sights from '../data/sights.json';
-import { Sight, AudioVariant } from '../types';
+import { Sight, AudioVariant, AudioLang } from '../types';
 
 export const useOfflineContent = () => {
   const [downloadProgress, setDownloadProgress] = useState<{ [key: string]: number }>({});
   const [downloadedSights, setDownloadedSights] = useState<{ [key: string]: boolean }>({});
+  const lang: AudioLang = 'en';
 
   useEffect(() => {
     checkDownloads();
@@ -16,14 +17,14 @@ export const useOfflineContent = () => {
     const status: { [key: string]: boolean } = {};
     for (const sight of sights as Sight[]) {
       // Check if 'quick' variant is downloaded as a proxy for the sight being available
-      const uri = await getLocalAudioUri(sight.id, 'quick');
+      const uri = await getLocalAudioUri(sight.id, `${lang}_quick`);
       status[sight.id] = !!uri;
     }
     setDownloadedSights(status);
   };
 
   const resolveAudioUrl = (sight: Sight, variant: AudioVariant): string | null => {
-    const url = sight.audioFiles?.[variant]?.url?.trim();
+    const url = sight.audioFiles?.[lang]?.[variant]?.url?.trim();
     if (!url) return null;
     if (url.includes('example.com')) return null;
     return url;
@@ -51,7 +52,7 @@ export const useOfflineContent = () => {
           });
           return;
         }
-        await downloadAudioPack(sightId, variant, url, (progress) => {
+        await downloadAudioPack(sightId, `${lang}_${variant}`, url, (progress) => {
            // Aggregate progress logic could be here
         });
         completed++;

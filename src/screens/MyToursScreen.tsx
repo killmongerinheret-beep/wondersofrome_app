@@ -2,10 +2,13 @@ import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  LayoutAnimation,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  UIManager,
   View,
 } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,6 +17,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import { getSupabase } from '../services/supabase';
 import { supabase } from '../services/supabase';
 import { getSiteId } from '../config/site';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 type Booking = {
   id: string;
@@ -85,9 +92,11 @@ export const MyToursScreen: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (fetchError) throw fetchError;
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setBookings((data as Booking[]) ?? []);
     } catch (e: any) {
       setError(e?.message ?? 'Failed to load bookings.');
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       setBookings([]);
     } finally {
       setLoading(false);

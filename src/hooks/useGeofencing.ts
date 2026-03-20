@@ -5,6 +5,7 @@ import { playAudioForSight, notifyUser } from '../services/audio';
 import sights from '../data/sights.json';
 
 const GEOFENCE_TASK = 'rome-geofence-task';
+const LAST_ENTER_BY_ID: Record<string, number> = {};
 
 // Define the task in the global scope
 TaskManager.defineTask(GEOFENCE_TASK, async ({ data, error }) => {
@@ -19,16 +20,19 @@ TaskManager.defineTask(GEOFENCE_TASK, async ({ data, error }) => {
   };
 
   if (eventType === Location.GeofencingEventType.Enter) {
-    console.log(`Entered region: ${region.identifier}`);
+    if (!region?.identifier) return;
+    const now = Date.now();
+    const last = LAST_ENTER_BY_ID[region.identifier] ?? 0;
+    if (now - last < 1000 * 60 * 10) return;
+    LAST_ENTER_BY_ID[region.identifier] = now;
+
     const sight = sights.find(s => s.id === region.identifier);
     if (sight) {
       await notifyUser(`Welcome to ${sight.name}`, 'Starting audio tour...');
       // Default to 'quick' variant for auto-play, or check user settings
-      await playAudioForSight(sight.id, 'quick');
+      const url = sight.audioFiles?.en?.quick?.url;
+      await playAudioForSight(sight.id, 'en_quick', url);
     }
-  } else if (eventType === Location.GeofencingEventType.Exit) {
-    console.log(`Exited region: ${region.identifier}`);
-    // Optional: Stop audio or notify
   }
 });
 
@@ -71,7 +75,7 @@ export const useGeofencing = () => {
         longitude: sight.lng,
         radius: sight.radius,
         notifyOnEnter: true,
-        notifyOnExit: true,
+        notifyOnExit: false,
       }));
 
       await Location.startGeofencingAsync(GEOFENCE_TASK, regions);

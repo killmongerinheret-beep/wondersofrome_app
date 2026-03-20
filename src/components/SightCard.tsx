@@ -89,7 +89,7 @@ export const SightCard: React.FC<SightCardProps> = ({ sight, onDownload, isDownl
         {isDownloaded ? (
           <View style={styles.playerWrapper}>
              <BlurView intensity={80} tint="light" style={styles.blurContainer}>
-                <AudioPlayer sightId={sight.id} />
+                <AudioPlayer sight={sight} />
              </BlurView>
           </View>
         ) : (

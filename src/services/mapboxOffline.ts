@@ -23,7 +23,7 @@ export const downloadRomeMap = async (
       styleURL: Mapbox.StyleURL.Street,
       minZoom: 14,
       maxZoom: 22,
-      bounds: [ROME_BOUNDS_NE, ROME_BOUNDS_SW],
+      bounds: [ROME_BOUNDS_SW, ROME_BOUNDS_NE],
     }, progressListener, errorListener);
   } catch (error) {
     onError(error as Error);

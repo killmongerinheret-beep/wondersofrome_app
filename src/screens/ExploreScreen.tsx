@@ -1,7 +1,11 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
+  Dimensions,
   Image,
+  PanResponder,
+  PanResponderGestureState,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -19,6 +23,8 @@ import { useSights } from '../hooks/useSights';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { Linking, Modal } from 'react-native';
 import { DownloadPackScreen } from './DownloadPackScreen';
+import { AnimatedPressable } from '../ui/AnimatedPressable';
+import { Skeleton } from '../ui/Skeleton';
 
 import { useNavigation } from '@react-navigation/native';
 
@@ -46,8 +52,15 @@ export const ExploreScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const cameraRef = useRef<Mapbox.Camera>(null);
-  const drawerHeight = 320;
-  const drawerTranslate = useRef(new Animated.Value(drawerHeight)).current;
+  const shapeSourceRef = useRef<any>(null);
+  const windowHeight = Dimensions.get('window').height;
+  const drawerMaxHeight = Math.min(Math.max(520, Math.round(windowHeight * 0.7)), 680);
+  const drawerPeekHeight = 170;
+  const drawerHiddenY = drawerMaxHeight + 56;
+  const drawerCollapsedY = Math.max(0, drawerMaxHeight - drawerPeekHeight);
+  const drawerTranslate = useRef(new Animated.Value(drawerHiddenY)).current;
+  const resultsAnim = useRef(new Animated.Value(0)).current;
+  const drawerDragStart = useRef(0);
 
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<ExploreFilter>('all');
@@ -55,7 +68,7 @@ export const ExploreScreen: React.FC = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showDownloadPack, setShowDownloadPack] = useState(false);
 
-  const { sights } = useSights();
+  const { sights, loading } = useSights();
 
   const filteredSights = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -73,21 +86,93 @@ export const ExploreScreen: React.FC = () => {
     return sights.find((s) => s.id === selectedSightId) ?? null;
   }, [selectedSightId, sights]);
 
-  const openDrawer = () => {
-    Animated.timing(drawerTranslate, {
-      toValue: 0,
-      duration: 220,
+  const sightsGeojson = useMemo(() => {
+    return {
+      type: 'FeatureCollection',
+      features: filteredSights.map((s) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [s.lng, s.lat] },
+        properties: { id: s.id, category: s.category, name: s.name },
+      })),
+    } as any;
+  }, [filteredSights]);
+
+  const topResults = useMemo(() => {
+    if (!query.trim()) return [];
+    return filteredSights.slice(0, 6);
+  }, [filteredSights, query]);
+
+  useEffect(() => {
+    const show = query.trim().length > 0 && topResults.length > 0;
+    Animated.timing(resultsAnim, {
+      toValue: show ? 1 : 0,
+      duration: show ? 160 : 120,
       useNativeDriver: true,
     }).start();
+  }, [query, resultsAnim, topResults.length]);
+
+  const animateDrawerTo = (y: number, velocity?: number) => {
+    Animated.spring(drawerTranslate, {
+      toValue: y,
+      useNativeDriver: true,
+      speed: 28,
+      bounciness: 6,
+      velocity,
+    }).start();
+  };
+
+  const openDrawer = () => {
+    animateDrawerTo(drawerCollapsedY);
+  };
+
+  const expandDrawer = () => {
+    animateDrawerTo(0);
   };
 
   const closeDrawer = () => {
     Animated.timing(drawerTranslate, {
-      toValue: drawerHeight,
-      duration: 180,
+      toValue: drawerHiddenY,
+      duration: 170,
       useNativeDriver: true,
     }).start(() => setSelectedSightId(null));
   };
+
+  const onHandleDrag = (_: any, gesture: PanResponderGestureState) => {
+    const next = Math.max(0, Math.min(drawerHiddenY, drawerDragStart.current + gesture.dy));
+    drawerTranslate.setValue(next);
+  };
+
+  const onHandleRelease = (_: any, gesture: PanResponderGestureState) => {
+    const vy = gesture.vy;
+    const shouldClose = vy > 0.75 || drawerDragStart.current + gesture.dy > drawerMaxHeight * 0.7;
+    if (shouldClose) {
+      closeDrawer();
+      return;
+    }
+    const projected = drawerDragStart.current + gesture.dy + vy * 80;
+    if (projected < drawerMaxHeight * 0.35) {
+      expandDrawer();
+      return;
+    }
+    animateDrawerTo(drawerCollapsedY);
+  };
+
+  const drawerPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: () => {
+          drawerTranslate.stopAnimation((v) => {
+            drawerDragStart.current = typeof v === 'number' ? v : 0;
+          });
+        },
+        onPanResponderMove: onHandleDrag,
+        onPanResponderRelease: onHandleRelease,
+        onPanResponderTerminate: onHandleRelease,
+      }),
+    [drawerCollapsedY, drawerHiddenY, drawerMaxHeight]
+  );
 
   const handleSelectSight = (sightId: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -101,6 +186,46 @@ export const ExploreScreen: React.FC = () => {
       });
     }
     openDrawer();
+  };
+
+  const handlePickResult = (sight: Sight) => {
+    setQuery('');
+    setFilter('all');
+    handleSelectSight(sight.id);
+  };
+
+  const handleRecenter = () => {
+    if (!userLocation) return;
+    Haptics.selectionAsync();
+    cameraRef.current?.setCamera({
+      centerCoordinate: [userLocation.lng, userLocation.lat],
+      zoomLevel: 15.2,
+      animationDuration: 650,
+    });
+  };
+
+  const handleMapPress = async (e: any) => {
+    const feature = e?.features?.[0];
+    if (!feature) return;
+    const props = feature.properties ?? {};
+    const isCluster = !!props.cluster;
+    if (isCluster) {
+      try {
+        const zoom = await shapeSourceRef.current?.getClusterExpansionZoom(feature);
+        const coords = feature.geometry?.coordinates;
+        if (Array.isArray(coords) && coords.length === 2) {
+          cameraRef.current?.setCamera({
+            centerCoordinate: coords,
+            zoomLevel: typeof zoom === 'number' ? zoom : 15,
+            animationDuration: 420,
+          });
+        }
+      } catch {
+      }
+      return;
+    }
+    const id = String(props.id ?? '').trim();
+    if (id) handleSelectSight(id);
   };
 
   const chips: Array<{ label: string; value: ExploreFilter; icon: keyof typeof Ionicons.glyphMap }> = [
@@ -153,50 +278,120 @@ export const ExploreScreen: React.FC = () => {
           }}
         />
 
-        {filteredSights.map((sight) => (
-          <Mapbox.PointAnnotation
-            key={sight.id}
-            id={sight.id}
-            coordinate={[sight.lng, sight.lat]}
-            onSelected={() => handleSelectSight(sight.id)}
-          >
-            <View style={styles.pinOuter}>
-              <View style={styles.pinInner} />
-            </View>
-          </Mapbox.PointAnnotation>
-        ))}
+        <Mapbox.ShapeSource
+          id="sights"
+          ref={shapeSourceRef}
+          shape={sightsGeojson}
+          cluster
+          clusterRadius={46}
+          onPress={handleMapPress}
+        >
+          <Mapbox.CircleLayer
+            id="clusters"
+            filter={['has', 'point_count']}
+            style={{
+              circleColor: 'rgba(0,122,255,0.9)',
+              circleOpacity: 0.95,
+              circleRadius: ['step', ['get', 'point_count'], 18, 10, 22, 30, 28],
+            }}
+          />
+          <Mapbox.SymbolLayer
+            id="cluster-count"
+            filter={['has', 'point_count']}
+            style={{
+              textField: ['get', 'point_count'],
+              textSize: 12,
+              textColor: '#fff',
+              textFont: ['System Bold'],
+            }}
+          />
+
+          <Mapbox.CircleLayer
+            id="sight-selected"
+            filter={[
+              'all',
+              ['!', ['has', 'point_count']],
+              ['==', ['get', 'id'], selectedSightId ?? ''],
+            ]}
+            style={{
+              circleColor: '#111',
+              circleOpacity: 1,
+              circleStrokeColor: '#fff',
+              circleStrokeWidth: 2,
+              circleRadius: 12,
+            }}
+          />
+          <Mapbox.CircleLayer
+            id="sight-points"
+            filter={[
+              'all',
+              ['!', ['has', 'point_count']],
+              ['!=', ['get', 'id'], selectedSightId ?? ''],
+            ]}
+            style={{
+              circleColor: '#fff',
+              circleOpacity: 1,
+              circleStrokeColor: '#007AFF',
+              circleStrokeWidth: 2,
+              circleRadius: 10,
+            }}
+          />
+        </Mapbox.ShapeSource>
       </Mapbox.MapView>
+
+      {/* Recenter button — top left */}
+      <View style={[styles.recenterWrap, { top: insets.top + 12 }]}>
+        <AnimatedPressable
+          onPress={handleRecenter}
+          haptics="light"
+          disabled={!userLocation}
+          style={[styles.recenterBtn, !userLocation && styles.recenterBtnDisabled]}
+          pressedStyle={styles.recenterBtnPressed}
+        >
+          <BlurView intensity={80} tint="dark" style={styles.recenterBtnBlur}>
+            <Ionicons name="locate-outline" size={18} color="#fff" />
+          </BlurView>
+        </AnimatedPressable>
+      </View>
 
       {/* Download pack button — top right */}
       <View style={[styles.downloadBtnWrap, { top: insets.top + 12 }]}>
-        <TouchableOpacity
+        <AnimatedPressable
           onPress={() => setShowDownloadPack(true)}
-          activeOpacity={0.85}
+          haptics="light"
           style={styles.downloadBtn}
+          pressedStyle={styles.downloadBtnPressed}
         >
           <BlurView intensity={80} tint="dark" style={styles.downloadBtnBlur}>
             <Ionicons name="cloud-download-outline" size={18} color="#fff" />
           </BlurView>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       {/* Shop nearby pill — floats above search bar */}
       <View style={[styles.shopPillWrap, { bottom: Math.max(16, insets.bottom + 12) + 130 }]}>
-        <TouchableOpacity
+        <AnimatedPressable
           onPress={() => navigation?.navigate?.('Shop' as never)}
-          activeOpacity={0.9}
+          haptics="light"
           style={styles.shopPill}
+          pressedStyle={styles.shopPillPressed}
         >
           <BlurView intensity={80} tint="dark" style={styles.shopPillBlur}>
             <Ionicons name="bag-handle-outline" size={16} color="#fff" />
             <Text style={styles.shopPillText}>Shop Tours & Souvenirs</Text>
             <Ionicons name="chevron-up" size={14} color="rgba(255,255,255,0.7)" />
           </BlurView>
-        </TouchableOpacity>
+        </AnimatedPressable>
       </View>
 
       <View style={[styles.bottomControls, { paddingBottom: Math.max(16, insets.bottom + 12) }]}>
         <BlurView intensity={80} tint="light" style={styles.controlsCard}>
+          {loading && (
+            <View style={styles.loadingRow}>
+              <Skeleton style={styles.loadingPill} />
+              <Skeleton style={styles.loadingPillSmall} />
+            </View>
+          )}
           <View style={styles.searchRow}>
             <Ionicons name="search" size={18} color="rgba(60,60,67,0.75)" />
             <TextInput
@@ -214,20 +409,69 @@ export const ExploreScreen: React.FC = () => {
             )}
           </View>
 
+          {topResults.length > 0 && (
+            <Animated.View
+              style={[
+                styles.resultsWrap,
+                {
+                  opacity: resultsAnim,
+                  transform: [
+                    {
+                      translateY: resultsAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [8, 0],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              <ScrollView
+                style={styles.resultsList}
+                contentContainerStyle={styles.resultsContent}
+                showsVerticalScrollIndicator={false}
+              >
+                {topResults.map((s) => (
+                  <AnimatedPressable
+                    key={s.id}
+                    onPress={() => handlePickResult(s)}
+                    haptics="light"
+                    style={styles.resultRow}
+                    pressedStyle={styles.resultRowPressed}
+                  >
+                    <View style={styles.resultInner}>
+                      <View style={styles.resultText}>
+                        <Text style={styles.resultTitle} numberOfLines={1}>
+                          {s.name}
+                        </Text>
+                        <Text style={styles.resultSub} numberOfLines={1}>
+                          {s.category.toUpperCase()}
+                        </Text>
+                      </View>
+                      <Ionicons name="arrow-forward" size={16} color="rgba(60,60,67,0.75)" />
+                    </View>
+                  </AnimatedPressable>
+                ))}
+              </ScrollView>
+            </Animated.View>
+          )}
+
           <View style={styles.chipsRow}>
-            <TouchableOpacity
+            <AnimatedPressable
               onPress={() => setFilter('all')}
-              activeOpacity={0.9}
+              haptics="light"
               style={[styles.chip, filter === 'all' && styles.chipActive]}
+              pressedStyle={styles.chipPressed}
             >
               <Text style={[styles.chipText, filter === 'all' && styles.chipTextActive]}>All</Text>
-            </TouchableOpacity>
+            </AnimatedPressable>
             {chips.map((c) => (
-              <TouchableOpacity
+              <AnimatedPressable
                 key={c.value}
                 onPress={() => setFilter((v) => (v === c.value ? 'all' : c.value))}
-                activeOpacity={0.9}
+                haptics="light"
                 style={[styles.chip, filter === c.value && styles.chipActive]}
+                pressedStyle={styles.chipPressed}
               >
                 <Ionicons
                   name={c.icon}
@@ -236,7 +480,7 @@ export const ExploreScreen: React.FC = () => {
                   style={styles.chipIcon}
                 />
                 <Text style={[styles.chipText, filter === c.value && styles.chipTextActive]}>{c.label}</Text>
-              </TouchableOpacity>
+              </AnimatedPressable>
             ))}
           </View>
         </BlurView>
@@ -253,12 +497,15 @@ export const ExploreScreen: React.FC = () => {
             styles.drawer,
             {
               paddingBottom: Math.max(16, insets.bottom + 12),
+              height: drawerMaxHeight,
               transform: [{ translateY: drawerTranslate }],
             },
           ]}
         >
           <BlurView intensity={90} tint="dark" style={styles.drawerCard}>
-            <View style={styles.drawerHandle} />
+            <View style={styles.drawerHandleHit} {...drawerPanResponder.panHandlers}>
+              <View style={styles.drawerHandle} />
+            </View>
             <View style={styles.drawerHeader}>
               <View style={styles.drawerTitleWrap}>
                 <Text style={styles.drawerTitle} numberOfLines={1}>
@@ -273,7 +520,7 @@ export const ExploreScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.drawerBody}>
+            <ScrollView style={styles.drawerBody} contentContainerStyle={styles.drawerBodyContent} showsVerticalScrollIndicator={false}>
               <Image source={{ uri: selectedSight.thumbnail }} style={styles.drawerImage} resizeMode="cover" />
 
               <AudioPlayer sight={selectedSight} />
@@ -290,7 +537,7 @@ export const ExploreScreen: React.FC = () => {
               <Text style={styles.drawerDescription} numberOfLines={3}>
                 {selectedSight.description}
               </Text>
-            </View>
+            </ScrollView>
           </BlurView>
         </Animated.View>
       )}
@@ -344,11 +591,41 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#007AFF',
   },
+  pinOuterActive: {
+    borderColor: '#111',
+    backgroundColor: '#111',
+    transform: [{ scale: 1.12 }],
+  },
   pinInner: {
     width: 16,
     height: 16,
     borderRadius: 8,
     backgroundColor: '#007AFF',
+  },
+  pinInnerActive: {
+    backgroundColor: '#fff',
+    transform: [{ scale: 0.92 }],
+  },
+  recenterWrap: {
+    position: 'absolute',
+    left: 16,
+  },
+  recenterBtn: {
+    borderRadius: 22,
+    overflow: 'hidden',
+  },
+  recenterBtnDisabled: {
+    opacity: 0.4,
+  },
+  recenterBtnPressed: {
+    opacity: 0.92,
+  },
+  recenterBtnBlur: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
   bottomControls: {
     position: 'absolute',
@@ -361,6 +638,21 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     padding: 12,
     backgroundColor: 'rgba(255,255,255,0.8)',
+  },
+  loadingRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+  },
+  loadingPill: {
+    height: 16,
+    borderRadius: 999,
+    flex: 1,
+  },
+  loadingPillSmall: {
+    height: 16,
+    borderRadius: 999,
+    width: 84,
   },
   searchRow: {
     flexDirection: 'row',
@@ -381,6 +673,53 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
     paddingVertical: 6,
   },
+  resultsWrap: {
+    marginTop: 10,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.06)',
+  },
+  resultsList: {
+    maxHeight: 210,
+  },
+  resultsContent: {
+    paddingVertical: 6,
+  },
+  resultRow: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginHorizontal: 6,
+    marginVertical: 4,
+    backgroundColor: 'rgba(118,118,128,0.12)',
+  },
+  resultRowPressed: {
+    opacity: 0.92,
+  },
+  resultInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  resultText: {
+    flex: 1,
+    gap: 2,
+  },
+  resultTitle: {
+    fontSize: 13,
+    fontWeight: '900',
+    color: '#111',
+  },
+  resultSub: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: 'rgba(60,60,67,0.7)',
+    letterSpacing: 0.4,
+  },
   chipsRow: {
     marginTop: 10,
     flexDirection: 'row',
@@ -394,6 +733,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
+  },
+  chipPressed: {
+    opacity: 0.92,
   },
   chipActive: {
     backgroundColor: '#111',
@@ -424,13 +766,19 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     backgroundColor: 'rgba(0,0,0,0.6)',
   },
+  drawerHandleHit: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    marginTop: -4,
+    marginBottom: 2,
+  },
   drawerHandle: {
     alignSelf: 'center',
     width: 44,
     height: 5,
     borderRadius: 999,
     backgroundColor: 'rgba(255,255,255,0.25)',
-    marginBottom: 10,
   },
   drawerHeader: {
     flexDirection: 'row',
@@ -462,7 +810,10 @@ const styles = StyleSheet.create({
   },
   drawerBody: {
     marginTop: 12,
+  },
+  drawerBodyContent: {
     gap: 12,
+    paddingBottom: 10,
   },
   drawerImage: {
     width: '100%',
@@ -500,6 +851,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     overflow: 'hidden',
   },
+  shopPillPressed: {
+    opacity: 0.92,
+  },
   shopPillBlur: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -520,6 +874,9 @@ const styles = StyleSheet.create({
   downloadBtn: {
     borderRadius: 22,
     overflow: 'hidden',
+  },
+  downloadBtnPressed: {
+    opacity: 0.92,
   },
   downloadBtnBlur: {
     width: 44,

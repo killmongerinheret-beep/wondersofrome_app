@@ -15,17 +15,13 @@
     "ticketsinrome": {
       "distribution": "store",
       "env": {
-        "EXPO_PUBLIC_SITE_ID": "ticketsinrome",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://ogrvhooygcoazracbvkb.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ncnZob295Z2NvYXpyYWNidmtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MDY4NzIsImV4cCI6MjA4NDk4Mjg3Mn0.LNxaDawFpPbEO4uuKTlv-UDqg1vuNZ98H5Iw9bYzRbA"
+        "EXPO_PUBLIC_SITE_ID": "ticketsinrome"
       }
     },
     "wondersofrome": {
       "distribution": "store",
       "env": {
-        "EXPO_PUBLIC_SITE_ID": "wondersofrome",
-        "EXPO_PUBLIC_SUPABASE_URL": "https://ogrvhooygcoazracbvkb.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ncnZob295Z2NvYXpyYWNidmtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk0MDY4NzIsImV4cCI6MjA4NDk4Mjg3Mn0.LNxaDawFpPbEO4uuKTlv-UDqg1vuNZ98H5Iw9bYzRbA"
+        "EXPO_PUBLIC_SITE_ID": "wondersofrome"
       }
     }
   },

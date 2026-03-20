@@ -192,6 +192,7 @@ export const ShopScreen: React.FC = () => {
         </View>
       ) : tab === 'tours' ? (
         <FlatList
+          key="tours"
           data={tours}
           keyExtractor={t => t.id}
           renderItem={renderTour}
@@ -200,6 +201,7 @@ export const ShopScreen: React.FC = () => {
         />
       ) : (
         <FlatList
+          key="shop-2col"
           data={products}
           keyExtractor={p => p.id}
           renderItem={renderProduct}
