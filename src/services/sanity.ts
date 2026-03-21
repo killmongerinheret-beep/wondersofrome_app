@@ -1,5 +1,6 @@
 import { SANITY_PROJECT_ID, SANITY_DATASET, SANITY_API_VERSION } from '../config/sanity';
 import { Sight, AudioVariant, AudioLang, LangAudioFiles } from '../types';
+import { getAudioCdnBaseUrl } from '../config/audioCdn';
 
 const BASE = `https://${SANITY_PROJECT_ID}.api.sanity.io/v${SANITY_API_VERSION}/data/query/${SANITY_DATASET}`;
 
@@ -74,26 +75,49 @@ export const fetchSightsFromSanity = async (): Promise<Sight[]> => {
   if (!res.ok) throw new Error(`Sanity fetch failed: ${res.status}`);
   const json = await res.json();
   const rows: SanitySight[] = json.result ?? [];
+  const audioCdnBase = getAudioCdnBaseUrl();
 
   return rows
     .filter(r => r.id && r.lat && r.lng)
-    .map((r): Sight => ({
-      id: r.id,
-      name: r.name,
-      name_it: r.name_it,
-      lat: r.lat,
-      lng: r.lng,
-      radius: r.radius ?? 20,
-      category: mapCategory(r.category),
-      has_tips: !!(r.tips?.length || r.kidsMyth),
-      pack: r.pack ?? 'full',
-      thumbnail: r.thumbnail ?? '',
-      description: r.description ?? '',
-      tips: r.tips,
-      kidsMyth: r.kidsMyth,
-      audioFiles: r.audioFiles ?? {},
-      linkedTour: r.linkedTour,
-    }));
+    .map((r): Sight => {
+      const audioFiles: LangAudioFiles = r.audioFiles ?? {};
+
+      if (audioCdnBase) {
+        const langs: AudioLang[] = ['en','it','es','fr','de','zh','ja','pt','pl','ru','ar','ko'];
+        const variants: AudioVariant[] = ['quick', 'deep', 'kids'];
+        for (const lang of langs) {
+          for (const variant of variants) {
+            const existing = audioFiles?.[lang]?.[variant]?.url?.trim() ?? '';
+            if (existing && !existing.includes('example.com')) continue;
+            const url = `${audioCdnBase}/audio/${lang}/${r.id}/${variant}.m4a`;
+            audioFiles[lang] = audioFiles[lang] ?? {};
+            audioFiles[lang]![variant] = {
+              url,
+              duration: audioFiles[lang]?.[variant]?.duration ?? 0,
+              size: audioFiles[lang]?.[variant]?.size ?? 0,
+            };
+          }
+        }
+      }
+
+      return {
+        id: r.id,
+        name: r.name,
+        name_it: r.name_it,
+        lat: r.lat,
+        lng: r.lng,
+        radius: r.radius ?? 20,
+        category: mapCategory(r.category),
+        has_tips: !!(r.tips?.length || r.kidsMyth),
+        pack: r.pack ?? 'full',
+        thumbnail: r.thumbnail ?? '',
+        description: r.description ?? '',
+        tips: r.tips,
+        kidsMyth: r.kidsMyth,
+        audioFiles,
+        linkedTour: r.linkedTour,
+      };
+    });
 };
 
 // ── Tours (all, for the Shop/Tours tab) ──────────────────────────────────────
@@ -137,6 +161,52 @@ export const fetchToursFromSanity = async (): Promise<SanityTour[]> => {
   if (!res.ok) throw new Error(`Sanity tours fetch failed: ${res.status}`);
   const json = await res.json();
   return (json.result ?? []).filter((t: SanityTour) => t.id);
+};
+
+// ── Audio Tours / Routes (ordered stops for in-app playback) ───────────────────
+
+const AUDIO_TOURS_QUERY = encodeURIComponent(`*[
+  (_type == "audioTour") ||
+  (_type == "tour" && defined(stops))
+] | order(_createdAt desc) {
+  "id": slug.current,
+  title,
+  description,
+  duration,
+  "thumbnail": coalesce(mainImage.asset->url, thumbnail.asset->url) + "?w=800&auto=format",
+  "stops": coalesce(stops, sights, route, itinerary)[]->{
+    "id": slug.current,
+    name,
+    name_it,
+    category,
+    pack,
+    lat,
+    lng,
+    radius,
+    description,
+    "thumbnail": thumbnail.asset->url + "?w=800&auto=format",
+    tips,
+    kidsMyth,
+    "audioFiles": {
+      ${audioLangProjection}
+    }
+  }
+}`);
+
+export type SanityAudioTour = {
+  id: string;
+  title: string;
+  description?: string;
+  duration?: string;
+  thumbnail?: string;
+  stops?: SanitySight[];
+};
+
+export const fetchAudioToursFromSanity = async (): Promise<SanityAudioTour[]> => {
+  const res = await fetch(`${BASE}?query=${AUDIO_TOURS_QUERY}`);
+  if (!res.ok) throw new Error(`Sanity audio tours fetch failed: ${res.status}`);
+  const json = await res.json();
+  return (json.result ?? []).filter((t: SanityAudioTour) => t.id);
 };
 
 // ── Products (souvenirs / shop) ───────────────────────────────────────────────

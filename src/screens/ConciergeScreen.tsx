@@ -6,6 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { fetchConcierge } from '../services/remoteContent';
 import { supabase } from '../services/supabase';
+import { theme } from '../ui/theme';
+
+const BRAND = theme.colors.brand;
 
 type Office = {
   name: string;
@@ -127,7 +130,7 @@ export const ConciergeScreen: React.FC = () => {
         <View style={styles.header}>
           <View style={styles.headerLogoRow}>
             <View style={styles.logoCircle}>
-              <Ionicons name="globe" size={22} color="#007AFF" />
+              <Ionicons name="globe" size={22} color={BRAND} />
             </View>
             <View>
               <Text style={styles.headerTitle}>Concierge</Text>
@@ -143,7 +146,7 @@ export const ConciergeScreen: React.FC = () => {
               <Image source={{ uri: displayAgent.avatarUrl }} style={styles.agentAvatar} />
             ) : (
               <View style={[styles.agentAvatar, styles.agentAvatarFallback]}>
-                <Ionicons name="globe" size={26} color="#007AFF" />
+                <Ionicons name="globe" size={26} color={BRAND} />
               </View>
             )}
             <View style={styles.agentText}>
@@ -160,11 +163,11 @@ export const ConciergeScreen: React.FC = () => {
         {/* Quick contact row */}
         <View style={styles.contactRow}>
           <TouchableOpacity onPress={handleWebsite} activeOpacity={0.85} style={styles.contactBtn}>
-            <Ionicons name="globe-outline" size={18} color="#007AFF" />
+            <Ionicons name="globe-outline" size={18} color={BRAND} />
             <Text style={styles.contactBtnText}>Website</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleEmail} activeOpacity={0.85} style={styles.contactBtn}>
-            <Ionicons name="mail-outline" size={18} color="#007AFF" />
+            <Ionicons name="mail-outline" size={18} color={BRAND} />
             <Text style={styles.contactBtnText}>Email us</Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -172,7 +175,7 @@ export const ConciergeScreen: React.FC = () => {
             activeOpacity={0.85}
             style={styles.contactBtn}
           >
-            <Ionicons name="call-outline" size={18} color="#007AFF" />
+            <Ionicons name="call-outline" size={18} color={BRAND} />
             <Text style={styles.contactBtnText}>Call</Text>
           </TouchableOpacity>
         </View>
@@ -320,7 +323,7 @@ const styles = StyleSheet.create({
   contactBtnText: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#007AFF',
+    color: BRAND,
   },
   officeCard: {
     borderRadius: 18,

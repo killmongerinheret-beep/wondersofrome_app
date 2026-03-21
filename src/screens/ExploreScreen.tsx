@@ -14,6 +14,7 @@ import {
   View,
   Linking,
   Modal,
+  Platform,
 } from 'react-native';
 import Mapbox from '@rnmapbox/maps';
 import { BlurView } from 'expo-blur';
@@ -23,10 +24,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Sight } from '../types';
 import { getMapboxAccessToken } from '../config/mapbox';
 import { useSights } from '../hooks/useSights';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import { AudioPlayer } from '../components/AudioPlayer';
 import { DownloadPackScreen } from './DownloadPackScreen';
 import { AnimatedPressable } from '../ui/AnimatedPressable';
 import { Skeleton } from '../ui/Skeleton';
+import { theme } from '../ui/theme';
+import { useContinueListening } from '../hooks/useContinueListening';
+import { useAudioTours } from '../hooks/useAudioTours';
+import { TourSheet } from '../components/TourSheet';
+import { SanityAudioTour } from '../services/sanity';
 
 type ExploreFilter = 'all' | 'ancient' | 'religious' | 'museum' | 'piazza' | 'other';
 
@@ -34,6 +41,10 @@ const ROME_CENTER: [number, number] = [12.4922, 41.8902];
 const { width: SCREEN_W } = Dimensions.get('window');
 const CARD_W = SCREEN_W * 0.72;
 const CARD_GAP = 12;
+const BRAND = theme.colors.brand;
+const BG = theme.colors.bg;
+const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 88 : 60;
+const MINI_PLAYER_HEIGHT = 86;
 
 const toRadians = (v: number) => (v * Math.PI) / 180;
 const distanceMeters = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
@@ -54,6 +65,7 @@ const SightSwipeCard: React.FC<{
   onPress: () => void;
 }> = ({ sight, isSelected, distance, onPress }) => {
   const scale = useRef(new Animated.Value(isSelected ? 1 : 0.94)).current;
+  const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
     Animated.spring(scale, {
@@ -75,7 +87,18 @@ const SightSwipeCard: React.FC<{
   return (
     <Animated.View style={[styles.swipeCard, { transform: [{ scale }] }]}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.92} style={styles.swipeCardInner}>
-        <Image source={{ uri: sight.thumbnail }} style={styles.swipeCardImage} resizeMode="cover" />
+        {sight.thumbnail?.trim() && !imageFailed ? (
+          <Image
+            source={{ uri: sight.thumbnail }}
+            style={styles.swipeCardImage}
+            resizeMode="cover"
+            onError={() => setImageFailed(true)}
+          />
+        ) : (
+          <View style={styles.swipeCardImageFallback}>
+            <Ionicons name="image-outline" size={26} color="rgba(255,255,255,0.7)" />
+          </View>
+        )}
         <View style={styles.swipeCardOverlay} />
         {isSelected && (
           <View style={styles.swipeCardSelectedBadge}>
@@ -101,6 +124,12 @@ const SightSwipeCard: React.FC<{
                 <Text style={styles.swipeCardPillText}>{distance < 1000 ? `${distance}m` : `${(distance / 1000).toFixed(1)}km`}</Text>
               </View>
             )}
+            {!!sight.audioFiles?.en?.quick?.url?.trim() && !sight.audioFiles.en.quick.url.includes('example.com') && (
+              <View style={[styles.swipeCardPill, styles.swipeCardPillBlue]}>
+                <Ionicons name="headset-outline" size={10} color="#fff" />
+                <Text style={styles.swipeCardPillText}>Audio</Text>
+              </View>
+            )}
             {sight.pack === 'essential' && (
               <View style={[styles.swipeCardPill, styles.swipeCardPillGold]}>
                 <Text style={styles.swipeCardPillTextGold}>Essential</Text>
@@ -109,7 +138,9 @@ const SightSwipeCard: React.FC<{
             {sight.linkedTour && (
               <View style={[styles.swipeCardPill, styles.swipeCardPillBlue]}>
                 <Ionicons name="ticket-outline" size={10} color="#fff" />
-                <Text style={styles.swipeCardPillText}>Tour available</Text>
+                <Text style={styles.swipeCardPillText}>
+                  {sight.linkedTour.price ? `From €${sight.linkedTour.price}` : 'Tour'}
+                </Text>
               </View>
             )}
           </View>
@@ -126,6 +157,8 @@ export const ExploreScreen: React.FC = () => {
   const shapeSourceRef = useRef<any>(null);
   const carouselRef = useRef<FlatList>(null);
   const windowHeight = Dimensions.get('window').height;
+  const { sightId: playingSightId, isPlaying, play, startQueue } = useAudioPlayer();
+  const isMiniPlayerVisible = !!playingSightId;
 
   const drawerMaxHeight = Math.min(Math.max(520, Math.round(windowHeight * 0.7)), 680);
   const drawerPeekHeight = 170;
@@ -140,8 +173,11 @@ export const ExploreScreen: React.FC = () => {
   const [selectedSightId, setSelectedSightId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showDownloadPack, setShowDownloadPack] = useState(false);
+  const [selectedTour, setSelectedTour] = useState<SanityAudioTour | null>(null);
 
   const { sights, loading } = useSights();
+  const { top: continueTop, refresh: refreshContinue } = useContinueListening(sights);
+  const { tours: audioTours } = useAudioTours();
 
   const filteredSights = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -180,6 +216,14 @@ export const ExploreScreen: React.FC = () => {
     }).start();
   }, [query, resultsAnim, topResults.length]);
 
+  useEffect(() => {
+    refreshContinue().catch(() => {});
+  }, [isPlaying, playingSightId, refreshContinue]);
+
+  const playableTours = useMemo(() => {
+    return (audioTours ?? []).filter((t) => (t.stops?.length ?? 0) >= 2);
+  }, [audioTours]);
+
   // ── Drawer helpers ──────────────────────────────────────────────────────────
   const animateDrawerTo = (y: number, velocity?: number) => {
     Animated.spring(drawerTranslate, {
@@ -204,8 +248,8 @@ export const ExploreScreen: React.FC = () => {
   };
 
   const drawerPanResponder = useMemo(() => PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onMoveShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponder: () => false,
+    onMoveShouldSetPanResponder: (_evt, g) => Math.abs(g.dy) > 4 && Math.abs(g.dy) > Math.abs(g.dx),
     onPanResponderGrant: () => {
       drawerTranslate.stopAnimation((v) => { drawerDragStart.current = typeof v === 'number' ? v : 0; });
     },
@@ -284,14 +328,30 @@ export const ExploreScreen: React.FC = () => {
 
   const accessToken = useMemo(() => getMapboxAccessToken(), []);
 
-  // ── Category chips config ───────────────────────────────────────────────────
-  const chips: Array<{ label: string; value: ExploreFilter; icon: keyof typeof Ionicons.glyphMap }> = [
-    { label: 'Ancient', value: 'ancient', icon: 'business-outline' },
-    { label: 'Churches', value: 'religious', icon: 'library-outline' },
-    { label: 'Museums', value: 'museum', icon: 'color-palette-outline' },
-    { label: 'Piazzas', value: 'piazza', icon: 'sunny-outline' },
-    { label: 'Hidden', value: 'other', icon: 'sparkles-outline' },
-  ];
+  const categoryCounts = useMemo(() => {
+    const counts: Record<Exclude<ExploreFilter, 'all'>, number> = {
+      ancient: 0,
+      religious: 0,
+      museum: 0,
+      piazza: 0,
+      other: 0,
+    };
+    for (const s of sights) {
+      counts[s.category] = (counts[s.category] ?? 0) + 1;
+    }
+    return counts;
+  }, [sights]);
+
+  const chips = useMemo(() => {
+    const config: Array<{ label: string; value: Exclude<ExploreFilter, 'all'>; icon: keyof typeof Ionicons.glyphMap }> = [
+      { label: 'Ancient', value: 'ancient', icon: 'business-outline' },
+      { label: 'Churches', value: 'religious', icon: 'library-outline' },
+      { label: 'Museums', value: 'museum', icon: 'color-palette-outline' },
+      { label: 'Piazzas', value: 'piazza', icon: 'sunny-outline' },
+      { label: 'Hidden', value: 'other', icon: 'sparkles-outline' },
+    ];
+    return config.filter((c) => (categoryCounts[c.value] ?? 0) > 0);
+  }, [categoryCounts]);
 
   if (!accessToken) {
     return (
@@ -340,7 +400,7 @@ export const ExploreScreen: React.FC = () => {
           <Mapbox.CircleLayer
             id="sight-points"
             filter={['all', ['!', ['has', 'point_count']], ['!=', ['get', 'id'], selectedSightId ?? '']]}
-            style={{ circleColor: '#fff', circleOpacity: 1, circleStrokeColor: '#007AFF', circleStrokeWidth: 2, circleRadius: 10 }}
+            style={{ circleColor: '#fff', circleOpacity: 1, circleStrokeColor: BRAND, circleStrokeWidth: 2, circleRadius: 10 }}
           />
         </Mapbox.ShapeSource>
       </Mapbox.MapView>
@@ -366,7 +426,15 @@ export const ExploreScreen: React.FC = () => {
       </View>
 
       {/* Bottom controls: search + chips + swipe carousel */}
-      <View style={[styles.bottomControls, { paddingBottom: Math.max(16, insets.bottom + 12) }]}>
+      <View
+        style={[
+          styles.bottomControls,
+          {
+            bottom: TAB_BAR_HEIGHT + (isMiniPlayerVisible ? MINI_PLAYER_HEIGHT + 12 : 0),
+            paddingBottom: 12,
+          },
+        ]}
+      >
         <BlurView intensity={80} tint="light" style={styles.controlsCard}>
           {loading && (
             <View style={styles.loadingRow}>
@@ -375,11 +443,88 @@ export const ExploreScreen: React.FC = () => {
             </View>
           )}
 
+          {!!continueTop && !isMiniPlayerVisible && (
+            <AnimatedPressable
+              onPress={() => {
+                const key = continueTop.progress.last_played_variant ?? 'en_quick';
+                const [lang, vRaw] = key.split('_');
+                const v = (vRaw || 'quick') as any;
+                const url = (continueTop.sight.audioFiles as any)?.[lang || 'en']?.[v]?.url;
+                play(continueTop.sight.id, key, url);
+              }}
+              haptics="light"
+              style={styles.continueCard}
+              pressedStyle={styles.continueCardPressed}
+            >
+              <View style={styles.continueRow}>
+                <View style={styles.continueThumbWrap}>
+                  {continueTop.sight.thumbnail?.trim() ? (
+                    <Image source={{ uri: continueTop.sight.thumbnail }} style={styles.continueThumb} />
+                  ) : (
+                    <View style={styles.continueThumbFallback}>
+                      <Ionicons name="headset-outline" size={18} color="rgba(0,0,0,0.6)" />
+                    </View>
+                  )}
+                </View>
+                <View style={styles.continueText}>
+                  <Text style={styles.continueLabel}>Continue listening</Text>
+                  <Text style={styles.continueTitle} numberOfLines={1}>
+                    {continueTop.sight.name}
+                  </Text>
+                </View>
+                <View style={styles.continueBtn}>
+                  <Ionicons name="play" size={16} color="#fff" />
+                </View>
+              </View>
+            </AnimatedPressable>
+          )}
+
+          {playableTours.length > 0 && !isMiniPlayerVisible && (
+            <View style={styles.toursBlock}>
+              <View style={styles.toursHeader}>
+                <Text style={styles.toursTitle}>Walking tours</Text>
+                <Text style={styles.toursHint}>Auto-play stops</Text>
+              </View>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.toursRow}>
+                {playableTours.slice(0, 8).map((t) => (
+                  <AnimatedPressable
+                    key={t.id}
+                    haptics="light"
+                    style={styles.tourCard}
+                    pressedStyle={styles.tourCardPressed}
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      setSelectedTour(t);
+                    }}
+                  >
+                    {t.thumbnail ? (
+                      <Image source={{ uri: t.thumbnail }} style={styles.tourCardImage} resizeMode="cover" />
+                    ) : (
+                      <View style={styles.tourCardImageFallback} />
+                    )}
+                    <View style={styles.tourCardOverlay} />
+                    <View style={styles.tourCardContent}>
+                      <Text style={styles.tourCardLabel} numberOfLines={1}>
+                        {t.duration ? `${t.duration} · ` : ''}
+                        {t.stops?.length ?? 0} stops
+                      </Text>
+                      <Text style={styles.tourCardTitle} numberOfLines={2}>
+                        {t.title}
+                      </Text>
+                    </View>
+                    <View style={styles.tourCardPlay}>
+                      <Ionicons name="play" size={14} color="#fff" />
+                    </View>
+                  </AnimatedPressable>
+                ))}
+              </ScrollView>
+            </View>
+          )}
+
           {/* Search */}
           <View style={styles.searchRow}>
             <Ionicons name="search" size={18} color="rgba(60,60,67,0.75)" />
             <TextInput
-              value={query}
               onChangeText={setQuery}
               placeholder="Search sights…"
               placeholderTextColor="rgba(60,60,67,0.55)"
@@ -419,14 +564,22 @@ export const ExploreScreen: React.FC = () => {
           {/* Category chips */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
             <AnimatedPressable onPress={() => setFilter('all')} haptics="light"
-              style={[styles.chip, filter === 'all' && styles.chipActive]} pressedStyle={{ opacity: 0.85 }}>
+              style={[styles.chip, filter === 'all' && styles.chipActive]} pressedStyle={styles.chipPressed}>
               <Text style={[styles.chipText, filter === 'all' && styles.chipTextActive]}>All</Text>
+              <View style={[styles.chipCount, filter === 'all' && styles.chipCountActive]}>
+                <Text style={[styles.chipCountText, filter === 'all' && styles.chipCountTextActive]}>{sights.length}</Text>
+              </View>
             </AnimatedPressable>
             {chips.map((c) => (
               <AnimatedPressable key={c.value} onPress={() => setFilter((v) => v === c.value ? 'all' : c.value)}
-                haptics="light" style={[styles.chip, filter === c.value && styles.chipActive]} pressedStyle={{ opacity: 0.85 }}>
-                <Ionicons name={c.icon} size={14} color={filter === c.value ? '#fff' : 'rgba(60,60,67,0.75)'} style={{ marginRight: 4 }} />
+                haptics="light" style={[styles.chip, filter === c.value && styles.chipActive]} pressedStyle={styles.chipPressed}>
+                <Ionicons name={c.icon} size={14} color={filter === c.value ? '#fff' : theme.colors.textMuted} style={{ marginRight: 4 }} />
                 <Text style={[styles.chipText, filter === c.value && styles.chipTextActive]}>{c.label}</Text>
+                <View style={[styles.chipCount, filter === c.value && styles.chipCountActive]}>
+                  <Text style={[styles.chipCountText, filter === c.value && styles.chipCountTextActive]}>
+                    {categoryCounts[c.value]}
+                  </Text>
+                </View>
               </AnimatedPressable>
             ))}
           </ScrollView>
@@ -460,6 +613,26 @@ export const ExploreScreen: React.FC = () => {
       <Modal visible={showDownloadPack} animationType="slide" presentationStyle="fullScreen">
         <DownloadPackScreen onClose={() => setShowDownloadPack(false)} />
       </Modal>
+
+      <TourSheet
+        visible={!!selectedTour}
+        tour={selectedTour}
+        onClose={() => setSelectedTour(null)}
+        onStartAt={(index, lang, variant) => {
+          const t = selectedTour;
+          if (!t) return;
+          const stops = (t.stops ?? []) as any[];
+          const key = `${lang}_${variant}`;
+          const items = stops
+            .filter((s) => s?.id)
+            .map((s) => ({ sightId: s.id, variant: key, remoteUrl: s.audioFiles?.[lang]?.[variant]?.url, title: s.name }));
+          if (items.length < 1) return;
+          const startAt = Math.max(0, Math.min(items.length - 1, index));
+          startQueue(items, startAt, t.title);
+          handleSelectSight(items[startAt].sightId);
+          setSelectedTour(null);
+        }}
+      />
 
       {/* Detail drawer */}
       {selectedSight && (
@@ -506,7 +679,8 @@ export const ExploreScreen: React.FC = () => {
                   <TouchableOpacity onPress={handleBookNow} activeOpacity={0.9} style={styles.bookButton}>
                     <Ionicons name="ticket-outline" size={18} color="#fff" />
                     <Text style={styles.bookText}>
-                      Book Tour{selectedSight.linkedTour.price ? ` · €${selectedSight.linkedTour.price}` : ''}
+                      {selectedSight.linkedTour.title?.trim() ? selectedSight.linkedTour.title : 'Book Tour'}
+                      {selectedSight.linkedTour.price ? ` · €${selectedSight.linkedTour.price}` : ''}
                     </Text>
                     <Ionicons name="arrow-forward" size={16} color="rgba(255,255,255,0.7)" />
                   </TouchableOpacity>
@@ -515,6 +689,33 @@ export const ExploreScreen: React.FC = () => {
               )}
 
               <Text style={styles.drawerDescription}>{selectedSight.description}</Text>
+
+              {!!selectedSight.tips?.length && (
+                <View style={styles.drawerSection}>
+                  <View style={styles.drawerSectionHeader}>
+                    <Ionicons name="bulb-outline" size={14} color="rgba(255,255,255,0.7)" />
+                    <Text style={styles.drawerSectionLabel}>TIPS</Text>
+                  </View>
+                  <View style={styles.tipsWrap}>
+                    {selectedSight.tips.slice(0, 6).map((t, idx) => (
+                      <View key={`${selectedSight.id}-tip-${idx}`} style={styles.tipRow}>
+                        <View style={styles.tipDot} />
+                        <Text style={styles.tipText}>{t}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {!!selectedSight.kidsMyth?.trim() && (
+                <View style={styles.drawerSection}>
+                  <View style={styles.drawerSectionHeader}>
+                    <Ionicons name="happy-outline" size={14} color="rgba(255,255,255,0.7)" />
+                    <Text style={styles.drawerSectionLabel}>KIDS STORY</Text>
+                  </View>
+                  <Text style={styles.kidsText}>{selectedSight.kidsMyth}</Text>
+                </View>
+              )}
             </ScrollView>
           </BlurView>
         </Animated.View>
@@ -524,8 +725,8 @@ export const ExploreScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#000' },
-  noTokenContainer: { flex: 1, padding: 24, justifyContent: 'center', backgroundColor: '#000' },
+  container: { flex: 1, backgroundColor: BG },
+  noTokenContainer: { flex: 1, padding: 24, justifyContent: 'center', backgroundColor: BG },
   noTokenTitle: { color: '#fff', fontSize: 22, fontWeight: '900' },
   noTokenBody: { marginTop: 10, color: 'rgba(255,255,255,0.78)', fontSize: 14, lineHeight: 20, fontWeight: '700' },
   noTokenStep: { marginTop: 14, color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: '800' },
@@ -540,14 +741,91 @@ const styles = StyleSheet.create({
 
   // Bottom controls
   bottomControls: { position: 'absolute', left: 0, right: 0, bottom: 0 },
-  controlsCard: { marginHorizontal: 12, borderRadius: 18, overflow: 'hidden', padding: 12, backgroundColor: 'rgba(255,255,255,0.8)' },
+  controlsCard: {
+    marginHorizontal: 12,
+    borderRadius: 18,
+    overflow: 'hidden',
+    padding: 12,
+    backgroundColor: 'rgba(255,255,255,0.76)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.08)',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 10,
+  },
+  continueCard: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.08)',
+    marginBottom: 10,
+  },
+  continueCardPressed: {
+    opacity: 0.92,
+  },
+  continueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  continueThumbWrap: { width: 44, height: 44, borderRadius: 12, overflow: 'hidden' },
+  continueThumb: { width: '100%', height: '100%' },
+  continueThumbFallback: {
+    flex: 1,
+    backgroundColor: 'rgba(118,118,128,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  continueText: { flex: 1, gap: 2 },
+  continueLabel: { fontSize: 11, fontWeight: '900', color: 'rgba(60,60,67,0.55)', letterSpacing: 0.5 },
+  continueTitle: { fontSize: 13, fontWeight: '900', color: theme.colors.text },
+  continueBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 12,
+    backgroundColor: BRAND,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toursBlock: { marginBottom: 10 },
+  toursHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 2 },
+  toursTitle: { fontSize: 13, fontWeight: '900', color: theme.colors.text },
+  toursHint: { fontSize: 11, fontWeight: '800', color: 'rgba(60,60,67,0.55)' },
+  toursRow: { gap: 10, paddingHorizontal: 2, paddingVertical: 2 },
+  tourCard: {
+    width: 210,
+    height: 110,
+    borderRadius: 18,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(0,0,0,0.08)',
+    shadowColor: '#000',
+    shadowOpacity: 0.14,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  tourCardPressed: { opacity: 0.92 },
+  tourCardImage: { ...StyleSheet.absoluteFillObject },
+  tourCardImageFallback: { ...StyleSheet.absoluteFillObject, backgroundColor: '#111' },
+  tourCardOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.22)' },
+  tourCardContent: { position: 'absolute', left: 12, right: 44, bottom: 12, gap: 4 },
+  tourCardLabel: { fontSize: 10, fontWeight: '900', color: 'rgba(255,255,255,0.78)', letterSpacing: 0.5 },
+  tourCardTitle: { fontSize: 14, fontWeight: '900', color: '#fff', lineHeight: 17 },
+  tourCardPlay: { position: 'absolute', right: 10, bottom: 10, width: 30, height: 30, borderRadius: 12, backgroundColor: BRAND, alignItems: 'center', justifyContent: 'center' },
   loadingRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
   loadingPill: { height: 16, borderRadius: 999, flex: 1 },
   loadingPillSmall: { height: 16, borderRadius: 999, width: 84 },
 
   // Search
   searchRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(118,118,128,0.16)', borderRadius: 14, paddingHorizontal: 12, height: 44 },
-  searchInput: { flex: 1, marginLeft: 8, fontSize: 15, fontWeight: '600', color: '#111' },
+  searchInput: { flex: 1, marginLeft: 8, fontSize: 15, fontWeight: '600', color: theme.colors.text },
   clearButton: { paddingLeft: 8, paddingVertical: 6 },
 
   // Search results
@@ -558,26 +836,47 @@ const styles = StyleSheet.create({
   resultRowPressed: { opacity: 0.92 },
   resultInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 10, gap: 10 },
   resultText: { flex: 1, gap: 2 },
-  resultTitle: { fontSize: 13, fontWeight: '900', color: '#111' },
+  resultTitle: { fontSize: 13, fontWeight: '900', color: theme.colors.text },
   resultSub: { fontSize: 11, fontWeight: '800', color: 'rgba(60,60,67,0.7)', letterSpacing: 0.4 },
 
   // Category chips
-  chipsRow: { gap: 8, paddingTop: 10, paddingBottom: 2 },
-  chip: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(118,118,128,0.16)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999 },
-  chipActive: { backgroundColor: '#111' },
-  chipText: { fontSize: 12, fontWeight: '800', color: 'rgba(60,60,67,0.75)' },
+  chipsRow: { gap: 8, paddingTop: 10, paddingBottom: 2, paddingHorizontal: 2, alignItems: 'center' },
+  chip: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(118,118,128,0.16)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, gap: 6 },
+  chipPressed: { opacity: 0.86 },
+  chipActive: { backgroundColor: theme.colors.text },
+  chipText: { fontSize: 12, fontWeight: '800', color: theme.colors.textMuted },
   chipTextActive: { color: '#fff' },
+  chipCount: {
+    minWidth: 22,
+    height: 18,
+    paddingHorizontal: 6,
+    borderRadius: 999,
+    backgroundColor: 'rgba(0,0,0,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chipCountActive: {
+    backgroundColor: 'rgba(255,255,255,0.16)',
+  },
+  chipCountText: { fontSize: 11, fontWeight: '900', color: 'rgba(60,60,67,0.7)' },
+  chipCountTextActive: { color: '#fff' },
 
   // Swipe carousel
   carouselContent: { paddingHorizontal: 12, paddingTop: 10, paddingBottom: 4, gap: CARD_GAP },
   swipeCard: { width: CARD_W, height: 130, borderRadius: 18, overflow: 'hidden' },
   swipeCardInner: { flex: 1 },
   swipeCardImage: { ...StyleSheet.absoluteFillObject },
+  swipeCardImageFallback: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   swipeCardOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.38)' },
   swipeCardSelectedBadge: {
     position: 'absolute', top: 10, right: 10,
     width: 22, height: 22, borderRadius: 11,
-    backgroundColor: '#007AFF',
+    backgroundColor: BRAND,
     alignItems: 'center', justifyContent: 'center',
   },
   swipeCardContent: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 12, gap: 4 },
@@ -608,7 +907,12 @@ const styles = StyleSheet.create({
   drawerSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   drawerSectionLabel: { fontSize: 10, fontWeight: '900', color: 'rgba(255,255,255,0.6)', letterSpacing: 0.8 },
   drawerDescription: { color: 'rgba(255,255,255,0.9)', fontSize: 13, lineHeight: 18, fontWeight: '600' },
-  bookButton: { height: 46, borderRadius: 16, backgroundColor: '#007AFF', alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
+  bookButton: { height: 46, borderRadius: 16, backgroundColor: BRAND, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, paddingHorizontal: 14 },
   bookText: { color: '#fff', fontSize: 15, fontWeight: '900' },
   tourNote: { fontSize: 11, fontWeight: '700', color: 'rgba(255,255,255,0.45)', textAlign: 'center' },
+  tipsWrap: { gap: 8, marginTop: 2 },
+  tipRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
+  tipDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.35)', marginTop: 6 },
+  tipText: { flex: 1, color: 'rgba(255,255,255,0.88)', fontSize: 13, lineHeight: 18, fontWeight: '600' },
+  kidsText: { color: 'rgba(255,255,255,0.88)', fontSize: 13, lineHeight: 18, fontWeight: '600' },
 });

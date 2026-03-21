@@ -6,6 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AnimatedPressable } from '../ui/AnimatedPressable';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
 
+export const MINI_PLAYER_HEIGHT = 86;
+
 const fmt = (ms: number) => {
   const s = Math.floor(ms / 1000);
   const m = Math.floor(s / 60);
@@ -14,76 +16,116 @@ const fmt = (ms: number) => {
 
 export const MiniPlayer: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const { isPlaying, positionMs, durationMs, sightId, pause, resume, stop } = useAudioPlayer();
+  const { isPlaying, positionMs, durationMs, sightId, queue, queueIndex, queueTitle, pause, resume, next, prev, stop } =
+    useAudioPlayer();
   const visible = !!sightId;
 
+  if (!visible) return null;
+
   const bottomTabHeight = Platform.OS === 'ios' ? 88 : 60;
-  const translateY = useRef(new Animated.Value(visible ? 0 : 120)).current;
+  const translateY = useRef(new Animated.Value(18)).current;
 
   useEffect(() => {
     Animated.spring(translateY, {
-      toValue: visible ? 0 : 120,
+      toValue: 0,
       useNativeDriver: true,
       speed: 22,
       bounciness: 7,
     }).start();
-  }, [translateY, visible]);
+  }, [translateY]);
 
   const progress = durationMs > 0 ? Math.max(0, Math.min(1, positionMs / durationMs)) : 0;
+  const qLen = queue?.length ?? 0;
+  const canPrev = qLen > 0 && queueIndex > 0;
+  const canNext = qLen > 0 && queueIndex < qLen - 1;
+  const subtitle = queueTitle && qLen > 0 ? `${queueTitle} · ${queueIndex + 1}/${qLen}` : null;
 
   return (
     <Animated.View
-      pointerEvents={visible ? 'auto' : 'none'}
+      pointerEvents="box-none"
       style={[
         styles.wrap,
         {
           transform: [{ translateY }],
-          bottom: Math.max(10, insets.bottom + 8 + bottomTabHeight),
+          bottom: bottomTabHeight + Math.max(8, insets.bottom) + 8,
         },
       ]}
     >
-      <BlurView intensity={90} tint="dark" style={styles.card}>
-        <View style={styles.row}>
-          <View style={styles.left}>
-            <Ionicons name="musical-notes" size={16} color="rgba(255,255,255,0.85)" />
-            <Text style={styles.title} numberOfLines={1}>
-              {sightId ?? 'Audio'}
-            </Text>
-          </View>
-
-          <View style={styles.controls}>
-            <AnimatedPressable
-              onPress={() => (isPlaying ? pause() : resume())}
-              haptics="light"
-              style={styles.ctrlBtn}
-              pressedStyle={styles.ctrlBtnPressed}
-            >
-              <View style={styles.ctrlInner}>
-                <Ionicons name={isPlaying ? 'pause' : 'play'} size={18} color="#0B0B0B" />
+      <View pointerEvents={visible ? 'auto' : 'none'}>
+        <BlurView intensity={90} tint="dark" style={styles.card}>
+          <View style={styles.row}>
+            <View style={styles.left}>
+              <Ionicons name="musical-notes" size={16} color="rgba(255,255,255,0.85)" />
+              <View style={styles.titleCol}>
+                <Text style={styles.title} numberOfLines={1}>
+                  {sightId ?? 'Audio'}
+                </Text>
+                {!!subtitle && (
+                  <Text style={styles.subtitle} numberOfLines={1}>
+                    {subtitle}
+                  </Text>
+                )}
               </View>
-            </AnimatedPressable>
+            </View>
 
-            <AnimatedPressable
-              onPress={() => stop()}
-              haptics="light"
-              style={styles.ctrlBtn}
-              pressedStyle={styles.ctrlBtnPressed}
-            >
-              <View style={styles.ctrlInner}>
-                <Ionicons name="close" size={18} color="#0B0B0B" />
-              </View>
-            </AnimatedPressable>
-          </View>
-        </View>
+            <View style={styles.controls}>
+              <AnimatedPressable
+                onPress={() => prev()}
+                haptics="light"
+                disabled={!canPrev}
+                style={[styles.ctrlBtn, !canPrev && styles.ctrlBtnDisabled]}
+                pressedStyle={styles.ctrlBtnPressed}
+              >
+                <View style={styles.ctrlInner}>
+                  <Ionicons name="play-skip-back" size={18} color="#0B0B0B" />
+                </View>
+              </AnimatedPressable>
 
-        <View style={styles.progressRow}>
-          <Text style={styles.time}>{fmt(positionMs)}</Text>
-          <View style={styles.track}>
-            <View style={[styles.fill, { width: `${progress * 100}%` }]} />
+              <AnimatedPressable
+                onPress={() => (isPlaying ? pause() : resume())}
+                haptics="light"
+                style={styles.ctrlBtn}
+                pressedStyle={styles.ctrlBtnPressed}
+              >
+                <View style={styles.ctrlInner}>
+                  <Ionicons name={isPlaying ? 'pause' : 'play'} size={18} color="#0B0B0B" />
+                </View>
+              </AnimatedPressable>
+
+              <AnimatedPressable
+                onPress={() => next()}
+                haptics="light"
+                disabled={!canNext}
+                style={[styles.ctrlBtn, !canNext && styles.ctrlBtnDisabled]}
+                pressedStyle={styles.ctrlBtnPressed}
+              >
+                <View style={styles.ctrlInner}>
+                  <Ionicons name="play-skip-forward" size={18} color="#0B0B0B" />
+                </View>
+              </AnimatedPressable>
+
+              <AnimatedPressable
+                onPress={() => stop()}
+                haptics="light"
+                style={styles.ctrlBtn}
+                pressedStyle={styles.ctrlBtnPressed}
+              >
+                <View style={styles.ctrlInner}>
+                  <Ionicons name="close" size={18} color="#0B0B0B" />
+                </View>
+              </AnimatedPressable>
+            </View>
           </View>
-          <Text style={styles.time}>{fmt(durationMs)}</Text>
-        </View>
-      </BlurView>
+
+          <View style={styles.progressRow}>
+            <Text style={styles.time}>{fmt(positionMs)}</Text>
+            <View style={styles.track}>
+              <View style={[styles.fill, { width: `${progress * 100}%` }]} />
+            </View>
+            <Text style={styles.time}>{fmt(durationMs)}</Text>
+          </View>
+        </BlurView>
+      </View>
     </Animated.View>
   );
 };
@@ -93,7 +135,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 12,
     right: 12,
-    zIndex: 50,
+    zIndex: 999,
+    elevation: 999,
   },
   card: {
     borderRadius: 20,
@@ -101,6 +144,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     backgroundColor: 'rgba(0,0,0,0.55)',
+    minHeight: MINI_PLAYER_HEIGHT,
   },
   row: {
     flexDirection: 'row',
@@ -114,11 +158,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  titleCol: {
+    flex: 1,
+    gap: 2,
+  },
   title: {
     flex: 1,
     color: '#fff',
     fontSize: 13,
     fontWeight: '900',
+  },
+  subtitle: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 11,
+    fontWeight: '800',
   },
   controls: {
     flexDirection: 'row',
@@ -126,6 +179,9 @@ const styles = StyleSheet.create({
   },
   ctrlBtn: {
     borderRadius: 14,
+  },
+  ctrlBtnDisabled: {
+    opacity: 0.5,
   },
   ctrlBtnPressed: {
     opacity: 0.92,

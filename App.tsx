@@ -15,6 +15,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Mapbox from '@rnmapbox/maps';
 import { getMapboxAccessToken } from './src/config/mapbox';
 import { MiniPlayer } from './src/components/MiniPlayer';
+import { theme } from './src/ui/theme';
 
 const Tab = createBottomTabNavigator();
 
@@ -66,7 +67,7 @@ function AppTabs() {
           const [active, inactive] = icons[route.name] ?? ['ellipse', 'ellipse-outline'];
           return <Ionicons name={(focused ? active : inactive) as any} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#007AFF',
+        tabBarActiveTintColor: theme.colors.brand,
         tabBarInactiveTintColor: '#8E8E93',
         headerShown: false,
         tabBarStyle: {

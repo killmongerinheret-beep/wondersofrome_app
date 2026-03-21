@@ -7,6 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import { AudioVariant, AudioLang, Sight } from '../types';
+import { theme } from '../ui/theme';
+
+const BRAND = theme.colors.brand;
 
 interface Props {
   sight: Sight;
@@ -148,7 +151,7 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
               <Ionicons
                 name={v.icon}
                 size={14}
-                color={active ? '#fff' : available ? '#007AFF' : '#555'}
+                  color={active ? '#fff' : available ? BRAND : '#555'}
               />
               <Text style={[
                 styles.tabLabel,
@@ -235,7 +238,7 @@ const styles = StyleSheet.create({
     gap: 2,
     minWidth: 44,
   },
-  langBtnActive: { backgroundColor: '#007AFF' },
+  langBtnActive: { backgroundColor: BRAND },
   langBtnDisabled: { opacity: 0.3 },
   langFlag: { fontSize: 16 },
   langLabel: { fontSize: 9, fontWeight: '800', color: 'rgba(255,255,255,0.7)' },
@@ -249,9 +252,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.12)',
     gap: 2,
   },
-  tabActive: { backgroundColor: '#007AFF' },
+  tabActive: { backgroundColor: BRAND },
   tabDisabled: { opacity: 0.35 },
-  tabLabel: { fontSize: 11, fontWeight: '800', color: '#007AFF' },
+  tabLabel: { fontSize: 11, fontWeight: '800', color: BRAND },
   tabLabelActive: { color: '#fff' },
   tabLabelDisabled: { color: '#888' },
   tabDuration: { fontSize: 9, fontWeight: '600', color: 'rgba(255,255,255,0.55)' },
@@ -284,7 +287,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.2)',
     overflow: 'hidden',
   },
-  progressFill: { height: '100%', borderRadius: 2, backgroundColor: '#007AFF' },
+  progressFill: { height: '100%', borderRadius: 2, backgroundColor: BRAND },
   timeLabel: {
     fontSize: 10,
     fontWeight: '700',

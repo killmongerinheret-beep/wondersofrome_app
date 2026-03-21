@@ -11,9 +11,11 @@ import { useOfflineContent } from '../hooks/useOfflineContent';
 import { getAudioStorageUsage, clearAudioStorage } from '../services/filesystem';
 import { checkMapPackStatus, deleteMapPack, downloadRomeMap } from '../services/mapboxOffline';
 import { Sight, AudioLang, AudioVariant } from '../types';
+import { theme } from '../ui/theme';
 
 const VARIANTS: AudioVariant[] = ['quick', 'deep', 'kids'];
 const LANG: AudioLang = 'en';
+const BRAND = theme.colors.brand;
 
 const fmtBytes = (b: number) => {
   if (b < 1024) return `${b} B`;
@@ -141,7 +143,7 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
       {/* Storage summary */}
       <View style={styles.storageCard}>
         <View style={styles.storageRow}>
-          <Ionicons name="cloud-download-outline" size={22} color="#007AFF" />
+          <Ionicons name="cloud-download-outline" size={22} color={BRAND} />
           <View style={styles.storageText}>
             <Text style={styles.storageLabel}>
               {downloadedCount} / {totalCount} sights downloaded
@@ -204,9 +206,9 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
               disabled={mapDownloading}
             >
               {mapDownloading ? (
-                <ActivityIndicator color="#007AFF" size="small" />
+                <ActivityIndicator color={BRAND} size="small" />
               ) : (
-                <Ionicons name="download-outline" size={18} color="#007AFF" />
+                <Ionicons name="download-outline" size={18} color={BRAND} />
               )}
             </TouchableOpacity>
           )}
@@ -247,7 +249,7 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
               </View>
 
               {isDownloading ? (
-                <ActivityIndicator size="small" color="#007AFF" />
+                <ActivityIndicator size="small" color={BRAND} />
               ) : isDownloaded ? (
                 <View style={styles.doneIcon}>
                   <Ionicons name="checkmark-circle" size={26} color="#34C759" />
@@ -259,7 +261,7 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
                   style={[styles.dlBtn, !hasAudio && styles.dlBtnDisabled]}
                   disabled={!hasAudio}
                 >
-                  <Ionicons name="download-outline" size={18} color={hasAudio ? '#007AFF' : '#555'} />
+                  <Ionicons name="download-outline" size={18} color={hasAudio ? BRAND : '#555'} />
                 </TouchableOpacity>
               )}
             </View>
@@ -298,11 +300,11 @@ const styles = StyleSheet.create({
     height: 4, borderRadius: 2,
     backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden',
   },
-  overallFill: { height: '100%', borderRadius: 2, backgroundColor: '#007AFF' },
+  overallFill: { height: '100%', borderRadius: 2, backgroundColor: BRAND },
   actions: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 16 },
   downloadAllBtn: {
     flex: 1, height: 48, borderRadius: 14,
-    backgroundColor: '#007AFF',
+    backgroundColor: BRAND,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
   },
   btnDisabled: { opacity: 0.5 },
@@ -354,7 +356,7 @@ const styles = StyleSheet.create({
     marginTop: 4, height: 3, borderRadius: 2,
     backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden',
   },
-  sightFill: { height: '100%', borderRadius: 2, backgroundColor: '#007AFF' },
+  sightFill: { height: '100%', borderRadius: 2, backgroundColor: BRAND },
   doneIcon: { width: 36, alignItems: 'center' },
   dlBtn: {
     width: 36, height: 36, borderRadius: 10,

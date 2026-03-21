@@ -10,6 +10,14 @@ export type DownloadRecord = {
   downloaded_at?: number | null;
 };
 
+export type ProgressRecord = {
+  sight_id: string;
+  completed: number;
+  last_played_variant: string | null;
+  last_position: number;
+  last_updated: number;
+};
+
 export const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
   if (dbInstance) return dbInstance;
   if (dbInitPromise) return await dbInitPromise;
@@ -56,6 +64,11 @@ const initDatabase = async (db: SQLite.SQLiteDatabase) => {
         cached_at INTEGER NOT NULL
       );
     `);
+    const cols = await db.getAllAsync<{ name: string }>('PRAGMA table_info(progress)');
+    const hasLastUpdated = (cols ?? []).some((c) => c.name === 'last_updated');
+    if (!hasLastUpdated) {
+      await db.execAsync('ALTER TABLE progress ADD COLUMN last_updated INTEGER DEFAULT 0;');
+    }
     console.log('Database initialized');
   } catch (error) {
     console.error('Error initializing database:', error);
@@ -101,9 +114,27 @@ export const clearProgress = async () => {
 export const updateProgress = async (sightId: string, completed: boolean, lastPlayedVariant: string, lastPosition: number) => {
   const db = await getDatabase();
   await db.runAsync(
-    'INSERT OR REPLACE INTO progress (sight_id, completed, last_played_variant, last_position) VALUES (?, ?, ?, ?)',
-    [sightId, completed ? 1 : 0, lastPlayedVariant, lastPosition]
+    'INSERT OR REPLACE INTO progress (sight_id, completed, last_played_variant, last_position, last_updated) VALUES (?, ?, ?, ?, ?)',
+    [sightId, completed ? 1 : 0, lastPlayedVariant, lastPosition, Date.now()]
   );
+};
+
+export const getProgress = async (sightId: string): Promise<ProgressRecord | null> => {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<ProgressRecord>(
+    'SELECT sight_id, completed, last_played_variant, last_position, last_updated FROM progress WHERE sight_id = ?',
+    [sightId]
+  );
+  return row ?? null;
+};
+
+export const getRecentProgress = async (limit: number = 5): Promise<ProgressRecord[]> => {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<ProgressRecord>(
+    'SELECT sight_id, completed, last_played_variant, last_position, last_updated FROM progress WHERE completed = 0 AND last_position > 0 ORDER BY last_updated DESC LIMIT ?',
+    [limit]
+  );
+  return rows ?? [];
 };
 
 // ── Sight cache ──────────────────────────────────────────────────────────────

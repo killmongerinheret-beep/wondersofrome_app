@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Mapbox from '@rnmapbox/maps';
 import sights from '../data/sights.json';
+import { theme } from '../ui/theme';
 
 const ROME_CENTER = [12.4922, 41.8902]; // Colosseum
 
@@ -61,13 +62,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 15,
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: theme.colors.brand,
   },
   annotationFill: {
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#007AFF',
+    backgroundColor: theme.colors.brand,
     transform: [{ scale: 0.6 }],
   },
 });

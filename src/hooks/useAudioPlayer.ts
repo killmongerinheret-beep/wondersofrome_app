@@ -5,6 +5,10 @@ import {
   playAudioForSight,
   pauseAudio,
   resumeAudio,
+  seekAudio,
+  startQueue,
+  playNextInQueue,
+  playPrevInQueue,
   stopAudio,
   PlayerState,
 } from '../services/audio';
@@ -30,6 +34,10 @@ export const useAudioPlayer = () => {
     play,
     pause: pauseAudio,
     resume: resumeAudio,
+    seek: seekAudio,
+    startQueue,
+    next: playNextInQueue,
+    prev: playPrevInQueue,
     stop: stopAudio,
   };
 };

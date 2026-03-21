@@ -19,10 +19,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as Brightness from 'expo-brightness';
 import QRCode from 'react-native-qrcode-svg';
 import { getSupabase, supabase } from '../services/supabase';
+import { theme } from '../ui/theme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
+
+const BRAND = theme.colors.brand;
 
 type Booking = {
   id: string;
@@ -131,7 +134,7 @@ const BookingCard: React.FC<{
       {isPaid && (
         <>
           <TouchableOpacity onPress={toggleQR} activeOpacity={0.85} style={styles.qrToggleBtn}>
-            <Ionicons name={qrOpen ? 'chevron-up' : 'qr-code-outline'} size={16} color="#007AFF" />
+            <Ionicons name={qrOpen ? 'chevron-up' : 'qr-code-outline'} size={16} color={BRAND} />
             <Text style={styles.qrToggleText}>{qrOpen ? 'Hide ticket' : 'Show entry ticket'}</Text>
           </TouchableOpacity>
 
@@ -317,7 +320,7 @@ const styles = StyleSheet.create({
   lookupLabel: { fontSize: 13, fontWeight: '800', color: 'rgba(60,60,67,0.7)', marginBottom: 10 },
   lookupRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   input: { flex: 1, height: 46, borderRadius: 14, paddingHorizontal: 14, backgroundColor: 'rgba(118,118,128,0.1)', fontSize: 14, fontWeight: '700', color: '#111' },
-  searchBtn: { width: 46, height: 46, borderRadius: 14, backgroundColor: '#007AFF', alignItems: 'center', justifyContent: 'center' },
+  searchBtn: { width: 46, height: 46, borderRadius: 14, backgroundColor: BRAND, alignItems: 'center', justifyContent: 'center' },
   searchBtnDisabled: { backgroundColor: 'rgba(0,122,255,0.35)' },
   errorWrap: { flexDirection: 'row', alignItems: 'center', gap: 8, marginHorizontal: 16, marginBottom: 10, padding: 12, backgroundColor: 'rgba(255,59,48,0.08)', borderRadius: 12 },
   errorText: { flex: 1, fontSize: 13, fontWeight: '700', color: '#FF3B30' },
@@ -331,7 +334,7 @@ const styles = StyleSheet.create({
   metaItem: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(118,118,128,0.1)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999 },
   metaText: { fontSize: 12, fontWeight: '700', color: 'rgba(60,60,67,0.85)' },
   qrToggleBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, paddingHorizontal: 4 },
-  qrToggleText: { fontSize: 13, fontWeight: '800', color: '#007AFF' },
+  qrToggleText: { fontSize: 13, fontWeight: '800', color: BRAND },
   qrWrap: { borderRadius: 16, overflow: 'hidden' },
   qrCard: { padding: 16, alignItems: 'center', gap: 8, borderRadius: 16 },
   qrCardTitle: { fontSize: 15, fontWeight: '900', color: '#fff', textAlign: 'center' },
