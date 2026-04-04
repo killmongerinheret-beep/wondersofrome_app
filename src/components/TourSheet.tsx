@@ -10,6 +10,7 @@ import { AudioLang, AudioVariant } from '../types';
 type Props = {
   visible: boolean;
   tour: SanityAudioTour | null;
+  userLocation?: { lat: number; lng: number } | null;
   onClose: () => void;
   onStartAt: (index: number, lang: AudioLang, variant: AudioVariant) => void;
 };
@@ -17,8 +18,18 @@ type Props = {
 const BRAND = theme.colors.brand;
 const LANGS: AudioLang[] = ['en', 'it', 'es', 'fr', 'de', 'pt', 'pl', 'ru', 'ar', 'zh', 'ja', 'ko'];
 const VARIANTS: AudioVariant[] = ['quick', 'deep', 'kids'];
+const toRadians = (v: number) => (v * Math.PI) / 180;
+const distanceMeters = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+  const R = 6371000;
+  const dLat = toRadians(b.lat - a.lat);
+  const dLng = toRadians(b.lng - a.lng);
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.sin(dLng / 2) ** 2 * Math.cos(toRadians(a.lat)) * Math.cos(toRadians(b.lat));
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x)));
+};
 
-export const TourSheet: React.FC<Props> = ({ visible, tour, onClose, onStartAt }) => {
+export const TourSheet: React.FC<Props> = ({ visible, tour, userLocation, onClose, onStartAt }) => {
   const insets = useSafeAreaInsets();
   const stops = useMemo(() => (tour?.stops ?? []).filter((s) => !!s?.id), [tour]);
 
@@ -114,6 +125,24 @@ export const TourSheet: React.FC<Props> = ({ visible, tour, onClose, onStartAt }
     }
   };
 
+  const nearestIndex = useMemo(() => {
+    if (!userLocation) return null;
+    let bestIdx: number | null = null;
+    let bestDist = Infinity;
+    for (let i = 0; i < stops.length; i += 1) {
+      const s: any = stops[i];
+      const lat = s?.lat;
+      const lng = s?.lng;
+      if (typeof lat !== 'number' || typeof lng !== 'number') continue;
+      const d = distanceMeters(userLocation, { lat, lng });
+      if (d < bestDist) {
+        bestDist = d;
+        bestIdx = i;
+      }
+    }
+    return bestIdx;
+  }, [stops, userLocation]);
+
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={handleClose}>
       <View style={styles.screen}>
@@ -186,15 +215,30 @@ export const TourSheet: React.FC<Props> = ({ visible, tour, onClose, onStartAt }
           </View>
 
           <View style={styles.actions}>
-            <TouchableOpacity
-              onPress={() => onStartAt(0, lang, variant)}
-              activeOpacity={0.9}
-              style={[styles.primaryBtn, (stops.length < 1 || !hasAnyAudio) && styles.btnDisabled]}
-              disabled={stops.length < 1 || !hasAnyAudio}
-            >
-              <Ionicons name="walk-outline" size={18} color="#fff" />
-              <Text style={styles.primaryText}>Start tour</Text>
-            </TouchableOpacity>
+            <View style={styles.actionsRow}>
+              <TouchableOpacity
+                onPress={() => onStartAt(0, lang, variant)}
+                activeOpacity={0.9}
+                style={[styles.primaryBtn, (stops.length < 1 || !hasAnyAudio) && styles.btnDisabled]}
+                disabled={stops.length < 1 || !hasAnyAudio}
+              >
+                <Ionicons name="walk-outline" size={18} color="#fff" />
+                <Text style={styles.primaryText}>Start tour</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  if (nearestIndex == null) return;
+                  onStartAt(nearestIndex, lang, variant);
+                }}
+                activeOpacity={0.9}
+                style={[styles.primaryBtn, styles.primaryBtnAlt, (nearestIndex == null || !hasAnyAudio) && styles.btnDisabled]}
+                disabled={nearestIndex == null || !hasAnyAudio}
+              >
+                <Ionicons name="navigate-outline" size={18} color="#fff" />
+                <Text style={styles.primaryText}>Start nearest</Text>
+              </TouchableOpacity>
+            </View>
 
             <TouchableOpacity
               onPress={handleDownloadTour}
@@ -314,7 +358,8 @@ const styles = StyleSheet.create({
   pillDisabled: { opacity: 0.35 },
   pillText: { color: theme.colors.textMuted, fontSize: 12, fontWeight: '900', letterSpacing: 0.4 },
   pillTextActive: { color: theme.colors.text },
-  actions: { flexDirection: 'row', gap: 10 },
+  actions: { gap: 10 },
+  actionsRow: { flexDirection: 'row', gap: 10 },
   primaryBtn: {
     flex: 1,
     height: 46,
@@ -325,6 +370,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
+  primaryBtnAlt: { backgroundColor: '#111' },
   primaryText: { color: '#fff', fontSize: 14, fontWeight: '900' },
   secondaryBtn: {
     flex: 1,

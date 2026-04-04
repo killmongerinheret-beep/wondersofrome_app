@@ -45,6 +45,8 @@
     },
     "plugins": [
       "expo-sqlite",
+      "expo-font",
+      "expo-asset",
       "expo-audio",
       [
         "expo-location",

@@ -8,6 +8,7 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+out/
 
 # Native
 .kotlin/
@@ -37,8 +38,16 @@ yarn-error.*
 .env.wondersofrome
 1.text
 
+# local tooling
+.venv/
+audio/
+
 # typescript
 *.tsbuildinfo
+
+# python
+__pycache__/
+*.pyc
 
 # generated native folders
 /ios

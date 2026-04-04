@@ -33,6 +33,8 @@ import { theme } from '../ui/theme';
 import { useContinueListening } from '../hooks/useContinueListening';
 import { useAudioTours } from '../hooks/useAudioTours';
 import { TourSheet } from '../components/TourSheet';
+import { UpNextSheet } from '../components/UpNextSheet';
+import { AudioToursScreen } from './AudioToursScreen';
 import { SanityAudioTour } from '../services/sanity';
 
 type ExploreFilter = 'all' | 'ancient' | 'religious' | 'museum' | 'piazza' | 'other';
@@ -157,7 +159,7 @@ export const ExploreScreen: React.FC = () => {
   const shapeSourceRef = useRef<any>(null);
   const carouselRef = useRef<FlatList>(null);
   const windowHeight = Dimensions.get('window').height;
-  const { sightId: playingSightId, isPlaying, play, startQueue } = useAudioPlayer();
+  const { sightId: playingSightId, isPlaying, play, startQueue, queue, queueIndex, queueTitle, jumpToIndex } = useAudioPlayer();
   const isMiniPlayerVisible = !!playingSightId;
 
   const drawerMaxHeight = Math.min(Math.max(520, Math.round(windowHeight * 0.7)), 680);
@@ -174,6 +176,8 @@ export const ExploreScreen: React.FC = () => {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showDownloadPack, setShowDownloadPack] = useState(false);
   const [selectedTour, setSelectedTour] = useState<SanityAudioTour | null>(null);
+  const [upNextOpen, setUpNextOpen] = useState(false);
+  const [toursHubOpen, setToursHubOpen] = useState(false);
 
   const { sights, loading } = useSights();
   const { top: continueTop, refresh: refreshContinue } = useContinueListening(sights);
@@ -223,6 +227,43 @@ export const ExploreScreen: React.FC = () => {
   const playableTours = useMemo(() => {
     return (audioTours ?? []).filter((t) => (t.stops?.length ?? 0) >= 2);
   }, [audioTours]);
+
+  const tourStopSights = useMemo(() => {
+    if (!queue?.length) return [];
+    const mapped = queue
+      .map((q) => sights.find((s) => s.id === q.sightId))
+      .filter((s): s is Sight => !!s);
+    return mapped;
+  }, [queue, sights]);
+
+  const tourRouteGeojson = useMemo(() => {
+    if (tourStopSights.length < 2) return null;
+    return {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: tourStopSights.map((s) => [s.lng, s.lat]),
+          },
+          properties: {},
+        },
+      ],
+    } as any;
+  }, [tourStopSights]);
+
+  const tourStopsGeojson = useMemo(() => {
+    if (tourStopSights.length < 1) return null;
+    return {
+      type: 'FeatureCollection',
+      features: tourStopSights.map((s, idx) => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [s.lng, s.lat] },
+        properties: { id: s.id, idx, active: idx === queueIndex ? 1 : 0 },
+      })),
+    } as any;
+  }, [queueIndex, tourStopSights]);
 
   // ── Drawer helpers ──────────────────────────────────────────────────────────
   const animateDrawerTo = (y: number, velocity?: number) => {
@@ -374,6 +415,43 @@ export const ExploreScreen: React.FC = () => {
             if (loc?.coords) setUserLocation({ lat: loc.coords.latitude, lng: loc.coords.longitude });
           }}
         />
+
+        {!!tourRouteGeojson && (
+          <Mapbox.ShapeSource id="tour-route" shape={tourRouteGeojson}>
+            <Mapbox.LineLayer
+              id="tour-route-line"
+              style={{
+                lineColor: BRAND,
+                lineWidth: 4,
+                lineOpacity: 0.85,
+                lineJoin: 'round',
+                lineCap: 'round',
+              }}
+            />
+          </Mapbox.ShapeSource>
+        )}
+
+        {!!tourStopsGeojson && (
+          <Mapbox.ShapeSource id="tour-stops" shape={tourStopsGeojson}>
+            <Mapbox.CircleLayer
+              id="tour-stops-halo"
+              style={{
+                circleColor: '#fff',
+                circleOpacity: ['case', ['==', ['get', 'active'], 1], 1, 0.6],
+                circleRadius: ['case', ['==', ['get', 'active'], 1], 10, 7],
+              }}
+            />
+            <Mapbox.CircleLayer
+              id="tour-stops-core"
+              style={{
+                circleColor: BRAND,
+                circleOpacity: 1,
+                circleRadius: ['case', ['==', ['get', 'active'], 1], 6, 4],
+              }}
+            />
+          </Mapbox.ShapeSource>
+        )}
+
         <Mapbox.ShapeSource
           id="sights"
           ref={shapeSourceRef}
@@ -408,6 +486,8 @@ export const ExploreScreen: React.FC = () => {
       {/* Recenter */}
       <View style={[styles.recenterWrap, { top: insets.top + 12 }]}>
         <AnimatedPressable onPress={handleRecenter} haptics="light" disabled={!userLocation}
+          accessibilityRole="button"
+          accessibilityLabel="Recenter map"
           style={[styles.mapBtn, !userLocation && styles.mapBtnDisabled]} pressedStyle={{ opacity: 0.85 }}>
           <BlurView intensity={80} tint="dark" style={styles.mapBtnBlur}>
             <Ionicons name="locate-outline" size={18} color="#fff" />
@@ -418,6 +498,8 @@ export const ExploreScreen: React.FC = () => {
       {/* Download pack */}
       <View style={[styles.downloadBtnWrap, { top: insets.top + 12 }]}>
         <AnimatedPressable onPress={() => setShowDownloadPack(true)} haptics="light"
+          accessibilityRole="button"
+          accessibilityLabel="Open offline downloads"
           style={styles.mapBtn} pressedStyle={{ opacity: 0.85 }}>
           <BlurView intensity={80} tint="dark" style={styles.mapBtnBlur}>
             <Ionicons name="cloud-download-outline" size={18} color="#fff" />
@@ -441,6 +523,29 @@ export const ExploreScreen: React.FC = () => {
               <Skeleton style={styles.loadingPill} />
               <Skeleton style={styles.loadingPillSmall} />
             </View>
+          )}
+
+          {!!queue?.length && (
+            <AnimatedPressable
+              onPress={() => setUpNextOpen(true)}
+              haptics="light"
+              style={styles.tourNowCard}
+              pressedStyle={styles.tourNowCardPressed}
+            >
+              <View style={styles.tourNowRow}>
+                <View style={styles.tourNowIcon}>
+                  <Ionicons name="walk-outline" size={16} color="#fff" />
+                </View>
+                <View style={styles.tourNowText}>
+                  <Text style={styles.tourNowLabel} numberOfLines={1}>Tour playing</Text>
+                  <Text style={styles.tourNowTitle} numberOfLines={1}>{queueTitle?.trim() ? queueTitle : 'Walking tour'}</Text>
+                </View>
+                <View style={styles.tourNowPill}>
+                  <Text style={styles.tourNowPillText}>{queueIndex + 1}/{queue.length}</Text>
+                  <Ionicons name="chevron-up" size={14} color="rgba(255,255,255,0.85)" />
+                </View>
+              </View>
+            </AnimatedPressable>
           )}
 
           {!!continueTop && !isMiniPlayerVisible && (
@@ -483,7 +588,13 @@ export const ExploreScreen: React.FC = () => {
             <View style={styles.toursBlock}>
               <View style={styles.toursHeader}>
                 <Text style={styles.toursTitle}>Walking tours</Text>
-                <Text style={styles.toursHint}>Auto-play stops</Text>
+                <View style={styles.toursHeaderRight}>
+                  <Text style={styles.toursHint}>Auto-play stops</Text>
+                  <TouchableOpacity onPress={() => setToursHubOpen(true)} activeOpacity={0.85} style={styles.seeAllBtn} accessibilityRole="button" accessibilityLabel="See all tours">
+                    <Text style={styles.seeAllText}>See all</Text>
+                    <Ionicons name="chevron-forward" size={14} color="rgba(60,60,67,0.55)" />
+                  </TouchableOpacity>
+                </View>
               </View>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.toursRow}>
                 {playableTours.slice(0, 8).map((t) => (
@@ -614,9 +725,21 @@ export const ExploreScreen: React.FC = () => {
         <DownloadPackScreen onClose={() => setShowDownloadPack(false)} />
       </Modal>
 
+      <Modal visible={toursHubOpen} animationType="slide" presentationStyle="fullScreen">
+        <AudioToursScreen
+          tours={audioTours}
+          onClose={() => setToursHubOpen(false)}
+          onOpenTour={(t) => {
+            setToursHubOpen(false);
+            setSelectedTour(t);
+          }}
+        />
+      </Modal>
+
       <TourSheet
         visible={!!selectedTour}
         tour={selectedTour}
+        userLocation={userLocation}
         onClose={() => setSelectedTour(null)}
         onStartAt={(index, lang, variant) => {
           const t = selectedTour;
@@ -633,6 +756,22 @@ export const ExploreScreen: React.FC = () => {
           setSelectedTour(null);
         }}
       />
+
+      {!!queue?.length && (
+        <UpNextSheet
+          visible={upNextOpen}
+          title={queueTitle}
+          items={queue}
+          activeIndex={queueIndex}
+          onClose={() => setUpNextOpen(false)}
+          onSelectIndex={(idx) => {
+            jumpToIndex(idx);
+            setUpNextOpen(false);
+            const next = queue[idx];
+            if (next?.sightId) handleSelectSight(next.sightId);
+          }}
+        />
+      )}
 
       {/* Detail drawer */}
       {selectedSight && (
@@ -766,6 +905,20 @@ const styles = StyleSheet.create({
   continueCardPressed: {
     opacity: 0.92,
   },
+  tourNowCard: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: BRAND,
+    marginBottom: 10,
+  },
+  tourNowCardPressed: { opacity: 0.92 },
+  tourNowRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 10, gap: 10 },
+  tourNowIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
+  tourNowText: { flex: 1, gap: 2 },
+  tourNowLabel: { fontSize: 11, fontWeight: '900', color: 'rgba(255,255,255,0.75)', letterSpacing: 0.5 },
+  tourNowTitle: { fontSize: 13, fontWeight: '900', color: '#fff' },
+  tourNowPill: { height: 34, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.18)', paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 6 },
+  tourNowPillText: { color: '#fff', fontSize: 12, fontWeight: '900' },
   continueRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -793,9 +946,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   toursBlock: { marginBottom: 10 },
-  toursHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 2 },
+  toursHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 2 },
+  toursHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   toursTitle: { fontSize: 13, fontWeight: '900', color: theme.colors.text },
   toursHint: { fontSize: 11, fontWeight: '800', color: 'rgba(60,60,67,0.55)' },
+  seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 6, borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.05)' },
+  seeAllText: { fontSize: 11, fontWeight: '900', color: theme.colors.text },
   toursRow: { gap: 10, paddingHorizontal: 2, paddingVertical: 2 },
   tourCard: {
     width: 210,

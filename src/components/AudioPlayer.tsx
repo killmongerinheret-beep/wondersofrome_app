@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  ActivityIndicator, GestureResponderEvent, LayoutChangeEvent,
+  ActivityIndicator, GestureResponderEvent, LayoutChangeEvent, Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -50,6 +50,7 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [barWidth, setBarWidth] = useState(1);
+  const [showTranscript, setShowTranscript] = useState(false);
 
   const trackKey = `${activeLang}_${activeVariant}`;
   const isThisSight = sightId === sight.id;
@@ -98,6 +99,7 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
   };
 
   const currentTrack = getTrack(activeLang, activeVariant);
+  const transcript = sight.transcripts?.[activeLang]?.[activeVariant];
 
   return (
     <View style={styles.container}>
@@ -222,6 +224,38 @@ export const AudioPlayer: React.FC<Props> = ({ sight }) => {
           <Text style={styles.timeLabel}>{fmt(durationMs)}</Text>
         </View>
       )}
+
+      {!!transcript?.trim() && (
+        <>
+          <TouchableOpacity
+            onPress={() => setShowTranscript(true)}
+            activeOpacity={0.85}
+            style={styles.transcriptBtn}
+          >
+            <Ionicons name="document-text-outline" size={16} color="#fff" />
+            <Text style={styles.transcriptText}>Transcript</Text>
+            <Ionicons name="chevron-forward" size={16} color="rgba(255,255,255,0.65)" />
+          </TouchableOpacity>
+
+          <Modal visible={showTranscript} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setShowTranscript(false)}>
+            <View style={styles.transcriptScreen}>
+              <View style={styles.transcriptHeader}>
+                <TouchableOpacity onPress={() => setShowTranscript(false)} activeOpacity={0.85} style={styles.transcriptClose}>
+                  <Ionicons name="close" size={18} color="#fff" />
+                </TouchableOpacity>
+                <View style={styles.transcriptHeaderText}>
+                  <Text style={styles.transcriptTitle} numberOfLines={1}>{sight.name}</Text>
+                  <Text style={styles.transcriptSub} numberOfLines={1}>{activeLang.toUpperCase()} · {activeVariant.toUpperCase()}</Text>
+                </View>
+                <View style={{ width: 36 }} />
+              </View>
+              <ScrollView style={styles.transcriptBody} contentContainerStyle={styles.transcriptBodyContent} showsVerticalScrollIndicator={false}>
+                <Text style={styles.transcriptBodyText}>{transcript}</Text>
+              </ScrollView>
+            </View>
+          </Modal>
+        </>
+      )}
     </View>
   );
 };
@@ -295,4 +329,39 @@ const styles = StyleSheet.create({
     minWidth: 32,
     textAlign: 'center',
   },
+  transcriptBtn: {
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+  },
+  transcriptText: { color: '#fff', fontSize: 13, fontWeight: '900' },
+  transcriptScreen: { flex: 1, backgroundColor: '#000' },
+  transcriptHeader: {
+    paddingHorizontal: 14,
+    paddingTop: 14,
+    paddingBottom: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(255,255,255,0.12)',
+  },
+  transcriptClose: {
+    width: 36,
+    height: 36,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  transcriptHeaderText: { flex: 1, gap: 2 },
+  transcriptTitle: { color: '#fff', fontSize: 16, fontWeight: '900' },
+  transcriptSub: { color: 'rgba(255,255,255,0.55)', fontSize: 12, fontWeight: '800' },
+  transcriptBody: { flex: 1 },
+  transcriptBodyContent: { paddingHorizontal: 14, paddingVertical: 14 },
+  transcriptBodyText: { color: 'rgba(255,255,255,0.9)', fontSize: 14, lineHeight: 20, fontWeight: '600' },
 });

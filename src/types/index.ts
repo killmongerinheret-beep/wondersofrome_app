@@ -32,6 +32,12 @@ export interface Sight {
   kidsMyth?: string;
   /** Multilingual audio: audioFiles[lang][variant] */
   audioFiles: LangAudioFiles;
+  /** Multilingual transcripts: transcripts[lang][variant] */
+  transcripts?: {
+    [lang in AudioLang]?: {
+      [variant in AudioVariant]?: string;
+    };
+  };
   linkedTour?: {
     slug: string;
     title: string;

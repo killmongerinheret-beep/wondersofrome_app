@@ -261,6 +261,19 @@ export const playPrevInQueue = async () => {
   });
 };
 
+export const jumpToQueueIndex = async (index: number) => {
+  if (!queue || queue.length === 0) return false;
+  const nextIndex = Math.max(0, Math.min(queue.length - 1, index));
+  queueIndex = nextIndex;
+  const item = queue[queueIndex];
+  if (!item) return false;
+  return await playAudioForSight(item.sightId, item.variant, item.remoteUrl, undefined, {
+    preserveQueue: true,
+    queueIndex,
+    queueTitle,
+  });
+};
+
 export const notifyUser = async (title: string, body?: string) => {
   await Notifications.scheduleNotificationAsync({ content: { title, body }, trigger: null });
 };

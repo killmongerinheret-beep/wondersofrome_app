@@ -25,6 +25,7 @@ const SIGHTS_QUERY = encodeURIComponent(`*[_type == "sight" && defined(lat) && d
   "thumbnail": thumbnail.asset->url + "?w=800&auto=format",
   tips,
   kidsMyth,
+  transcripts,
   "audioFiles": {
     ${audioLangProjection}
   },
@@ -56,6 +57,7 @@ export type SanitySight = {
   thumbnail?: string;
   tips?: string[];
   kidsMyth?: string;
+  transcripts?: any;
   audioFiles?: LangAudioFiles;
   linkedTour?: LinkedTour;
 };
@@ -115,6 +117,7 @@ export const fetchSightsFromSanity = async (): Promise<Sight[]> => {
         tips: r.tips,
         kidsMyth: r.kidsMyth,
         audioFiles,
+        transcripts: r.transcripts ?? undefined,
         linkedTour: r.linkedTour,
       };
     });

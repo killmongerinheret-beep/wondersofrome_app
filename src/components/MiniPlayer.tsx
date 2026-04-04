@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Platform, StyleSheet, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AnimatedPressable } from '../ui/AnimatedPressable';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
+import { UpNextSheet } from './UpNextSheet';
 
 export const MINI_PLAYER_HEIGHT = 86;
 
@@ -16,8 +17,22 @@ const fmt = (ms: number) => {
 
 export const MiniPlayer: React.FC = () => {
   const insets = useSafeAreaInsets();
-  const { isPlaying, positionMs, durationMs, sightId, queue, queueIndex, queueTitle, pause, resume, next, prev, stop } =
-    useAudioPlayer();
+  const {
+    isPlaying,
+    positionMs,
+    durationMs,
+    sightId,
+    queue,
+    queueIndex,
+    queueTitle,
+    pause,
+    resume,
+    next,
+    prev,
+    jumpToIndex,
+    stop,
+  } = useAudioPlayer();
+  const [upNextOpen, setUpNextOpen] = useState(false);
   const visible = !!sightId;
 
   if (!visible) return null;
@@ -69,10 +84,27 @@ export const MiniPlayer: React.FC = () => {
             </View>
 
             <View style={styles.controls}>
+              {qLen > 0 && (
+                <AnimatedPressable
+                  onPress={() => setUpNextOpen(true)}
+                  haptics="light"
+                  accessibilityRole="button"
+                  accessibilityLabel="Open up next list"
+                  style={styles.ctrlBtn}
+                  pressedStyle={styles.ctrlBtnPressed}
+                >
+                  <View style={styles.ctrlInner}>
+                    <Ionicons name="list" size={18} color="#0B0B0B" />
+                  </View>
+                </AnimatedPressable>
+              )}
+
               <AnimatedPressable
                 onPress={() => prev()}
                 haptics="light"
                 disabled={!canPrev}
+                accessibilityRole="button"
+                accessibilityLabel="Previous stop"
                 style={[styles.ctrlBtn, !canPrev && styles.ctrlBtnDisabled]}
                 pressedStyle={styles.ctrlBtnPressed}
               >
@@ -84,6 +116,8 @@ export const MiniPlayer: React.FC = () => {
               <AnimatedPressable
                 onPress={() => (isPlaying ? pause() : resume())}
                 haptics="light"
+                accessibilityRole="button"
+                accessibilityLabel={isPlaying ? 'Pause audio' : 'Play audio'}
                 style={styles.ctrlBtn}
                 pressedStyle={styles.ctrlBtnPressed}
               >
@@ -96,6 +130,8 @@ export const MiniPlayer: React.FC = () => {
                 onPress={() => next()}
                 haptics="light"
                 disabled={!canNext}
+                accessibilityRole="button"
+                accessibilityLabel="Next stop"
                 style={[styles.ctrlBtn, !canNext && styles.ctrlBtnDisabled]}
                 pressedStyle={styles.ctrlBtnPressed}
               >
@@ -107,6 +143,8 @@ export const MiniPlayer: React.FC = () => {
               <AnimatedPressable
                 onPress={() => stop()}
                 haptics="light"
+                accessibilityRole="button"
+                accessibilityLabel="Stop audio"
                 style={styles.ctrlBtn}
                 pressedStyle={styles.ctrlBtnPressed}
               >
@@ -126,6 +164,20 @@ export const MiniPlayer: React.FC = () => {
           </View>
         </BlurView>
       </View>
+
+      {!!queue && queue.length > 0 && (
+        <UpNextSheet
+          visible={upNextOpen}
+          title={queueTitle}
+          items={queue}
+          activeIndex={queueIndex}
+          onClose={() => setUpNextOpen(false)}
+          onSelectIndex={(idx) => {
+            jumpToIndex(idx);
+            setUpNextOpen(false);
+          }}
+        />
+      )}
     </Animated.View>
   );
 };

@@ -9,6 +9,7 @@ import {
   startQueue,
   playNextInQueue,
   playPrevInQueue,
+  jumpToQueueIndex,
   stopAudio,
   PlayerState,
 } from '../services/audio';
@@ -38,6 +39,7 @@ export const useAudioPlayer = () => {
     startQueue,
     next: playNextInQueue,
     prev: playPrevInQueue,
+    jumpToIndex: jumpToQueueIndex,
     stop: stopAudio,
   };
 };
