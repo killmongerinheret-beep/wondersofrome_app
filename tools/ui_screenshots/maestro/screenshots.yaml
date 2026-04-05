@@ -1,0 +1,22 @@
+appId: host.exp.Exponent
+---
+- launchApp
+- takeScreenshot: 01_explore_tab
+- tapOn: "Tickets"
+- takeScreenshot: 02_tickets_tab
+- tapOn: "Shop"
+- takeScreenshot: 03_shop_tab
+- tapOn: "Concierge"
+- takeScreenshot: 04_concierge_tab
+- tapOn: "Explore"
+- takeScreenshot: 05_explore_again
+- tapOn:
+    accessibilityLabel: "See all tours"
+- takeScreenshot: 06_audio_tours_modal
+- tapOn:
+    accessibilityLabel: "Close tours"
+- tapOn:
+    accessibilityLabel: "Open offline downloads"
+- takeScreenshot: 07_offline_pack
+- tapOn:
+    accessibilityLabel: "Close offline pack"

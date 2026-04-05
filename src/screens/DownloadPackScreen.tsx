@@ -133,7 +133,13 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
     <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={onClose} style={styles.closeBtn} activeOpacity={0.8}>
+        <TouchableOpacity
+          onPress={onClose}
+          style={styles.closeBtn}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Close offline pack"
+        >
           <Ionicons name="close" size={20} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.title}>Offline Pack</Text>

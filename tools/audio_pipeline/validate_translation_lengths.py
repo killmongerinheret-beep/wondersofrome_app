@@ -5,6 +5,13 @@ from typing import Dict, List, Tuple
 
 
 TARGET_LANGS = ["it", "es", "fr", "de", "pt", "pl", "ru", "ar", "zh", "ja", "ko"]
+DEFAULT_MIN_RATIO_BY_LANG: Dict[str, float] = {
+    "zh": 0.15,
+    "ja": 0.2,
+    "ko": 0.2,
+    "ar": 0.25,
+    "ru": 0.3,
+}
 
 
 def read_json(path: str) -> Dict:
@@ -32,6 +39,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=os.path.join("out", "transcripts"))
     ap.add_argument("--min-ratio", type=float, default=0.35)
+    ap.add_argument("--per-lang-defaults", action="store_true")
     ap.add_argument("--out", default=os.path.join("out", "transcripts", "_translation_length_report.json"))
     args = ap.parse_args()
 
@@ -50,12 +58,16 @@ def main() -> int:
         for lang in TARGET_LANGS:
             t = str(th.get(lang) or "").strip()
             ratio = (len(t) / max(1, base_len)) if base_len else 0.0
-            if ratio < float(args.min_ratio):
+            min_ratio = float(args.min_ratio)
+            if args.per_lang_defaults:
+                min_ratio = DEFAULT_MIN_RATIO_BY_LANG.get(lang, min_ratio)
+            if ratio < min_ratio:
                 findings.append(
                     {
                         "sightId": sight,
                         "lang": lang,
                         "ratio": round(ratio, 4),
+                        "minRatio": round(min_ratio, 4),
                         "baseChars": base_len,
                         "translatedChars": len(t),
                         "json": fp,
@@ -65,6 +77,7 @@ def main() -> int:
     summary = {
         "filesChecked": len(files),
         "minRatio": args.min_ratio,
+        "perLangDefaults": bool(args.per_lang_defaults),
         "findings": len(findings),
     }
     report = {"summary": summary, "findings": findings}

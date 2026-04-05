@@ -80,6 +80,12 @@ If translations come out too short, increase the max generation length for Ollam
 .\.venv\Scripts\python tools/audio_pipeline/pipeline.py --audio-root audio --out out/transcripts --skip-transcribe --translate --force-llm --llm-provider ollama --ollama-model llama3.1:8b --ollama-timeout 7200 --ollama-num-predict 4096 --translate-chunk-chars 1200
 ```
 
+To automatically fix only the translations flagged as "too short" by the length report:
+
+```bash
+.\.venv\Scripts\python tools/audio_pipeline/fix_short_translations.py --report out/transcripts/_translation_length_report.json
+```
+
 ### Generate audio from exported scripts (TTS)
 
 If you don't want to install Coqui TTS (Python version constraints), you can generate audio from the exported `.txt` scripts using `edge-tts`.
