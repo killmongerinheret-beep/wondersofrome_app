@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import { fetchAudioToursFromSanity, SanityAudioTour } from '../services/sanity';
+import { AudioTour, fetchAudioTours } from '../services/content';
 
 export const useAudioTours = () => {
-  const [tours, setTours] = useState<SanityAudioTour[]>([]);
+  const [tours, setTours] = useState<AudioTour[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const t = await fetchAudioToursFromSanity();
+        const t = await fetchAudioTours();
         if (mounted) setTours(t);
       } catch {
         if (mounted) setTours([]);
@@ -24,4 +24,3 @@ export const useAudioTours = () => {
 
   return { tours, loading };
 };
-

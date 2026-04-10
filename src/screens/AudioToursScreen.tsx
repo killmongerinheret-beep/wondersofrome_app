@@ -2,13 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { SanityAudioTour } from '../services/sanity';
+import { AudioTour } from '../services/content';
 import { theme } from '../ui/theme';
 
 type Props = {
-  tours: SanityAudioTour[];
+  tours: AudioTour[];
   onClose: () => void;
-  onOpenTour: (tour: SanityAudioTour) => void;
+  onOpenTour: (tour: AudioTour) => void;
 };
 
 const BRAND = theme.colors.brand;
@@ -174,4 +174,3 @@ const styles = StyleSheet.create({
   emptyWrap: { alignItems: 'center', paddingTop: 60, gap: 10 },
   emptyText: { color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: '800' },
 });
-

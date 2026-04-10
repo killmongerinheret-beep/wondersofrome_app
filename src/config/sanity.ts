@@ -1,5 +1,5 @@
-export const SANITY_PROJECT_ID = process.env.EXPO_PUBLIC_SANITY_PROJECT_ID ?? 'aknmkkwd';
-export const SANITY_DATASET = process.env.EXPO_PUBLIC_SANITY_DATASET ?? 'production';
+export const SANITY_PROJECT_ID = process.env.EXPO_PUBLIC_SANITY_PROJECT_ID ?? '';
+export const SANITY_DATASET = process.env.EXPO_PUBLIC_SANITY_DATASET ?? '';
 export const SANITY_API_VERSION = '2024-01-01';
 
 export const getSanityImageUrl = (ref: string, width = 800): string => {

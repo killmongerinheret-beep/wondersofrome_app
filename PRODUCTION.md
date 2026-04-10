@@ -14,10 +14,14 @@ Create `.env` (or brand-specific `.env.wondersofrome` / `.env.ticketsinrome`) ba
   - `EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN`
 - Mapbox download token (offline map packs)
   - `RNMAPBOX_MAPS_DOWNLOAD_TOKEN`
-- Sanity content backend (sights, tours, products, audio)
-  - `EXPO_PUBLIC_SANITY_PROJECT_ID`
-  - `EXPO_PUBLIC_SANITY_DATASET`
-  - `EXPO_PUBLIC_SANITY_API_VERSION` (if used)
+- Payload CMS content backend (sights, tours, products, audio)
+  - `EXPO_PUBLIC_CONTENT_PROVIDER=payload`
+  - `EXPO_PUBLIC_PAYLOAD_BASE_URL`
+  - Optional collection slugs:
+    - `EXPO_PUBLIC_PAYLOAD_SIGHTS_COLLECTION`
+    - `EXPO_PUBLIC_PAYLOAD_TOURS_COLLECTION`
+    - `EXPO_PUBLIC_PAYLOAD_AUDIO_TOURS_COLLECTION`
+    - `EXPO_PUBLIC_PAYLOAD_PRODUCTS_COLLECTION`
 - Audio CDN (optional, if you want to override Sanity URLs)
   - `EXPO_PUBLIC_AUDIO_CDN_BASE_URL`
 - Tickets / checkout backend (if you ship Tickets tab)
@@ -46,7 +50,11 @@ Create `.env` (or brand-specific `.env.wondersofrome` / `.env.ticketsinrome`) ba
 
 ### Privacy + legal
 - Add Privacy Policy + Terms URLs (required for app stores, especially with location + background audio).
-- Add in-app “About” / “Support” screen that links to these pages.
+- In-app About screen exists; configure links via:
+  - `EXPO_PUBLIC_BRAND_DOMAIN`
+  - `EXPO_PUBLIC_PRIVACY_POLICY_URL`
+  - `EXPO_PUBLIC_TERMS_URL`
+  - `EXPO_PUBLIC_SUPPORT_URL`
 
 ### Monitoring
 - Add crash reporting (e.g. Sentry) and optional analytics.

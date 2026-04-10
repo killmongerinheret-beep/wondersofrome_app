@@ -1,20 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Sight } from '../types';
-import { fetchSightsFromSanity } from '../services/sanity';
+import { fetchSights } from '../services/content';
 import { saveCachedSights, getCachedSights } from '../services/sqlite';
 import fallbackSights from '../data/sights.json';
 
 type SightsState = {
   sights: Sight[];
   loading: boolean;
-  source: 'sanity' | 'cache' | 'fallback';
+  source: 'remote' | 'cache' | 'fallback';
   refresh: () => Promise<void>;
 };
 
 export const useSights = (): SightsState => {
   const [sights, setSights] = useState<Sight[]>(fallbackSights as Sight[]);
   const [loading, setLoading] = useState(true);
-  const [source, setSource] = useState<'sanity' | 'cache' | 'fallback'>('fallback');
+  const [source, setSource] = useState<'remote' | 'cache' | 'fallback'>('fallback');
 
   const load = useCallback(async (forceRemote = false) => {
     setLoading(true);
@@ -32,7 +32,7 @@ export const useSights = (): SightsState => {
         }
       }
 
-      // 2. Fetch from Sanity
+      // 2. Fetch from remote CMS
       await fetchAndSave();
     } catch {
       // 3. Fall back to bundled JSON
@@ -44,11 +44,11 @@ export const useSights = (): SightsState => {
   }, []);
 
   const fetchAndSave = async () => {
-    const remote = await fetchSightsFromSanity();
+    const remote = await fetchSights();
     if (remote.length > 0) {
       await saveCachedSights(remote);
       setSights(remote);
-      setSource('sanity');
+      setSource('remote');
     }
   };
 

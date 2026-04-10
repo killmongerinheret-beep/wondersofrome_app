@@ -8,7 +8,8 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { fetchProductsFromSanity, fetchToursFromSanity, SanityProduct, SanityTour } from '../services/sanity';
+import { fetchToursFromSanity, SanityTour } from '../services/sanity';
+import { fetchProducts } from '../services/content';
 import { useCart } from '../context/CartContext';
 import { Product } from '../types';
 
@@ -16,25 +17,12 @@ type Tab = 'tours' | 'shop';
 
 const WONDERS_DOMAIN = 'https://wondersofrome.com';
 
-const toProduct = (p: SanityProduct): Product => ({
-  id: p.id,
-  name: p.name,
-  description: p.description ?? '',
-  price: p.price,
-  images: p.images ?? [],
-  category: (p.category as any) ?? 'other',
-  inStock: p.inStock,
-  stockCount: p.stockCount,
-  weight: p.weight,
-  variants: p.variants,
-});
-
 export const ShopScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { addItem, totalItems } = useCart();
   const [tab, setTab] = useState<Tab>('tours');
   const [tours, setTours] = useState<SanityTour[]>([]);
-  const [products, setProducts] = useState<SanityProduct[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Cart sheet
@@ -45,7 +33,7 @@ export const ShopScreen: React.FC = () => {
     (async () => {
       setLoading(true);
       try {
-        const [t, p] = await Promise.all([fetchToursFromSanity(), fetchProductsFromSanity()]);
+        const [t, p] = await Promise.all([fetchToursFromSanity(), fetchProducts()]);
         setTours(t);
         setProducts(p);
       } catch {
@@ -70,9 +58,9 @@ export const ShopScreen: React.FC = () => {
     await Linking.openURL(`${domain}/tour/${tour.slug}`);
   };
 
-  const handleAddToCart = (p: SanityProduct) => {
+  const handleAddToCart = (p: Product) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    addItem(toProduct(p));
+    addItem(p);
   };
 
   const renderTour = ({ item }: { item: SanityTour }) => (
@@ -121,7 +109,7 @@ export const ShopScreen: React.FC = () => {
     </View>
   );
 
-  const renderProduct = ({ item }: { item: SanityProduct }) => (
+  const renderProduct = ({ item }: { item: Product }) => (
     <View style={styles.productCard}>
       <Image
         source={{ uri: item.images?.[0] ?? '' }}

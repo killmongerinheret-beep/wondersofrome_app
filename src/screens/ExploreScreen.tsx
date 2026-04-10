@@ -36,7 +36,7 @@ import { useAudioTours } from '../hooks/useAudioTours';
 import { TourSheet } from '../components/TourSheet';
 import { UpNextSheet } from '../components/UpNextSheet';
 import { AudioToursScreen } from './AudioToursScreen';
-import { SanityAudioTour } from '../services/sanity';
+import { AudioTour } from '../services/content';
 
 type ExploreFilter = 'all' | 'ancient' | 'religious' | 'museum' | 'piazza' | 'other';
 
@@ -177,7 +177,7 @@ export const ExploreScreen: React.FC = () => {
   const [selectedSightId, setSelectedSightId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [showDownloadPack, setShowDownloadPack] = useState(false);
-  const [selectedTour, setSelectedTour] = useState<SanityAudioTour | null>(null);
+  const [selectedTour, setSelectedTour] = useState<AudioTour | null>(null);
   const [upNextOpen, setUpNextOpen] = useState(false);
   const [toursHubOpen, setToursHubOpen] = useState(false);
 

@@ -2,14 +2,14 @@ import React, { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Image, Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SanityAudioTour } from '../services/sanity';
+import { AudioTour } from '../services/content';
 import { downloadAudioPack, getLocalAudioUri } from '../services/filesystem';
 import { theme } from '../ui/theme';
 import { AudioLang, AudioVariant } from '../types';
 
 type Props = {
   visible: boolean;
-  tour: SanityAudioTour | null;
+  tour: AudioTour | null;
   userLocation?: { lat: number; lng: number } | null;
   onClose: () => void;
   onStartAt: (index: number, lang: AudioLang, variant: AudioVariant) => void;

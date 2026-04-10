@@ -7,13 +7,14 @@ import * as Haptics from 'expo-haptics';
 import { theme } from '../ui/theme';
 import { ProductCard } from '../components/ProductCard';
 import { useAudioTours } from '../hooks/useAudioTours';
-import { SanityAudioTour } from '../services/sanity';
 import { TourSheet } from '../components/TourSheet';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import { AudioLang, AudioVariant, Sight } from '../types';
 import { useSights } from '../hooks/useSights';
 import { useContinueListening } from '../hooks/useContinueListening';
 import { Skeleton } from '../ui/Skeleton';
+import { AudioTour } from '../services/content';
+import { SettingsSheet } from '../components/SettingsSheet';
 
 type Chip = { key: string; label: string };
 const CHIPS: Chip[] = [
@@ -69,7 +70,8 @@ export const HomeScreen: React.FC = () => {
   const { items: continueItems, refresh: refreshContinue } = useContinueListening(sights);
   const [query, setQuery] = useState('');
   const [chip, setChip] = useState<Chip>(CHIPS[0]);
-  const [selectedTour, setSelectedTour] = useState<SanityAudioTour | null>(null);
+  const [selectedTour, setSelectedTour] = useState<AudioTour | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [audioLang, setAudioLang] = useState<AudioLang>('en');
   const [audioVariant, setAudioVariant] = useState<AudioVariant>('deep');
 
@@ -77,7 +79,7 @@ export const HomeScreen: React.FC = () => {
   const loading = toursLoading || sightsLoading;
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return tours.filter((t: SanityAudioTour) => {
+    return tours.filter((t: AudioTour) => {
       const c = t.stops?.[0]?.category ?? 'other';
       if (chip.key !== 'all' && c !== chip.key) return false;
       if (!q) return true;
@@ -114,9 +116,15 @@ export const HomeScreen: React.FC = () => {
             <Text style={styles.hTitle}>Good evening</Text>
             <Text style={styles.hSub}>Pick an audio guide and press play</Text>
           </View>
-          <View style={styles.hAvatar}>
+          <TouchableOpacity
+            onPress={() => setSettingsOpen(true)}
+            activeOpacity={0.85}
+            style={styles.hAvatar}
+            accessibilityRole="button"
+            accessibilityLabel="Open settings"
+          >
             <Ionicons name="person" size={18} color="#0B0B0B" />
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.searchRow}>
@@ -346,6 +354,8 @@ export const HomeScreen: React.FC = () => {
           navigation.navigate('Explore');
         }}
       />
+
+      <SettingsSheet visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </SafeAreaView>
   );
 };
