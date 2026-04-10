@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AnimatedPressable } from '../ui/AnimatedPressable';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
 import { UpNextSheet } from './UpNextSheet';
+import { NowPlayingSheet } from './NowPlayingSheet';
 
 export const MINI_PLAYER_HEIGHT = 86;
 
@@ -33,6 +34,7 @@ export const MiniPlayer: React.FC = () => {
     stop,
   } = useAudioPlayer();
   const [upNextOpen, setUpNextOpen] = useState(false);
+  const [nowPlayingOpen, setNowPlayingOpen] = useState(false);
   const visible = !!sightId;
 
   if (!visible) return null;
@@ -67,10 +69,17 @@ export const MiniPlayer: React.FC = () => {
       ]}
     >
       <View pointerEvents={visible ? 'auto' : 'none'}>
-        <BlurView intensity={90} tint="dark" style={styles.card}>
+        <BlurView intensity={95} tint="light" style={styles.card}>
           <View style={styles.row}>
-            <View style={styles.left}>
-              <Ionicons name="musical-notes" size={16} color="rgba(255,255,255,0.85)" />
+            <AnimatedPressable
+              onPress={() => setNowPlayingOpen(true)}
+              haptics="light"
+              accessibilityRole="button"
+              accessibilityLabel="Open now playing"
+              style={styles.left}
+              pressedStyle={{ opacity: 0.92 }}
+            >
+              <Ionicons name="musical-notes" size={16} color="rgba(17,17,17,0.85)" />
               <View style={styles.titleCol}>
                 <Text style={styles.title} numberOfLines={1}>
                   {sightId ?? 'Audio'}
@@ -81,7 +90,7 @@ export const MiniPlayer: React.FC = () => {
                   </Text>
                 )}
               </View>
-            </View>
+            </AnimatedPressable>
 
             <View style={styles.controls}>
               {qLen > 0 && (
@@ -94,7 +103,7 @@ export const MiniPlayer: React.FC = () => {
                   pressedStyle={styles.ctrlBtnPressed}
                 >
                   <View style={styles.ctrlInner}>
-                    <Ionicons name="list" size={18} color="#0B0B0B" />
+                    <Ionicons name="list" size={18} color="#111" />
                   </View>
                 </AnimatedPressable>
               )}
@@ -109,7 +118,7 @@ export const MiniPlayer: React.FC = () => {
                 pressedStyle={styles.ctrlBtnPressed}
               >
                 <View style={styles.ctrlInner}>
-                  <Ionicons name="play-skip-back" size={18} color="#0B0B0B" />
+                  <Ionicons name="play-skip-back" size={18} color="#111" />
                 </View>
               </AnimatedPressable>
 
@@ -122,7 +131,7 @@ export const MiniPlayer: React.FC = () => {
                 pressedStyle={styles.ctrlBtnPressed}
               >
                 <View style={styles.ctrlInner}>
-                  <Ionicons name={isPlaying ? 'pause' : 'play'} size={18} color="#0B0B0B" />
+                  <Ionicons name={isPlaying ? 'pause' : 'play'} size={18} color="#111" />
                 </View>
               </AnimatedPressable>
 
@@ -136,7 +145,7 @@ export const MiniPlayer: React.FC = () => {
                 pressedStyle={styles.ctrlBtnPressed}
               >
                 <View style={styles.ctrlInner}>
-                  <Ionicons name="play-skip-forward" size={18} color="#0B0B0B" />
+                  <Ionicons name="play-skip-forward" size={18} color="#111" />
                 </View>
               </AnimatedPressable>
 
@@ -149,7 +158,7 @@ export const MiniPlayer: React.FC = () => {
                 pressedStyle={styles.ctrlBtnPressed}
               >
                 <View style={styles.ctrlInner}>
-                  <Ionicons name="close" size={18} color="#0B0B0B" />
+                  <Ionicons name="close" size={18} color="#111" />
                 </View>
               </AnimatedPressable>
             </View>
@@ -178,6 +187,8 @@ export const MiniPlayer: React.FC = () => {
           }}
         />
       )}
+
+      <NowPlayingSheet visible={nowPlayingOpen} onClose={() => setNowPlayingOpen(false)} />
     </Animated.View>
   );
 };
@@ -195,7 +206,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     paddingHorizontal: 14,
     paddingVertical: 12,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: 'rgba(255,255,255,0.75)',
     minHeight: MINI_PLAYER_HEIGHT,
   },
   row: {
@@ -216,12 +227,12 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    color: '#fff',
+    color: '#111',
     fontSize: 13,
     fontWeight: '900',
   },
   subtitle: {
-    color: 'rgba(255,255,255,0.6)',
+    color: 'rgba(60,60,67,0.6)',
     fontSize: 11,
     fontWeight: '800',
   },
@@ -242,7 +253,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 14,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(0,0,0,0.06)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -253,7 +264,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   time: {
-    color: 'rgba(255,255,255,0.7)',
+    color: 'rgba(60,60,67,0.7)',
     fontSize: 11,
     fontWeight: '800',
     width: 42,
@@ -263,12 +274,12 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 6,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: 'rgba(0,0,0,0.12)',
     overflow: 'hidden',
   },
   fill: {
     height: '100%',
     borderRadius: 999,
-    backgroundColor: '#fff',
+    backgroundColor: '#111',
   },
 });

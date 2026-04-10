@@ -16,6 +16,7 @@ import {
   Modal,
   Platform,
 } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import Mapbox from '@rnmapbox/maps';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
@@ -154,6 +155,7 @@ const SightSwipeCard: React.FC<{
 
 // ── Main screen ───────────────────────────────────────────────────────────────
 export const ExploreScreen: React.FC = () => {
+  const route = useRoute<any>();
   const insets = useSafeAreaInsets();
   const cameraRef = useRef<Mapbox.Camera>(null);
   const shapeSourceRef = useRef<any>(null);
@@ -320,6 +322,12 @@ export const ExploreScreen: React.FC = () => {
       }, 100);
     }
   };
+
+  useEffect(() => {
+    const pick = String(route?.params?.pickSightId ?? '').trim();
+    if (!pick) return;
+    handleSelectSight(pick);
+  }, [route?.params?.pickSightId]);
 
   const handlePickResult = (sight: Sight) => {
     setQuery('');
@@ -489,8 +497,8 @@ export const ExploreScreen: React.FC = () => {
           accessibilityRole="button"
           accessibilityLabel="Recenter map"
           style={[styles.mapBtn, !userLocation && styles.mapBtnDisabled]} pressedStyle={{ opacity: 0.85 }}>
-          <BlurView intensity={80} tint="dark" style={styles.mapBtnBlur}>
-            <Ionicons name="locate-outline" size={18} color="#fff" />
+          <BlurView intensity={90} tint="light" style={styles.mapBtnBlur}>
+            <Ionicons name="locate-outline" size={18} color="#111" />
           </BlurView>
         </AnimatedPressable>
       </View>
@@ -501,8 +509,8 @@ export const ExploreScreen: React.FC = () => {
           accessibilityRole="button"
           accessibilityLabel="Open offline downloads"
           style={styles.mapBtn} pressedStyle={{ opacity: 0.85 }}>
-          <BlurView intensity={80} tint="dark" style={styles.mapBtnBlur}>
-            <Ionicons name="cloud-download-outline" size={18} color="#fff" />
+          <BlurView intensity={90} tint="light" style={styles.mapBtnBlur}>
+            <Ionicons name="cloud-download-outline" size={18} color="#111" />
           </BlurView>
         </AnimatedPressable>
       </View>
@@ -780,7 +788,7 @@ export const ExploreScreen: React.FC = () => {
           height: drawerMaxHeight,
           transform: [{ translateY: drawerTranslate }],
         }]}>
-          <BlurView intensity={90} tint="dark" style={styles.drawerCard}>
+          <BlurView intensity={90} tint="light" style={styles.drawerCard}>
             <View style={styles.drawerHandleHit} {...drawerPanResponder.panHandlers}>
               <View style={styles.drawerHandle} />
             </View>
@@ -1048,12 +1056,12 @@ const styles = StyleSheet.create({
 
   // Detail drawer
   drawer: { position: 'absolute', left: 0, right: 0, bottom: 0 },
-  drawerCard: { marginHorizontal: 12, borderRadius: 24, overflow: 'hidden', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 14, backgroundColor: 'rgba(0,0,0,0.6)' },
+  drawerCard: { marginHorizontal: 12, borderRadius: 24, overflow: 'hidden', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 14, backgroundColor: 'rgba(255,255,255,0.75)' },
   drawerHandleHit: { alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginTop: -4, marginBottom: 2 },
-  drawerHandle: { alignSelf: 'center', width: 44, height: 5, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.25)' },
+  drawerHandle: { alignSelf: 'center', width: 44, height: 5, borderRadius: 999, backgroundColor: 'rgba(0,0,0,0.18)' },
   drawerHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   drawerTitleWrap: { flex: 1, paddingRight: 12 },
-  drawerTitle: { color: '#fff', fontSize: 18, fontWeight: '900' },
+  drawerTitle: { color: '#111', fontSize: 18, fontWeight: '900' },
   drawerMeta: { marginTop: 2, color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: '700' },
   drawerClose: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' },
   drawerBody: { marginTop: 12 },
@@ -1062,7 +1070,7 @@ const styles = StyleSheet.create({
   drawerSection: { gap: 8 },
   drawerSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   drawerSectionLabel: { fontSize: 10, fontWeight: '900', color: 'rgba(255,255,255,0.6)', letterSpacing: 0.8 },
-  drawerDescription: { color: 'rgba(255,255,255,0.9)', fontSize: 13, lineHeight: 18, fontWeight: '600' },
+  drawerDescription: { color: 'rgba(60,60,67,0.9)', fontSize: 13, lineHeight: 18, fontWeight: '600' },
   bookButton: { height: 46, borderRadius: 16, backgroundColor: BRAND, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, paddingHorizontal: 14 },
   bookText: { color: '#fff', fontSize: 15, fontWeight: '900' },
   tourNote: { fontSize: 11, fontWeight: '700', color: 'rgba(255,255,255,0.45)', textAlign: 'center' },

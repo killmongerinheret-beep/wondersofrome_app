@@ -1,6 +1,9 @@
 export const theme = {
   colors: {
-    brand: '#007AFF',
+    brand: '#0A84FF',
+    brandDark: '#0053CE',
+    surfaceLight: '#F2F3F7',
+    surfaceDarkBlur: 'rgba(0,0,0,0.55)',
     bg: '#000000',
     bgSoft: '#0B0B0B',
     card: 'rgba(255,255,255,0.08)',
@@ -35,4 +38,3 @@ export const theme = {
     caption: { fontSize: 12, fontWeight: '700' as const },
   },
 };
-

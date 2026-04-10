@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { ExploreScreen } from './src/screens/ExploreScreen';
+import { HomeScreen } from './src/screens/HomeScreen';
 import { MyTicketsScreen } from './src/screens/MyTicketsScreen';
 import { ConciergeScreen } from './src/screens/ConciergeScreen';
 import { ShopScreen } from './src/screens/ShopScreen';
@@ -16,6 +17,7 @@ import Mapbox from '@rnmapbox/maps';
 import { getMapboxAccessToken } from './src/config/mapbox';
 import { MiniPlayer } from './src/components/MiniPlayer';
 import { theme } from './src/ui/theme';
+import { BrandingSplash } from './src/ui/BrandingSplash';
 
 const Tab = createBottomTabNavigator();
 
@@ -59,6 +61,7 @@ function AppTabs() {
         tabBarIcon: ({ focused, color, size }) => {
           if (route.name === 'Shop') return <ShopTabIcon focused={focused} color={color} size={size} />;
           const icons: Record<string, [string, string]> = {
+            Home: ['home', 'home-outline'],
             Explore: ['map', 'map-outline'],
             Tickets: ['ticket', 'ticket-outline'],
             Shop: ['bag', 'bag-outline'],
@@ -80,8 +83,9 @@ function AppTabs() {
           <BlurView tint="light" intensity={80} style={StyleSheet.absoluteFill} />
         ),
       })}
-      initialRouteName="Explore"
+      initialRouteName="Home"
     >
+      <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Explore" component={ExploreScreen} />
       <Tab.Screen name="Tickets" component={MyTicketsScreen} />
       <Tab.Screen name="Shop" component={ShopScreen} />
@@ -91,12 +95,18 @@ function AppTabs() {
 }
 
 export default function App() {
+  const [booting, setBooting] = useState(true);
+  React.useEffect(() => {
+    const t = setTimeout(() => setBooting(false), 900);
+    return () => clearTimeout(t);
+  }, []);
   return (
     <SafeAreaProvider>
       <CartProvider>
         <NavigationContainer>
           <AppTabs />
           <MiniPlayer />
+          <BrandingSplash visible={booting} />
         </NavigationContainer>
       </CartProvider>
     </SafeAreaProvider>
