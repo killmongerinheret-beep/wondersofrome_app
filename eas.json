@@ -1,0 +1,31 @@
+{
+  "cli": {
+    "version": ">= 10.0.0"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": { "simulator": true }
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {},
+    "ticketsinrome": {
+      "distribution": "store",
+      "env": {
+        "EXPO_PUBLIC_SITE_ID": "ticketsinrome"
+      }
+    },
+    "wondersofrome": {
+      "distribution": "store",
+      "env": {
+        "EXPO_PUBLIC_SITE_ID": "wondersofrome"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

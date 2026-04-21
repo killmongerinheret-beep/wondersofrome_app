@@ -1,0 +1,742 @@
+[
+  {
+    "id": "colosseum",
+    "name": "Colosseum",
+    "name_it": "Colosseo",
+    "pack": "essential",
+    "lat": 41.8902,
+    "lng": 12.4922,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/d/de/Colosseo_2020.jpg",
+    "description": "Rome’s iconic amphitheatre where gladiators fought and emperors entertained the city. Walk around the arches and imagine the roar of 50,000 spectators.",
+    "kidsMyth": "Legend says the Colosseum was a stage for heroes. Imagine you’re a young messenger racing through the arches, delivering a secret note to a brave gladiator before the gates open!",
+    "tips": [
+      "Go early for the best photos and shorter lines.",
+      "Carry water—there is little shade around the monument."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/colosseum-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/colosseum-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/colosseum-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "vatican",
+    "name": "Vatican City",
+    "name_it": "Città del Vaticano",
+    "pack": "essential",
+    "lat": 41.9029,
+    "lng": 12.4534,
+    "radius": 20,
+    "category": "religious",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/0/00/St_Peter%27s_Square%2C_Vatican_City_-_April_2007.jpg",
+    "description": "A country inside a city: St. Peter’s Square, the Vatican Museums, and centuries of art and history packed into one place.",
+    "kidsMyth": "Some say the obelisk in the square is a giant “needle” that pins the whole plaza in place. If it ever moved, the pigeons would lose their way home!",
+    "tips": [
+      "Dress respectfully (shoulders and knees covered).",
+      "Arrive early to avoid the longest security lines."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/vatican-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/vatican-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/vatican-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "trevi",
+    "name": "Trevi Fountain",
+    "name_it": "Fontana di Trevi",
+    "pack": "essential",
+    "lat": 41.9009,
+    "lng": 12.4833,
+    "radius": 20,
+    "category": "piazza",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/70/Trevi_Fountain%2C_Rome%2C_Italy_2_-_May_2007.jpg",
+    "description": "The most famous fountain in Rome. Toss a coin over your shoulder to “guarantee” a return trip to the Eternal City.",
+    "kidsMyth": "Neptune’s sea horses are said to wake up at night and gallop through the water. If you listen closely, you might hear a splash that isn’t yours.",
+    "tips": [
+      "Visit early morning or late night for fewer crowds.",
+      "Keep your phone and wallet secure in busy times."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/trevi-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/trevi-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/trevi-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "pantheon",
+    "name": "Pantheon",
+    "name_it": "Pantheon",
+    "pack": "essential",
+    "lat": 41.8986,
+    "lng": 12.4769,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/9/97/Pantheon_Rome_2022.jpg",
+    "description": "A masterpiece of Roman engineering with a perfect dome and open oculus. Step inside and feel the scale of 2,000 years of design.",
+    "kidsMyth": "The oculus is like a giant eye watching over Rome. When it rains, the Pantheon is “drinking” from the sky—don’t worry, the floor has secret drains!",
+    "tips": [
+      "Step inside to feel the dome—photos work best from the center.",
+      "A quick stop, but worth it even on busy days."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/pantheon-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/pantheon-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/pantheon-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "forum",
+    "name": "Roman Forum",
+    "name_it": "Foro Romano",
+    "pack": "essential",
+    "lat": 41.8925,
+    "lng": 12.4853,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Roman_Forum_2019.jpg",
+    "description": "The political and social heart of ancient Rome. Walk the Via Sacra where triumphs, speeches, and everyday life once unfolded.",
+    "kidsMyth": "They say the stones can still remember speeches. Pick a pillar and pretend you’re a young senator practicing your most powerful Roman voice.",
+    "tips": [
+      "Wear comfortable shoes—uneven stones and long paths.",
+      "Pair it with the Colosseum on the same day."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/forum-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/forum-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/forum-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "spanish-steps",
+    "name": "Spanish Steps",
+    "name_it": "Scalinata di Trinità dei Monti",
+    "pack": "essential",
+    "lat": 41.9059,
+    "lng": 12.4823,
+    "radius": 20,
+    "category": "piazza",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Spanish_Steps%2C_Rome_%28April_2019%29.jpg",
+    "description": "A grand staircase linking Piazza di Spagna to Trinità dei Monti. A classic spot for people-watching and sunset photos.",
+    "kidsMyth": "The steps are said to count your wishes. Climb slowly and make one wish on every landing—just don’t tell anyone or it won’t come true.",
+    "tips": [
+      "Sunset is the prettiest time for photos.",
+      "Rules change: avoid sitting where it’s not allowed."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/spanish-steps-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/spanish-steps-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/spanish-steps-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "piazza-navona",
+    "name": "Piazza Navona",
+    "name_it": "Piazza Navona",
+    "pack": "essential",
+    "lat": 41.8992,
+    "lng": 12.4731,
+    "radius": 20,
+    "category": "piazza",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/b/b7/Piazza_Navona_Rome_2016.jpg",
+    "description": "One of Rome’s most beautiful squares, built on a stadium’s footprint. Fountains, artists, and evening energy fill the space.",
+    "kidsMyth": "People say the fountains are “training pools” for sea creatures learning to swim in fresh water. Look for the one that’s splashing the most.",
+    "tips": [
+      "Evening visits feel magical with lights and street artists.",
+      "Great place for a quick gelato break."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/piazza-navona-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/piazza-navona-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/piazza-navona-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "castel-santangelo",
+    "name": "Castel Sant'Angelo",
+    "name_it": "Castel Sant'Angelo",
+    "pack": "essential",
+    "lat": 41.9031,
+    "lng": 12.4663,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Castel_Sant%27Angelo%2C_Rome%2C_Italy.jpg",
+    "description": "From emperor’s tomb to fortress and papal refuge. Climb up for sweeping views over the Tiber and St. Peter’s dome.",
+    "kidsMyth": "A secret tunnel once helped popes escape. Imagine you’re a night guard with a lantern, listening for footsteps echoing inside the stone halls.",
+    "tips": [
+      "Go up to the terrace for the best skyline view.",
+      "Bring a light jacket—wind can be strong on top."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/castel-santangelo-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/castel-santangelo-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/castel-santangelo-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "st-peters-basilica",
+    "name": "St. Peter’s Basilica",
+    "name_it": "Basilica di San Pietro",
+    "pack": "essential",
+    "lat": 41.9022,
+    "lng": 12.4539,
+    "radius": 20,
+    "category": "religious",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg",
+    "description": "The heart of Catholicism and a showcase of Renaissance art. Inside: Michelangelo’s Pietà and a soaring dome above Rome.",
+    "kidsMyth": "The giant dome is like a stone umbrella protecting the city. If you whisper a wish inside, the echo is said to carry it upward to the top.",
+    "tips": [
+      "Dress code applies (shoulders and knees covered).",
+      "Go early for shorter security queues."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/st-peters-basilica-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/st-peters-basilica-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/st-peters-basilica-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "vatican-museums",
+    "name": "Vatican Museums",
+    "name_it": "Musei Vaticani",
+    "pack": "full",
+    "lat": 41.9065,
+    "lng": 12.4536,
+    "radius": 20,
+    "category": "museum",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/0/04/Vatican_Museums_Courtyard.jpg",
+    "description": "A vast museum complex packed with classical sculptures, galleries, and masterpieces. Plan your route to save energy and time.",
+    "kidsMyth": "Somewhere in the halls, a marble statue is said to blink when nobody is looking. The trick is to look away at the same time!",
+    "tips": [
+      "Book a timed entry to avoid long waits.",
+      "Pick a few highlights instead of trying to see everything."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/vatican-museums-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/vatican-museums-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/vatican-museums-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "borghese-gallery",
+    "name": "Galleria Borghese",
+    "name_it": "Galleria Borghese",
+    "pack": "full",
+    "lat": 41.9142,
+    "lng": 12.4923,
+    "radius": 20,
+    "category": "museum",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Galleria_Borghese_Rome_2013.jpg",
+    "description": "An intimate museum famous for Bernini sculptures and Caravaggio paintings. Timed entry makes it calmer than most big museums.",
+    "kidsMyth": "They say one statue here is so realistic it could step off its pedestal. If you spot the most lifelike face, you’ve found the ‘sleeping’ statue.",
+    "tips": [
+      "Reservation is usually required—book ahead.",
+      "Arrive a little early; entry is timed."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/borghese-gallery-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/borghese-gallery-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/borghese-gallery-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "villa-borghese",
+    "name": "Villa Borghese Gardens",
+    "name_it": "Villa Borghese",
+    "pack": "full",
+    "lat": 41.914,
+    "lng": 12.486,
+    "radius": 20,
+    "category": "other",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Tempio_di_Esculapio%2C_Villa_Borghese%2C_Rome.jpg",
+    "description": "Rome’s green escape: lakes, viewpoints, and shaded paths. Perfect for a relaxing break between heavy-history stops.",
+    "kidsMyth": "In the little lake, the temple is said to belong to a friendly water spirit who protects tired travelers. If you’re kind to nature, it grants extra energy!",
+    "tips": [
+      "Great mid-day break from the heat.",
+      "Rent a bike to cover more ground."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/villa-borghese-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/villa-borghese-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/villa-borghese-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "capitoline-museums",
+    "name": "Capitoline Museums",
+    "name_it": "Musei Capitolini",
+    "pack": "full",
+    "lat": 41.8928,
+    "lng": 12.4829,
+    "radius": 20,
+    "category": "museum",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/6a/Campidoglio_-_Musei_Capitolini_-_Rome%2C_Italy.jpg",
+    "description": "A world-class collection of Roman art and sculpture on Michelangelo’s Capitoline Hill. Great views over the Forum nearby.",
+    "kidsMyth": "A bronze wolf here once guarded the hill at night. If you hear a faint ‘clink’, it might be the wolf’s armor as it patrols.",
+    "tips": [
+      "Combine with Capitoline Hill viewpoints.",
+      "Take your time—this museum rewards slow looking."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/capitoline-museums-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/capitoline-museums-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/capitoline-museums-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "vittoriano",
+    "name": "Vittoriano (Altare della Patria)",
+    "name_it": "Vittoriano (Altare della Patria)",
+    "pack": "full",
+    "lat": 41.8946,
+    "lng": 12.483,
+    "radius": 20,
+    "category": "other",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Altare_della_Patria_Rome_2016.jpg",
+    "description": "A monumental white-marble complex honoring the unification of Italy. The terrace offers one of the best panoramic viewpoints in central Rome.",
+    "kidsMyth": "At night, the giant statues are said to ‘wake up’ and watch over the city. They stand perfectly still—but they’re always counting the stars.",
+    "tips": [
+      "Go up to the terrace for panoramic views.",
+      "Best photos with a wide-angle lens."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/vittoriano-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/vittoriano-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/vittoriano-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "piazza-del-popolo",
+    "name": "Piazza del Popolo",
+    "name_it": "Piazza del Popolo",
+    "pack": "full",
+    "lat": 41.9109,
+    "lng": 12.4763,
+    "radius": 20,
+    "category": "piazza",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/0/02/Piazza_del_Popolo_Rome_2013.jpg",
+    "description": "A grand northern gateway to the historic center. Nearby viewpoints at Pincio Hill are perfect for golden-hour photos.",
+    "kidsMyth": "The twin churches are like two ‘watch towers’ for friendly guardian spirits. They help travelers find the right road into the city.",
+    "tips": [
+      "Walk up to Pincio Terrace for a sunset view.",
+      "Good starting point for a stroll into the center."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/piazza-del-popolo-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/piazza-del-popolo-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/piazza-del-popolo-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "circus-maximus",
+    "name": "Circus Maximus",
+    "name_it": "Circo Massimo",
+    "pack": "full",
+    "lat": 41.8855,
+    "lng": 12.4853,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Circus_Maximus%2C_Rome_%28Italy%29.jpg",
+    "description": "The site of ancient Rome’s massive chariot-racing stadium. Today it’s an open space, but its scale is still easy to feel.",
+    "kidsMyth": "The fastest chariot team was said to be blessed by the wind god. If you run here and feel a sudden breeze, you might be getting a ‘speed boost’!",
+    "tips": [
+      "Best enjoyed by imagining the stadium’s size—look end to end.",
+      "Great stop between Aventine Hill and the Forum."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/circus-maximus-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/circus-maximus-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/circus-maximus-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "baths-caracalla",
+    "name": "Baths of Caracalla",
+    "name_it": "Terme di Caracalla",
+    "pack": "full",
+    "lat": 41.8799,
+    "lng": 12.4923,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Caracalla_Baths_Rome_Italy.jpg",
+    "description": "Enormous imperial baths that once hosted exercise, libraries, and social life. The ruins hint at the luxury of ancient Rome.",
+    "kidsMyth": "The baths were so huge that echoes could travel like secret messages. Try clapping—imagine your sound racing through marble halls!",
+    "tips": [
+      "Bring water; the site is large and open.",
+      "Look for mosaic floors and massive brick walls."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/baths-caracalla-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/baths-caracalla-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/baths-caracalla-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "trastevere",
+    "name": "Trastevere",
+    "name_it": "Trastevere",
+    "pack": "essential",
+    "lat": 41.8897,
+    "lng": 12.4708,
+    "radius": 20,
+    "category": "other",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Rome_Trastevere.jpg",
+    "description": "A charming neighborhood of cobbled lanes, small piazzas, and lively evenings. A great place for dinner after sightseeing.",
+    "kidsMyth": "Local cats are said to be the neighborhood’s ‘secret guides’. If one follows you for a few steps, it means you’re going the right way to something tasty.",
+    "tips": [
+      "Best in the evening for atmosphere and food.",
+      "Explore side streets for quieter corners."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/trastevere-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/trastevere-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/trastevere-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "appia-antica",
+    "name": "Via Appia Antica",
+    "name_it": "Via Appia Antica",
+    "pack": "full",
+    "lat": 41.8535,
+    "lng": 12.5454,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/8/86/Via_Appia_Antica_Rome.jpg",
+    "description": "One of the oldest roads of the Roman world. Walk or bike along ancient stones lined with tombs, ruins, and countryside views.",
+    "kidsMyth": "They say the road stones are ‘memory stones’. Every traveler leaves a tiny piece of their story behind, and the road remembers it forever.",
+    "tips": [
+      "Great by bike; weekends are calmer with fewer cars.",
+      "Bring sunscreen—many sections are exposed."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/appia-antica-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/appia-antica-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/appia-antica-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "catacombs-callixtus",
+    "name": "Catacombs of Callixtus",
+    "name_it": "Catacombe di San Callisto",
+    "pack": "full",
+    "lat": 41.8579,
+    "lng": 12.5192,
+    "radius": 20,
+    "category": "religious",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/3/3f/Catacombe_di_San_Callisto.jpg",
+    "description": "Underground burial tunnels from early Christian Rome. A quiet, atmospheric counterpoint to the crowds in the city center.",
+    "kidsMyth": "People whisper about ‘lantern lights’ that appear when explorers get lost. The catacombs are like a maze that helps kind visitors find their way out.",
+    "tips": [
+      "Bring a light jacket—it can feel cool underground.",
+      "Join a guided visit; access is usually controlled."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/catacombs-callixtus-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        },
+        "deep": {
+          "url": "https://example.com/audio/catacombs-callixtus-deep.m4a",
+          "duration": 600,
+          "size": 5000000
+        },
+        "kids": {
+          "url": "https://example.com/audio/catacombs-callixtus-kids.m4a",
+          "duration": 180,
+          "size": 1500000
+        }
+      }
+    }
+  }
+]

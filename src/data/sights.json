@@ -1,0 +1,1091 @@
+[
+  {
+    "id": "colosseum",
+    "name": "Colosseum",
+    "name_it": "Colosseo",
+    "pack": "essential",
+    "lat": 41.8902,
+    "lng": 12.4922,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/d/de/Colosseo_2020.jpg",
+    "description": "Rome's iconic amphitheatre where gladiators fought and emperors entertained the city.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/colosseum/deep.mp3",
+          "duration": 786,
+          "size": 12889584
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/colosseum/deep.mp3",
+          "duration": 1253,
+          "size": 20541744
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  },
+  {
+    "id": "forum",
+    "name": "Roman Forum",
+    "name_it": "Foro Romano",
+    "pack": "essential",
+    "lat": 41.8925,
+    "lng": 12.4853,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/5/5a/Roman_Forum_2019.jpg",
+    "description": "The political and social heart of ancient Rome.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/forum/deep.mp3",
+          "duration": 763,
+          "size": 12503088
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/forum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  },
+  {
+    "id": "heart",
+    "name": "Heart of Rome",
+    "name_it": "Cuore di Roma",
+    "pack": "essential",
+    "lat": 41.9,
+    "lng": 12.48,
+    "radius": 20,
+    "category": "piazza",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/7/70/Trevi_Fountain%2C_Rome%2C_Italy_2_-_May_2007.jpg",
+    "description": "The vibrant center of Rome with fountains, piazzas, and historic streets.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/heart/deep.mp3",
+          "duration": 51,
+          "size": 849600
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/heart/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  },
+  {
+    "id": "jewish-ghetto",
+    "name": "Jewish Ghetto",
+    "name_it": "Ghetto Ebraico",
+    "pack": "essential",
+    "lat": 41.8917,
+    "lng": 12.4778,
+    "radius": 20,
+    "category": "other",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Rome_Jewish_Ghetto.jpg/1280px-Rome_Jewish_Ghetto.jpg",
+    "description": "Historic Jewish quarter with rich cultural heritage and traditional cuisine.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/jewish-ghetto/deep.mp3",
+          "duration": 536,
+          "size": 8792784
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/jewish-ghetto/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  },
+  {
+    "id": "ostia-antica",
+    "name": "Ostia Antica",
+    "name_it": "Ostia Antica",
+    "pack": "full",
+    "lat": 41.7556,
+    "lng": 12.2925,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Ostia_Antica_-_Decumanus_Maximus.jpg/1280px-Ostia_Antica_-_Decumanus_Maximus.jpg",
+    "description": "Ancient Roman port city with remarkably preserved ruins.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/ostia-antica/deep.mp3",
+          "duration": 607,
+          "size": 9949968
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/ostia-antica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  },
+  {
+    "id": "pantheon",
+    "name": "Pantheon",
+    "name_it": "Pantheon",
+    "pack": "essential",
+    "lat": 41.8986,
+    "lng": 12.4769,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/9/97/Pantheon_Rome_2022.jpg",
+    "description": "A masterpiece of Roman engineering with a perfect dome and open oculus.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/pantheon/deep.mp3",
+          "duration": 465,
+          "size": 7620768
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/pantheon/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  },
+  {
+    "id": "sistine-chapel",
+    "name": "Sistine Chapel",
+    "name_it": "Cappella Sistina",
+    "pack": "essential",
+    "lat": 41.9029,
+    "lng": 12.4545,
+    "radius": 20,
+    "category": "religious",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Sistine_Chapel_ceiling_01.jpg/1280px-Sistine_Chapel_ceiling_01.jpg",
+    "description": "Michelangelo's masterpiece ceiling in the heart of the Vatican.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/sistine-chapel/deep.mp3",
+          "duration": 42,
+          "size": 696960
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/sistine-chapel/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  },
+  {
+    "id": "st-peters-basilica",
+    "name": "St. Peter's Basilica",
+    "name_it": "Basilica di San Pietro",
+    "pack": "essential",
+    "lat": 41.9022,
+    "lng": 12.4539,
+    "radius": 20,
+    "category": "religious",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Basilica_di_San_Pietro_in_Vaticano_September_2015-1a.jpg",
+    "description": "The heart of Catholicism and a showcase of Renaissance art.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/st-peters-basilica/deep.mp3",
+          "duration": 1023,
+          "size": 16770960
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/st-peters-basilica/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  },
+  {
+    "id": "trastevere",
+    "name": "Trastevere",
+    "name_it": "Trastevere",
+    "pack": "essential",
+    "lat": 41.8897,
+    "lng": 12.4708,
+    "radius": 20,
+    "category": "other",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Rome_Trastevere.jpg",
+    "description": "A charming neighborhood of cobbled lanes, small piazzas, and lively evenings.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/trastevere/deep.mp3",
+          "duration": 539,
+          "size": 8838288
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/trastevere/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  },
+  {
+    "id": "vatican-museums",
+    "name": "Vatican Museums",
+    "name_it": "Musei Vaticani",
+    "pack": "full",
+    "lat": 41.9065,
+    "lng": 12.4536,
+    "radius": 20,
+    "category": "museum",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/0/04/Vatican_Museums_Courtyard.jpg",
+    "description": "A vast museum complex packed with classical sculptures, galleries, and masterpieces.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/vatican-museums/deep.mp3",
+          "duration": 1026,
+          "size": 16816752
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/vatican-museums/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  },
+  {
+    "id": "vatican-pinacoteca",
+    "name": "Vatican Pinacoteca",
+    "name_it": "Pinacoteca Vaticana",
+    "pack": "full",
+    "lat": 41.9055,
+    "lng": 12.4525,
+    "radius": 20,
+    "category": "museum",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Vatican_Museums_-_Pinacoteca.jpg/1280px-Vatican_Museums_-_Pinacoteca.jpg",
+    "description": "Vatican's art gallery featuring paintings from medieval to modern times.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/vatican-pinacoteca/deep.mp3",
+          "duration": 1054,
+          "size": 17274096
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/vatican-pinacoteca/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  }
+]

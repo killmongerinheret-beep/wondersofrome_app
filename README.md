@@ -1,0 +1,5 @@
+# Wonders of Rome (Expo / React Native)
+
+- Build instructions: [BUILDING.md](file:///d:/bot/wondersofrome_app/BUILDING.md)
+- Production checklist: [PRODUCTION.md](file:///d:/bot/wondersofrome_app/PRODUCTION.md)
+- Audio pipeline tooling: [tools/audio_pipeline/README.md](file:///d:/bot/wondersofrome_app/tools/audio_pipeline/README.md)

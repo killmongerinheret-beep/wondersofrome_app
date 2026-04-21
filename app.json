@@ -1,0 +1,61 @@
+{
+  "expo": {
+    "name": "Rome Audio Guide",
+    "slug": "rome-audio-guide",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.wondersofrome.romeaudioguide",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio",
+          "location"
+        ],
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app uses your location to automatically play audio guides when you approach monuments.",
+        "NSLocationWhenInUseUsageDescription": "This app uses your location to show your position on the offline map."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "package": "com.wondersofrome.romeaudioguide",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
+        "WRITE_SETTINGS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-sqlite",
+      "expo-font",
+      "expo-asset",
+      "expo-audio",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Rome Audio Guide to use your location for automatic audio guides."
+        }
+      ],
+      "@rnmapbox/maps",
+      "expo-build-properties"
+    ]
+  }
+}

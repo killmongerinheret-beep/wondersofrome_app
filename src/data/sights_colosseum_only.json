@@ -1,0 +1,101 @@
+[
+  {
+    "id": "colosseum",
+    "name": "Colosseum",
+    "name_it": "Colosseo",
+    "pack": "essential",
+    "lat": 41.8902,
+    "lng": 12.4922,
+    "radius": 20,
+    "category": "ancient",
+    "has_tips": true,
+    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/d/de/Colosseo_2020.jpg",
+    "description": "Rome's iconic amphitheatre where gladiators fought and emperors entertained the city. Experience a complete 30-40 minute guided audio tour in 12 languages.",
+    "audioFiles": {
+      "en": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/en/colosseum/deep.mp3",
+          "duration": 786,
+          "size": 12889584
+        }
+      },
+      "ar": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ar/colosseum/deep.mp3",
+          "duration": 1253,
+          "size": 20541744
+        }
+      },
+      "de": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/de/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "es": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/es/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "fr": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/fr/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "it": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/it/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ja": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ja/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ko": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ko/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pl": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pl/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "pt": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/pt/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "ru": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/ru/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      },
+      "zh": {
+        "deep": {
+          "url": "https://pub-7389b9102db544bb85bdf6f8e1417995.r2.dev/zh/colosseum/deep.mp3",
+          "duration": 600,
+          "size": 5000000
+        }
+      }
+    }
+  }
+]
