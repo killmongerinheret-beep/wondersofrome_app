@@ -1,0 +1,148 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                    FIX AUDIO TRANSCRIPTS - START HERE                          ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+🎯 WHAT THIS DOES
+
+  Fixes ONLY the transcript text files:
+  ✓ Removes repetition loops (sentences repeating 3-33x)
+  ✓ Removes "Rick Steves" branding in all languages
+  ✓ Removes URLs and credits
+  ✓ Analyzes content gaps
+
+  Does NOT touch:
+  ✗ Your app code
+  ✗ Audio files
+  ✗ Deployment
+  ✗ Anything else
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 HOW TO RUN (3 WAYS)
+
+┌─ METHOD 1: Double-Click (Easiest) ───────────────────────────────────────┐
+│                                                                            │
+│  1. Find file: FIX_TRANSCRIPTS_ONLY.bat                                   │
+│  2. Double-click it                                                        │
+│  3. Press any key when prompted                                            │
+│  4. Wait 2-5 minutes                                                       │
+│  5. Done!                                                                  │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+┌─ METHOD 2: Command Prompt ───────────────────────────────────────────────┐
+│                                                                            │
+│  1. Press Win + R                                                          │
+│  2. Type: cmd                                                              │
+│  3. Press Enter                                                            │
+│  4. Type: cd C:\wondersofrome_app                                          │
+│  5. Type: FIX_TRANSCRIPTS_ONLY.bat                                         │
+│  6. Press Enter                                                            │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+┌─ METHOD 3: Python Directly ──────────────────────────────────────────────┐
+│                                                                            │
+│  1. Open Command Prompt                                                    │
+│  2. Type: cd C:\wondersofrome_app\tools                                    │
+│  3. Type: python fix_all_issues.py                                         │
+│  4. Press Enter                                                            │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════
+
+📊 WHAT YOU'LL GET
+
+┌─ Clean Transcript Files ─────────────────────────────────────────────────┐
+│                                                                            │
+│  Location: D:\wondersofrome\final_cleaned_content\                        │
+│                                                                            │
+│  ✓ 22 Colosseum files (COMPLETE & CLEAN)                                  │
+│  ✓ 110 other files (CLEAN but SHORT)                                      │
+│                                                                            │
+│  Total: 132 files (11 attractions × 12 languages)                         │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+┌─ Detailed Report ────────────────────────────────────────────────────────┐
+│                                                                            │
+│  Location: D:\wondersofrome\fix_report.json                               │
+│                                                                            │
+│  Shows:                                                                    │
+│  • How many files had repetitions (45)                                     │
+│  • How many files had branding (12)                                        │
+│  • How many files are short (110)                                          │
+│  • Detailed changes for each file                                          │
+│                                                                            │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════
+
+✅ VERIFICATION
+
+After running, check:
+
+1. Open report:
+   D:\wondersofrome\fix_report.json
+
+2. Check a Colosseum file:
+   D:\wondersofrome\final_cleaned_content\colosseum\en\deep.txt
+   
+   Verify:
+   ✓ No sentences repeating 3+ times
+   ✓ No "Rick Steves" mentions
+   ✓ No ricksteves.com URLs
+   ✓ Text flows naturally
+
+3. Compare before/after:
+   BEFORE: D:\wondersofrome\cleaned_production_content_v2\colosseum\ru\deep.txt
+   AFTER:  D:\wondersofrome\final_cleaned_content\colosseum\ru\deep.txt
+
+═══════════════════════════════════════════════════════════════════════════
+
+⏱️ TIME & COST
+
+  Time: 2-5 minutes
+  Cost: $0
+  Result: 132 clean transcript files
+
+═══════════════════════════════════════════════════════════════════════════
+
+📁 FILES
+
+  FIX_TRANSCRIPTS_ONLY.bat        ← START HERE (double-click)
+  tools/fix_all_issues.py         ← The actual script
+  TRANSCRIPT_FIXES_SUMMARY.md     ← Full documentation
+  PROMPT_FOR_GEMINI_CLI.md        ← For Gemini CLI (alternative)
+
+═══════════════════════════════════════════════════════════════════════════
+
+🆘 IF IT DOESN'T WORK
+
+Problem: "Python not found"
+Solution: Install Python from python.org
+          OR use Gemini CLI with PROMPT_FOR_GEMINI_CLI.md
+
+Problem: "Source directory not found"
+Solution: Check if D:\wondersofrome\cleaned_production_content_v2 exists
+          Update path in tools/fix_all_issues.py if needed
+
+Problem: "Permission denied"
+Solution: Run Command Prompt as Administrator
+
+═══════════════════════════════════════════════════════════════════════════
+
+🎯 NEXT STEPS AFTER FIXING
+
+Option 1: Use clean transcripts for new TTS generation
+Option 2: Use existing audio (transcripts now match better)
+Option 3: Deploy app with clean Colosseum files only
+
+═══════════════════════════════════════════════════════════════════════════
+
+🚀 READY?
+
+Double-click: FIX_TRANSCRIPTS_ONLY.bat
+
+╚════════════════════════════════════════════════════════════════════════════════╝
