@@ -1,0 +1,99 @@
+================================================================================
+HOW TO UPLOAD TO GITHUB - killmongerinheret-beep/wondersofrome_app
+================================================================================
+
+PROBLEM: You're logged in as "nehru52" but need to push to "killmongerinheret-beep"
+
+SOLUTION: Use Personal Access Token
+
+================================================================================
+STEP-BY-STEP INSTRUCTIONS
+================================================================================
+
+1. CREATE PERSONAL ACCESS TOKEN
+   -------------------------------
+   a) Login to GitHub as: killmongerinheret-beep
+   b) Go to: https://github.com/settings/tokens
+   c) Click: "Generate new token (classic)"
+   d) Name: "WondersOfRome Upload"
+   e) Expiration: 90 days (or No expiration)
+   f) Select scopes:
+      ☑ repo (Full control of private repositories)
+   g) Click: "Generate token"
+   h) COPY THE TOKEN (looks like: ghp_xxxxxxxxxxxxxxxxxxxx)
+
+2. RUN THE UPLOAD SCRIPT
+   ----------------------
+   a) Double-click: UPLOAD_WITH_TOKEN.bat
+   b) Paste your token when prompted
+   c) Press Enter
+
+3. VERIFY UPLOAD
+   --------------
+   a) Go to: https://github.com/killmongerinheret-beep/wondersofrome_app
+   b) You should see all files uploaded
+
+================================================================================
+ALTERNATIVE: USE GITHUB DESKTOP (EASIER)
+================================================================================
+
+1. Download GitHub Desktop: https://desktop.github.com/
+2. Login with: killmongerinheret-beep account
+3. File → Add Local Repository → Select: C:\wondersofrome_app
+4. Click "Publish repository" or "Push origin"
+
+================================================================================
+WHAT WILL BE UPLOADED
+================================================================================
+
+✅ 87 files total (12,991 lines)
+
+NEW FILES (86):
+  - tools/ (26 Python scripts)
+    • fix_all_issues.py - Remove repetitions & branding
+    • retranslate_all_languages.py - Re-translate all files
+    • regenerate_all_audio.py - Generate audio with Edge TTS
+    • verify_fixes.py - Automated verification
+    • And 22 more tools...
+
+  - Batch files (20)
+    • FIX_TRANSCRIPTS_ONLY.bat
+    • GENERATE_AUDIO.bat
+    • CHECK_AUDIO_PROGRESS.bat
+    • And 17 more...
+
+  - Documentation (41 markdown files)
+    • AUDIO_GENERATION_STATUS.md
+    • TRANSCRIPT_FIXES_COMPLETE_SUMMARY.md
+    • GITHUB_UPLOAD_GUIDE.md
+    • And 38 more...
+
+MODIFIED FILES IN wondersofrome_app/ (20):
+  - src/ui/theme.ts (Fixed corrupted file)
+  - src/components/MiniPlayer.tsx (Added theme import)
+  - src/services/supabase.ts (Fixed config)
+  - src/hooks/useGeofencing.ts (Fixed audio variant)
+  - app.json (Fixed package name)
+  - And 15 more...
+
+================================================================================
+CURRENT STATUS
+================================================================================
+
+✅ All files committed locally (Commit: 1866cb2)
+⏳ Waiting to push to GitHub
+🎙️ Audio generation running (33/132 files, 3-4 hours remaining)
+
+================================================================================
+NEED HELP?
+================================================================================
+
+If you still can't upload:
+1. Share your screen with the repository owner
+2. Ask them to add you as collaborator
+3. Or send them the files via ZIP
+
+To create ZIP:
+  Right-click folder → Send to → Compressed (zipped) folder
+
+================================================================================
