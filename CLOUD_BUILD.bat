@@ -17,21 +17,44 @@ pause
 
 echo.
 echo ================================================================================
-echo Step 1: Login to Expo
+echo Step 1: Expo Account Setup
 echo ================================================================================
 echo.
-echo If you don't have an account, create one at: https://expo.dev/signup
+echo Do you have an Expo account?
+echo   1. Yes - I have an account (login)
+echo   2. No - Create new account (signup)
 echo.
+set /p ACCOUNT_CHOICE="Enter 1 or 2: "
 
-call eas login
-
-if %ERRORLEVEL% NEQ 0 (
+if "%ACCOUNT_CHOICE%"=="2" (
     echo.
-    echo Login failed. Please try again or create an account:
-    echo   https://expo.dev/signup
+    echo Creating new Expo account...
     echo.
-    pause
-    exit /b 1
+    call eas register
+    
+    if %ERRORLEVEL% NEQ 0 (
+        echo.
+        echo Registration failed. You can also create account at:
+        echo   https://expo.dev/signup
+        echo.
+        pause
+        exit /b 1
+    )
+) else (
+    echo.
+    echo Logging into Expo...
+    echo.
+    call eas login
+    
+    if %ERRORLEVEL% NEQ 0 (
+        echo.
+        echo Login failed. Please try again or create an account:
+        echo   Run this script again and choose option 2
+        echo   Or visit: https://expo.dev/signup
+        echo.
+        pause
+        exit /b 1
+    )
 )
 
 echo.
