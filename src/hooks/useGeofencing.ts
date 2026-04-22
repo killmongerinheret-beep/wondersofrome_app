@@ -42,27 +42,33 @@ export const useGeofencing = () => {
   const [isGeofencing, setIsGeofencing] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<Location.PermissionStatus | null>(null);
 
-  useEffect(() => {
-    checkPermissions();
-  }, []);
+  // Don't auto-check permissions on mount - let the user trigger it
+  // useEffect(() => {
+  //   checkPermissions();
+  // }, []);
 
   const checkPermissions = async (): Promise<boolean> => {
-    const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
-    if (foregroundStatus !== Location.PermissionStatus.GRANTED) {
-      console.log('Foreground location permission denied');
-      setPermissionStatus(foregroundStatus);
+    try {
+      const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+      if (foregroundStatus !== Location.PermissionStatus.GRANTED) {
+        console.log('Foreground location permission denied');
+        setPermissionStatus(foregroundStatus);
+        return false;
+      }
+
+      const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+      setPermissionStatus(backgroundStatus);
+      
+      if (backgroundStatus === Location.PermissionStatus.GRANTED) {
+        const isRegistered = await TaskManager.isTaskRegisteredAsync(GEOFENCE_TASK);
+        setIsGeofencing(isRegistered);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error checking permissions:', error);
       return false;
     }
-
-    const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
-    setPermissionStatus(backgroundStatus);
-    
-    if (backgroundStatus === Location.PermissionStatus.GRANTED) {
-      const isRegistered = await TaskManager.isTaskRegisteredAsync(GEOFENCE_TASK);
-      setIsGeofencing(isRegistered);
-      return true;
-    }
-    return false;
   };
 
   const startGeofencing = async () => {

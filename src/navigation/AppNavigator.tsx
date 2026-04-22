@@ -33,7 +33,12 @@ export function AppNavigator() {
   const { startGeofencing } = useGeofencing();
   
   useEffect(() => {
-    startGeofencing();
+    // Defer geofencing initialization to avoid blocking the initial load
+    const timer = setTimeout(() => {
+      startGeofencing();
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   return (
