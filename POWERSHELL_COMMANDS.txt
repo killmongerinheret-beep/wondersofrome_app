@@ -1,0 +1,77 @@
+================================================================================
+                    POWERSHELL COMMANDS REFERENCE
+================================================================================
+
+⚠️  IMPORTANT: In PowerShell, add .\ before batch file names!
+
+================================================================================
+CORRECT COMMANDS (PowerShell)
+================================================================================
+
+Tunnel Mode (Global Testing):
+   .\START_TUNNEL_MODE.bat
+
+Cloud Build (APK):
+   .\CLOUD_BUILD.bat
+
+Account Setup:
+   .\QUICK_EXPO_SETUP.bat
+   .\CREATE_EXPO_ACCOUNT.bat
+
+================================================================================
+WHY THE .\ PREFIX?
+================================================================================
+
+PowerShell doesn't run files from current directory by default.
+The .\ tells PowerShell: "Run this file from HERE"
+
+Examples:
+   ❌ Wrong:  START_TUNNEL_MODE.bat
+   ✅ Right:  .\START_TUNNEL_MODE.bat
+
+   ❌ Wrong:  CLOUD_BUILD.bat
+   ✅ Right:  .\CLOUD_BUILD.bat
+
+================================================================================
+ALTERNATIVE: USE CMD INSTEAD
+================================================================================
+
+If you prefer, you can use Command Prompt (CMD) instead:
+
+1. Open Command Prompt (not PowerShell)
+2. Navigate to folder: cd C:\wondersofrome_app
+3. Run without .\:  START_TUNNEL_MODE.bat
+
+In CMD, you DON'T need the .\ prefix!
+
+================================================================================
+ALL AVAILABLE BATCH FILES
+================================================================================
+
+Testing:
+   .\START_TUNNEL_MODE.bat          - Test from anywhere (tunnel)
+   
+Building:
+   .\CLOUD_BUILD.bat                - Build APK in cloud
+   
+Account:
+   .\QUICK_EXPO_SETUP.bat           - Setup Expo account
+   .\CREATE_EXPO_ACCOUNT.bat        - Create account only
+
+================================================================================
+QUICK REFERENCE
+================================================================================
+
+Current Directory: C:\wondersofrome_app
+
+To test locally (no batch file needed):
+   1. Open Expo Go app
+   2. Enter URL: exp://10.106.103.152:8081
+
+To test globally:
+   .\START_TUNNEL_MODE.bat
+
+To build APK:
+   .\CLOUD_BUILD.bat
+
+================================================================================
