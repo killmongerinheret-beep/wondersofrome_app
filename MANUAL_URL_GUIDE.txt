@@ -1,0 +1,117 @@
+================================================================================
+                    MANUAL URL METHOD - NO QR SCANNING!
+================================================================================
+
+✅ EASIEST WAY TO CONNECT - Just type the URL!
+
+================================================================================
+STEP-BY-STEP INSTRUCTIONS
+================================================================================
+
+📱 ON YOUR PHONE:
+
+1. Open "Expo Go" app
+   (Download from App Store or Play Store if you don't have it)
+
+2. Look at the bottom of the screen
+   You'll see: "Enter URL manually"
+
+3. Tap "Enter URL manually"
+   A keyboard will appear
+
+4. Type this EXACTLY (copy it):
+
+   ┌─────────────────────────────────┐
+   │  exp://10.106.103.152:8081      │
+   └─────────────────────────────────┘
+
+5. Tap "Connect" or "Go"
+
+6. Wait 5-10 seconds
+
+7. Your app will load! 🎉
+
+================================================================================
+IMPORTANT NOTES
+================================================================================
+
+⚠️  Make sure:
+   - Phone and computer are on the SAME WiFi network
+   - You're NOT using mobile data
+   - You typed the URL exactly as shown above
+   - Metro bundler is running (check your terminal)
+
+================================================================================
+ALTERNATIVE URLS TO TRY
+================================================================================
+
+If the first URL doesn't work, try these:
+
+URL 1 (Primary):
+   exp://10.106.103.152:8081
+
+URL 2 (Alternative):
+   exp://172.26.224.1:8081
+
+Web URL (in browser):
+   http://10.106.103.152:8081
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+❌ "Connection Refused" or "Can't Connect"
+   → Check if both devices are on same WiFi
+   → Check if Metro bundler is running (look for QR code in terminal)
+   → Try the alternative URL above
+
+❌ "Network Error"
+   → Turn off mobile data on phone
+   → Make sure WiFi is connected
+   → Restart Expo Go app
+
+❌ "Invalid URL"
+   → Check you typed it exactly: exp://10.106.103.152:8081
+   → No spaces, no typos
+   → Must start with "exp://"
+
+================================================================================
+STILL NOT WORKING? TRY TUNNEL MODE
+================================================================================
+
+In your terminal:
+1. Press Ctrl+C to stop Metro
+2. Run: npx expo start --tunnel
+3. Wait 1-2 minutes
+4. Use the new URL shown
+
+Tunnel mode is slower but works from anywhere!
+
+================================================================================
+WHAT YOU SHOULD SEE
+================================================================================
+
+When it works:
+✅ "Connecting to Metro..."
+✅ "Loading..."
+✅ App appears on your phone!
+
+When it doesn't work:
+❌ "Connection refused"
+❌ "Network error"
+❌ "Can't connect to Metro"
+
+================================================================================
+QUICK REFERENCE
+================================================================================
+
+Metro URL:  exp://10.106.103.152:8081
+Web URL:    http://10.106.103.152:8081
+Port:       8081
+Status:     Metro bundler is RUNNING ✅
+
+================================================================================
+
+💡 TIP: Save this URL in your phone's notes for easy access!
+
+================================================================================
