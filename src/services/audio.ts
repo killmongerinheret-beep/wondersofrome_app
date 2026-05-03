@@ -1,7 +1,9 @@
 import { createAudioPlayer, setAudioModeAsync, AudioPlayer as ExpoAudioPlayer } from 'expo-audio';
-import { getLocalAudioUri, downloadAudioPack } from './filesystem';
 import * as Notifications from 'expo-notifications';
-import { getProgress, updateProgress } from './sqlite';
+import { Alert } from 'react-native';
+
+import { getLocalAudioUri, downloadAudioPack } from './filesystem';
+import { getProgress, updateProgress, saveQueue, getQueue, PersistedQueueItem } from './sqlite';
 
 export type PlayerState = {
   isPlaying: boolean;
@@ -57,13 +59,21 @@ const computeCompleted = (positionMs: number, durationMs: number) => {
 const persistProgress = async (force: boolean = false) => {
   if (!state.sightId || !state.variant) return;
   const now = Date.now();
-  if (!force && now - lastSavedAt < 5000) return;
+
+  // Throttle: Save every 15 seconds unless forced (e.g. pause/stop)
+  if (!force && now - lastSavedAt < 15000) return;
+
   if (saveInFlight) return;
   saveInFlight = true;
   lastSavedAt = now;
   try {
     const completed = computeCompleted(state.positionMs, state.durationMs);
-    await updateProgress(state.sightId, completed, state.variant, Math.max(0, Math.floor(state.positionMs)));
+    await updateProgress(
+      state.sightId,
+      completed,
+      state.variant,
+      Math.max(0, Math.floor(state.positionMs))
+    );
   } catch {
   } finally {
     saveInFlight = false;
@@ -92,32 +102,82 @@ const startTick = () => {
         }
       }
     }
-  }, 500);
+  }, 250);
 };
 
 const stopTick = () => {
-  if (tickInterval) { clearInterval(tickInterval); tickInterval = null; }
+  if (tickInterval) {
+    clearInterval(tickInterval);
+    tickInterval = null;
+  }
+};
+
+const persistQueue = async () => {
+  if (!queue) {
+    await saveQueue([], null);
+    return;
+  }
+  try {
+    const items: PersistedQueueItem[] = queue.map((item, idx) => ({
+      sight_id: item.sightId,
+      variant: item.variant,
+      remote_url: item.remoteUrl ?? null,
+      title: item.title ?? null,
+      queue_title: queueTitle,
+      queue_index: idx,
+    }));
+    await saveQueue(items, queueTitle);
+  } catch {}
 };
 
 export const subscribePlayer = (fn: Listener) => {
   listeners.push(fn);
   fn({ ...state });
-  return () => { listeners = listeners.filter((l) => l !== fn); };
+  return () => {
+    listeners = listeners.filter((l) => l !== fn);
+  };
 };
 
 export const getPlayerState = () => ({ ...state });
+
+export const hydrateQueue = async () => {
+  try {
+    const persisted = await getQueue();
+    if (persisted && persisted.items.length > 0) {
+      queue = persisted.items.map((i) => ({
+        sightId: i.sight_id,
+        variant: i.variant,
+        remoteUrl: i.remote_url ?? undefined,
+        title: i.title ?? undefined,
+      }));
+      queueTitle = persisted.queueTitle;
+      // We don't necessarily know which one was playing, but we can try to find
+      // the one with recent progress in the progress table.
+      // For now, just set the state to match the loaded queue structure.
+      state.queue = queue;
+      state.queueTitle = queueTitle;
+      emit();
+    }
+  } catch {}
+};
 
 export const playAudioForSight = async (
   sightId: string,
   variant: string = 'quick',
   remoteUrl?: string,
   onDownloadProgress?: (p: number) => void,
-  options?: { preserveQueue?: boolean; queueIndex?: number; queueTitle?: string | null },
+  options?: { preserveQueue?: boolean; queueIndex?: number; queueTitle?: string | null }
 ) => {
+  console.log(`[AudioService] Attempting to play: ${sightId} (${variant})`);
+  console.log(`[AudioService] Remote URL: ${remoteUrl}`);
   try {
     await persistProgress(true);
     // Stop existing
-    if (player) { player.pause(); player.remove(); player = null; }
+    if (player) {
+      player.pause();
+      player.remove();
+      player = null;
+    }
     stopTick();
     if (!options?.preserveQueue) {
       queue = null;
@@ -129,16 +189,36 @@ export const playAudioForSight = async (
 
     // Try local first
     let uri = await getLocalAudioUri(sightId, variant);
+    let isRemote = false;
 
-    // Download if not cached and we have a URL
+    // Spotify-fast: If not local, stream the remote URL immediately
     if (!uri && remoteUrl) {
-      uri = await downloadAudioPack(sightId, variant, remoteUrl, onDownloadProgress);
+      uri = remoteUrl;
+      isRemote = true;
+      // Start background download for future offline use (don't await it)
+      downloadAudioPack(sightId, variant, remoteUrl).catch(() => {});
     }
 
     if (!uri) {
-      console.log(`Audio not available for ${sightId}/${variant}`);
+      console.log(`[AudioService] Audio not available for ${sightId}/${variant}`);
       return false;
     }
+
+    console.log(`[AudioService] Playing from ${isRemote ? 'Remote' : 'Local'} URI: ${uri}`);
+
+    // Optimistic UI: Update state immediately so the player appears while buffering
+    state = {
+      ...state,
+      sightId,
+      variant,
+      isPlaying: true,
+      positionMs: 0,
+      durationMs: 0,
+      queue,
+      queueIndex,
+      queueTitle,
+    };
+    emit();
 
     await setAudioModeAsync({
       playsInSilentMode: true,
@@ -154,23 +234,11 @@ export const playAudioForSight = async (
       if (p && !p.completed && p.last_played_variant === variant && p.last_position > 5000) {
         resumePositionMs = p.last_position;
       }
-    } catch {
-    }
+    } catch {}
 
-    player = createAudioPlayer(uri, { updateInterval: 500 });
+    player = createAudioPlayer(uri, { updateInterval: 250 });
     player.play();
 
-    state = {
-      isPlaying: true,
-      positionMs: 0,
-      durationMs: 0,
-      sightId,
-      variant,
-      queue,
-      queueIndex,
-      queueTitle,
-    };
-    emit();
     startTick();
 
     if (resumePositionMs > 0) {
@@ -180,23 +248,43 @@ export const playAudioForSight = async (
           player.seekTo(resumePositionMs / 1000);
           state.positionMs = resumePositionMs;
           emit();
-        } catch {
-        }
+        } catch {}
       }, 250);
     }
     return true;
-  } catch (error) {
-    console.error('Error playing audio:', error);
+  } catch (error: any) {
+    console.log(`[AudioService] Play error for ${sightId}:`, error);
+    
+    // Check if it was a 404 (Not Found)
+    if (String(error).includes('404')) {
+      Alert.alert(
+        'Coming Soon',
+        'The audio guide for this sight is currently being updated and will be available shortly.',
+        [{ text: 'OK' }]
+      );
+    } else {
+      Alert.alert('Playback Error', 'Could not play audio. Please check your connection.');
+    }
+    
     return false;
   }
 };
 
 export const pauseAudio = () => {
-  if (player) { player.pause(); state.isPlaying = false; emit(); persistProgress(true); }
+  if (player) {
+    player.pause();
+    state.isPlaying = false;
+    emit();
+    persistProgress(true);
+  }
 };
 
 export const resumeAudio = () => {
-  if (player) { player.play(); state.isPlaying = true; emit(); }
+  if (player) {
+    player.play();
+    state.isPlaying = true;
+    emit();
+  }
 };
 
 export const seekAudio = (positionMs: number) => {
@@ -210,12 +298,26 @@ export const seekAudio = (positionMs: number) => {
 
 export const stopAudio = () => {
   persistProgress(true);
-  if (player) { player.pause(); player.remove(); player = null; }
+  if (player) {
+    player.pause();
+    player.remove();
+    player = null;
+  }
   stopTick();
   queue = null;
   queueIndex = 0;
   queueTitle = null;
-  state = { isPlaying: false, positionMs: 0, durationMs: 0, sightId: null, variant: null, queue: null, queueIndex: 0, queueTitle: null };
+  persistQueue().catch(() => {});
+  state = {
+    isPlaying: false,
+    positionMs: 0,
+    durationMs: 0,
+    sightId: null,
+    variant: null,
+    queue: null,
+    queueIndex: 0,
+    queueTitle: null,
+  };
   emit();
 };
 
@@ -223,6 +325,7 @@ export const startQueue = async (items: QueueItem[], startAt: number = 0, title?
   queue = items.filter((i) => i.sightId && i.variant);
   queueIndex = Math.max(0, Math.min(queue.length - 1, startAt));
   queueTitle = title ?? null;
+  persistQueue().catch(() => {});
   const item = queue[queueIndex];
   if (!item) return false;
   return await playAudioForSight(item.sightId, item.variant, item.remoteUrl, undefined, {

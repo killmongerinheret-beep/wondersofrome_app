@@ -1,15 +1,16 @@
+import { getAudioCdnBaseUrl } from '../config/audioCdn';
 import { SANITY_PROJECT_ID, SANITY_DATASET, SANITY_API_VERSION } from '../config/sanity';
 import { Sight, AudioVariant, AudioLang, LangAudioFiles } from '../types';
-import { getAudioCdnBaseUrl } from '../config/audioCdn';
 
 const BASE = `https://${SANITY_PROJECT_ID}.api.sanity.io/v${SANITY_API_VERSION}/data/query/${SANITY_DATASET}`;
 
-const LANGS: AudioLang[] = ['en','it','es','fr','de','zh','ja','pt','pl','ru','ar','ko'];
+const LANGS: AudioLang[] = ['en', 'it', 'es', 'fr', 'de', 'zh', 'ja', 'pt', 'pl', 'ru', 'ar', 'ko'];
 
 // Build GROQ projection for all language audio blocks
 // Each lang has audioQuick/audioDeep/audioKids sub-objects in Sanity
-const audioLangProjection = LANGS.map(lang =>
-  `"${lang}": audio_${lang}{ "quick": audioQuick{url,duration,size}, "deep": audioDeep{url,duration,size}, "kids": audioKids{url,duration,size} }`
+const audioLangProjection = LANGS.map(
+  (lang) =>
+    `"${lang}": audio_${lang}{ "quick": audioQuick{url,duration,size}, "deep": audioDeep{url,duration,size}, "kids": audioKids{url,duration,size} }`
 ).join(',\n    ');
 
 const SIGHTS_QUERY = encodeURIComponent(`*[_type == "sight" && defined(lat) && defined(lng)]{
@@ -64,8 +65,10 @@ export type SanitySight = {
 
 const mapCategory = (cat?: string): Sight['category'] => {
   const map: Record<string, Sight['category']> = {
-    ancient: 'ancient', religious: 'religious',
-    museum: 'museum', piazza: 'piazza',
+    ancient: 'ancient',
+    religious: 'religious',
+    museum: 'museum',
+    piazza: 'piazza',
   };
   return map[cat ?? ''] ?? 'other';
 };
@@ -80,24 +83,70 @@ export const fetchSightsFromSanity = async (): Promise<Sight[]> => {
   const audioCdnBase = getAudioCdnBaseUrl();
 
   return rows
-    .filter(r => r.id && r.lat && r.lng)
+    .filter((r) => r.id && r.lat && r.lng)
     .map((r): Sight => {
       const audioFiles: LangAudioFiles = r.audioFiles ?? {};
 
       if (audioCdnBase) {
-        const langs: AudioLang[] = ['en','it','es','fr','de','zh','ja','pt','pl','ru','ar','ko'];
+        const langs: AudioLang[] = [
+          'en',
+          'it',
+          'es',
+          'fr',
+          'de',
+          'zh',
+          'ja',
+          'pt',
+          'pl',
+          'ru',
+          'ar',
+          'ko',
+        ];
         const variants: AudioVariant[] = ['quick', 'deep', 'kids'];
+
+        // Map app IDs to specific R2 folder names (Only for exact matches)
+        const r2FolderMap: Record<string, string> = {
+          'vatican-museums': 'vatican-museums',
+          'st-peters-basilica': 'st-peters-basilica',
+          'sistine-chapel': 'sistine-chapel',
+          'vatican-pinacoteca': 'vatican-pinacoteca',
+          'jewish-ghetto': 'jewish-ghetto',
+          'ostia-antica': 'ostia-antica',
+        };
+
+        // Folders that actually exist in your R2 bucket
+        const existingR2Folders = new Set([
+          'colosseum',
+          'forum',
+          'heart',
+          'jewish-ghetto',
+          'ostia-antica',
+          'pantheon',
+          'sistine-chapel',
+          'st-peters-basilica',
+          'trastevere',
+          'vatican-museums',
+          'vatican-pinacoteca',
+        ]);
+
         for (const lang of langs) {
           for (const variant of variants) {
             const existing = audioFiles?.[lang]?.[variant]?.url?.trim() ?? '';
-            if (existing && !existing.includes('example.com')) continue;
-            const url = `${audioCdnBase}/audio/${lang}/${r.id}/${variant}.m4a`;
-            audioFiles[lang] = audioFiles[lang] ?? {};
-            audioFiles[lang]![variant] = {
-              url,
-              duration: audioFiles[lang]?.[variant]?.duration ?? 0,
-              size: audioFiles[lang]?.[variant]?.size ?? 0,
-            };
+            if (!existing || existing.includes('example.com')) {
+              const folderName = r2FolderMap[r.id] ?? r.id;
+              
+              // Only inject if the folder exists in R2
+              if (existingR2Folders.has(folderName)) {
+                const fileToUse = (variant === 'quick' || variant === 'deep') ? 'deep' : variant;
+                const url = `${audioCdnBase}/${lang}/${folderName}/${fileToUse}.mp3`;
+                audioFiles[lang] = audioFiles[lang] ?? {};
+                audioFiles[lang]![variant] = {
+                  url,
+                  duration: audioFiles[lang]?.[variant]?.duration ?? 0,
+                  size: audioFiles[lang]?.[variant]?.size ?? 0,
+                };
+              }
+            }
           }
         }
       }
@@ -214,7 +263,8 @@ export const fetchAudioToursFromSanity = async (): Promise<SanityAudioTour[]> =>
 
 // ── Products (souvenirs / shop) ───────────────────────────────────────────────
 
-const PRODUCTS_QUERY = encodeURIComponent(`*[_type == "product" && inStock == true] | order(_createdAt desc) {
+const PRODUCTS_QUERY =
+  encodeURIComponent(`*[_type == "product" && inStock == true] | order(_createdAt desc) {
   "id": slug.current,
   name,
   description,
@@ -237,7 +287,7 @@ export type SanityProduct = {
   stockCount?: number;
   weight?: number;
   images?: string[];
-  variants?: Array<{ id: string; label: string; price?: number; inStock: boolean }>;
+  variants?: { id: string; label: string; price?: number; inStock: boolean }[];
 };
 
 export const fetchProductsFromSanity = async (): Promise<SanityProduct[]> => {

@@ -86,24 +86,27 @@ export const fetchConcierge = async (): Promise<{
   const supabase = getSupabase();
   const siteId = getSiteId();
 
-  const [{ data: agentRows, error: agentError }, { data: officeRows, error: officeError }, { data: faqRows, error: faqError }] =
-    await Promise.all([
-      supabase
-        .from('concierge_agents')
-        .select('name,subtitle,avatar_url,whatsapp_url,site_id')
-        .eq('site_id', siteId)
-        .limit(1),
-      supabase
-        .from('office_locations')
-        .select('name,address,hours,site_id')
-        .eq('site_id', siteId)
-        .order('name', { ascending: true }),
-      supabase
-        .from('faqs')
-        .select('question,answer,site_id,order_index')
-        .eq('site_id', siteId)
-        .order('order_index', { ascending: true }),
-    ]);
+  const [
+    { data: agentRows, error: agentError },
+    { data: officeRows, error: officeError },
+    { data: faqRows, error: faqError },
+  ] = await Promise.all([
+    supabase
+      .from('concierge_agents')
+      .select('name,subtitle,avatar_url,whatsapp_url,site_id')
+      .eq('site_id', siteId)
+      .limit(1),
+    supabase
+      .from('office_locations')
+      .select('name,address,hours,site_id')
+      .eq('site_id', siteId)
+      .order('name', { ascending: true }),
+    supabase
+      .from('faqs')
+      .select('question,answer,site_id,order_index')
+      .eq('site_id', siteId)
+      .order('order_index', { ascending: true }),
+  ]);
 
   if (agentError) throw agentError;
   if (officeError) throw officeError;

@@ -1,7 +1,6 @@
+import { BlurView } from 'expo-blur';
 import React, { useEffect, useRef } from 'react';
 import { Animated, Image, Platform, StyleSheet, Text, View } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { theme } from './theme';
 
 type Props = {
   visible: boolean;
@@ -9,10 +8,18 @@ type Props = {
   subtitle?: string;
 };
 
-export const BrandingSplash: React.FC<Props> = ({ visible, title = 'Wonders of Rome', subtitle = 'Audio Tours' }) => {
+export const BrandingSplash: React.FC<Props> = ({
+  visible,
+  title = 'Wonders of Rome',
+  subtitle = 'Audio Tours',
+}) => {
   const fade = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    Animated.timing(fade, { toValue: visible ? 1 : 0, duration: visible ? 280 : 220, useNativeDriver: true }).start();
+    Animated.timing(fade, {
+      toValue: visible ? 1 : 0,
+      duration: visible ? 280 : 220,
+      useNativeDriver: true,
+    }).start();
   }, [fade, visible]);
   if (!visible) return null;
   return (
@@ -52,4 +59,3 @@ const styles = StyleSheet.create({
   title: { color: '#fff', fontSize: 22, fontWeight: '900' as const, letterSpacing: 0.4 },
   subtitle: { color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '800' as const },
 });
-

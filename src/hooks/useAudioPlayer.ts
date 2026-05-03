@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import {
   subscribePlayer,
   getPlayerState,
@@ -27,7 +28,7 @@ export const useAudioPlayer = () => {
     sightId: string,
     variant: AudioVariant | string,
     remoteUrl?: string,
-    onProgress?: (p: number) => void,
+    onProgress?: (p: number) => void
   ) => playAudioForSight(sightId, variant, remoteUrl, onProgress);
 
   return {

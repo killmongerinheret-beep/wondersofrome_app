@@ -1,7 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { QueueItem } from '../services/audio';
 import { theme } from '../ui/theme';
 
@@ -16,14 +17,32 @@ type Props = {
 
 const BRAND = theme.colors.brand;
 
-export const UpNextSheet: React.FC<Props> = ({ visible, title, items, activeIndex, onClose, onSelectIndex }) => {
+export const UpNextSheet: React.FC<Props> = ({
+  visible,
+  title,
+  items,
+  activeIndex,
+  onClose,
+  onSelectIndex,
+}) => {
   const insets = useSafeAreaInsets();
 
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
       <View style={styles.screen}>
         <View style={[styles.header, { paddingTop: Math.max(12, insets.top + 10) }]}>
-          <TouchableOpacity onPress={onClose} activeOpacity={0.85} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Close up next">
+          <TouchableOpacity
+            onPress={onClose}
+            activeOpacity={0.85}
+            style={styles.closeBtn}
+            accessibilityRole="button"
+            accessibilityLabel="Close up next"
+          >
             <Ionicons name="close" size={18} color="#fff" />
           </TouchableOpacity>
           <View style={styles.headerText}>
@@ -41,7 +60,10 @@ export const UpNextSheet: React.FC<Props> = ({ visible, title, items, activeInde
 
         <ScrollView
           style={styles.body}
-          contentContainerStyle={[styles.bodyContent, { paddingBottom: Math.max(18, insets.bottom + 18) }]}
+          contentContainerStyle={[
+            styles.bodyContent,
+            { paddingBottom: Math.max(18, insets.bottom + 18) },
+          ]}
           showsVerticalScrollIndicator={false}
         >
           {items.map((it, idx) => {
@@ -56,7 +78,9 @@ export const UpNextSheet: React.FC<Props> = ({ visible, title, items, activeInde
                 accessibilityLabel={`Play stop ${idx + 1}`}
               >
                 <View style={[styles.indexPill, active && styles.indexPillActive]}>
-                  <Text style={[styles.indexText, active && styles.indexTextActive]}>{idx + 1}</Text>
+                  <Text style={[styles.indexText, active && styles.indexTextActive]}>
+                    {idx + 1}
+                  </Text>
                 </View>
                 <View style={styles.textCol}>
                   <Text style={[styles.title, active && styles.titleActive]} numberOfLines={1}>
@@ -67,7 +91,11 @@ export const UpNextSheet: React.FC<Props> = ({ visible, title, items, activeInde
                   </Text>
                 </View>
                 <View style={[styles.playPill, active && styles.playPillActive]}>
-                  <Ionicons name={active ? 'volume-high' : 'play'} size={14} color={active ? BRAND : '#fff'} />
+                  <Ionicons
+                    name={active ? 'volume-high' : 'play'}
+                    size={14}
+                    color={active ? BRAND : '#fff'}
+                  />
                 </View>
               </TouchableOpacity>
             );

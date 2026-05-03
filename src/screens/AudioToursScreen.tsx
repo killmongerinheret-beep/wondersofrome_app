@@ -1,8 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import React, { useMemo, useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+
 import { AudioTour } from '../services/content';
+import { getSightImage } from '../services/images';
 import { theme } from '../ui/theme';
 
 type Props = {
@@ -27,7 +29,13 @@ export const AudioToursScreen: React.FC<Props> = ({ tours, onClose, onOpenTour }
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
       <View style={[styles.header, { paddingTop: Math.max(10, insets.top + 6) }]}>
-        <TouchableOpacity onPress={onClose} activeOpacity={0.85} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Close tours">
+        <TouchableOpacity
+          onPress={onClose}
+          activeOpacity={0.85}
+          style={styles.closeBtn}
+          accessibilityRole="button"
+          accessibilityLabel="Close tours"
+        >
           <Ionicons name="close" size={18} color="#fff" />
         </TouchableOpacity>
         <View style={styles.headerText}>
@@ -53,7 +61,11 @@ export const AudioToursScreen: React.FC<Props> = ({ tours, onClose, onOpenTour }
       <FlatList
         data={filtered}
         keyExtractor={(t) => t.id}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: Math.max(18, insets.bottom + 18), paddingTop: 12 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom: Math.max(18, insets.bottom + 18),
+          paddingTop: 12,
+        }}
         renderItem={({ item }) => (
           <TouchableOpacity
             activeOpacity={0.9}
@@ -63,11 +75,11 @@ export const AudioToursScreen: React.FC<Props> = ({ tours, onClose, onOpenTour }
             accessibilityLabel={`Open tour ${item.title}`}
           >
             <View style={styles.cardImageWrap}>
-              {item.thumbnail?.trim() ? (
-                <Image source={{ uri: item.thumbnail }} style={styles.cardImage} resizeMode="cover" />
-              ) : (
-                <View style={styles.cardImageFallback} />
-              )}
+              <Image
+                source={{ uri: getSightImage(item.id, item.thumbnail) }}
+                style={styles.cardImage}
+                resizeMode="cover"
+              />
               <View style={styles.cardOverlay} />
               <View style={styles.cardBadge}>
                 <Ionicons name="walk-outline" size={12} color="#fff" />
@@ -168,8 +180,21 @@ const styles = StyleSheet.create({
   cardBody: { padding: 12, gap: 6 },
   cardTitle: { color: '#fff', fontSize: 16, fontWeight: '900', lineHeight: 20 },
   cardSub: { color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '700' },
-  cardCtaRow: { marginTop: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  cardCta: { height: 34, borderRadius: 14, backgroundColor: BRAND, paddingHorizontal: 12, flexDirection: 'row', alignItems: 'center', gap: 8 },
+  cardCtaRow: {
+    marginTop: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cardCta: {
+    height: 34,
+    borderRadius: 14,
+    backgroundColor: BRAND,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   cardCtaText: { color: '#fff', fontSize: 13, fontWeight: '900' },
   emptyWrap: { alignItems: 'center', paddingTop: 60, gap: 10 },
   emptyText: { color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: '800' },

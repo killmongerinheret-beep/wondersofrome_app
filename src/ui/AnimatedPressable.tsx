@@ -1,6 +1,6 @@
+import * as Haptics from 'expo-haptics';
 import React, { useRef } from 'react';
 import { Animated, Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
-import * as Haptics from 'expo-haptics';
 
 type Props = PressableProps & {
   style?: StyleProp<ViewStyle>;
@@ -26,11 +26,21 @@ export const AnimatedPressable: React.FC<Props> = ({
         onPressIn={(e) => {
           if (haptics === 'light') Haptics.selectionAsync();
           if (haptics === 'medium') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-          Animated.spring(scale, { toValue: 0.98, useNativeDriver: true, speed: 30, bounciness: 8 }).start();
+          Animated.spring(scale, {
+            toValue: 0.98,
+            useNativeDriver: true,
+            speed: 30,
+            bounciness: 8,
+          }).start();
           onPressIn?.(e);
         }}
         onPressOut={(e) => {
-          Animated.spring(scale, { toValue: 1, useNativeDriver: true, speed: 30, bounciness: 8 }).start();
+          Animated.spring(scale, {
+            toValue: 1,
+            useNativeDriver: true,
+            speed: 30,
+            bounciness: 8,
+          }).start();
           onPressOut?.(e);
         }}
         onPress={(e) => {

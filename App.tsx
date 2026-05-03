@@ -1,23 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import Mapbox from '@rnmapbox/maps';
+import { BlurView } from 'expo-blur';
+import * as Notifications from 'expo-notifications';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Platform, View, Text } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { MiniPlayer } from './src/components/MiniPlayer';
+import { getMapboxAccessToken } from './src/config/mapbox';
+import { CartProvider, useCart } from './src/context/CartContext';
+import { useGeofencing } from './src/hooks/useGeofencing';
+import { ConciergeScreen } from './src/screens/ConciergeScreen';
 import { ExploreScreen } from './src/screens/ExploreScreen';
 import { HomeScreen } from './src/screens/HomeScreen';
 import { MyTicketsScreen } from './src/screens/MyTicketsScreen';
-import { ConciergeScreen } from './src/screens/ConciergeScreen';
 import { ShopScreen } from './src/screens/ShopScreen';
-import { CartProvider, useCart } from './src/context/CartContext';
-import { useGeofencing } from './src/hooks/useGeofencing';
-import * as Notifications from 'expo-notifications';
-import { BlurView } from 'expo-blur';
-import { StyleSheet, Platform, View, Text } from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import Mapbox from '@rnmapbox/maps';
-import { getMapboxAccessToken } from './src/config/mapbox';
-import { MiniPlayer } from './src/components/MiniPlayer';
-import { theme } from './src/ui/theme';
 import { BrandingSplash } from './src/ui/BrandingSplash';
+import { theme } from './src/ui/theme';
 
 const Tab = createBottomTabNavigator();
 
@@ -48,7 +49,9 @@ function ShopTabIcon({ focused, color, size }: { focused: boolean; color: string
 function AppTabs() {
   const { startGeofencing } = useGeofencing();
 
-  useEffect(() => { startGeofencing(); }, []);
+  useEffect(() => {
+    startGeofencing();
+  }, []);
 
   useEffect(() => {
     const token = getMapboxAccessToken();
@@ -59,7 +62,8 @@ function AppTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          if (route.name === 'Shop') return <ShopTabIcon focused={focused} color={color} size={size} />;
+          if (route.name === 'Shop')
+            return <ShopTabIcon focused={focused} color={color} size={size} />;
           const icons: Record<string, [string, string]> = {
             Home: ['home', 'home-outline'],
             Explore: ['map', 'map-outline'],

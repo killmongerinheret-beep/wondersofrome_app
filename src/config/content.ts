@@ -7,4 +7,3 @@ export const getContentProvider = (): ContentProvider => {
   const hasPayload = Boolean((process.env.EXPO_PUBLIC_PAYLOAD_BASE_URL ?? '').trim());
   return hasPayload ? 'payload' : 'sanity';
 };
-

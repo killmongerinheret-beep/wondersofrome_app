@@ -1,7 +1,17 @@
 import { getContentProvider } from '../config/content';
 import { Product, Sight } from '../types';
-import { AudioTour, fetchAudioToursFromPayload, fetchProductsFromPayload, fetchSightsFromPayload } from './payload';
-import { fetchAudioToursFromSanity, fetchProductsFromSanity, fetchSightsFromSanity, SanityAudioTour } from './sanity';
+import {
+  AudioTour,
+  fetchAudioToursFromPayload,
+  fetchProductsFromPayload,
+  fetchSightsFromPayload,
+} from './payload';
+import {
+  fetchAudioToursFromSanity,
+  fetchProductsFromSanity,
+  fetchSightsFromSanity,
+  SanityAudioTour,
+} from './sanity';
 
 export type { AudioTour };
 
@@ -57,7 +67,14 @@ export const fetchAudioTours = async (): Promise<AudioTour[]> => {
   return sanity
     .map((t: SanityAudioTour) => {
       const stops = (t.stops ?? []).map(toSightSafe).filter(Boolean) as Sight[];
-      return { id: t.id, title: t.title, description: t.description, duration: t.duration, thumbnail: t.thumbnail, stops };
+      return {
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        duration: t.duration,
+        thumbnail: t.thumbnail,
+        stops,
+      };
     })
     .filter((t) => !!t.id);
 };

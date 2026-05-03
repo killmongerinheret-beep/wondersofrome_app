@@ -1,11 +1,12 @@
+import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useMemo, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
+
 import { AudioPlayer } from './AudioPlayer';
 import { Sight } from '../types';
-import { Ionicons } from '@expo/vector-icons';
 
 interface SightCardProps {
   sight: Sight;
@@ -15,7 +16,13 @@ interface SightCardProps {
   language: 'en' | 'it';
 }
 
-export const SightCard: React.FC<SightCardProps> = ({ sight, onDownload, isDownloaded, isDownloading, language }) => {
+export const SightCard: React.FC<SightCardProps> = ({
+  sight,
+  onDownload,
+  isDownloaded,
+  isDownloading,
+  language,
+}) => {
   const [imageFailed, setImageFailed] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
 
@@ -38,9 +45,12 @@ export const SightCard: React.FC<SightCardProps> = ({ sight, onDownload, isDownl
   const tips = useMemo(() => {
     if (sight.tips && sight.tips.length > 0) return sight.tips;
     if (!sight.has_tips) return [];
-    if (sight.category === 'religious') return ['Dress respectfully (shoulders/knees covered).', 'Quiet voices inside.'];
-    if (sight.category === 'museum') return ['Book a time slot if possible.', 'Go early for shorter queues.'];
-    if (sight.category === 'piazza') return ['Best photos at golden hour.', 'Watch your belongings in crowds.'];
+    if (sight.category === 'religious')
+      return ['Dress respectfully (shoulders/knees covered).', 'Quiet voices inside.'];
+    if (sight.category === 'museum')
+      return ['Book a time slot if possible.', 'Go early for shorter queues.'];
+    if (sight.category === 'piazza')
+      return ['Best photos at golden hour.', 'Watch your belongings in crowds.'];
     return ['Go early to avoid crowds.', 'Carry water, especially in summer.'];
   }, [sight.category, sight.has_tips, sight.tips]);
 
@@ -64,43 +74,55 @@ export const SightCard: React.FC<SightCardProps> = ({ sight, onDownload, isDownl
             <Ionicons name="image-outline" size={40} color="rgba(255,255,255,0.85)" />
           </View>
         )}
-        
-        <LinearGradient
-          colors={['transparent', 'rgba(0,0,0,0.8)']}
-          style={styles.gradient}
-        />
+
+        <LinearGradient colors={['transparent', 'rgba(0,0,0,0.8)']} style={styles.gradient} />
 
         <View style={styles.textOverlay}>
           <Text style={styles.category}>{sight.category.toUpperCase()}</Text>
           <View style={styles.titleRow}>
-            <Text style={styles.title} numberOfLines={2}>{displayName}</Text>
-            <TouchableOpacity style={styles.detailsButton} onPress={handleToggleDetails} activeOpacity={0.8}>
+            <Text style={styles.title} numberOfLines={2}>
+              {displayName}
+            </Text>
+            <TouchableOpacity
+              style={styles.detailsButton}
+              onPress={handleToggleDetails}
+              activeOpacity={0.8}
+            >
               <BlurView intensity={30} tint="dark" style={styles.detailsButtonBlur}>
                 <Ionicons name="information-circle-outline" size={20} color="#fff" />
               </BlurView>
             </TouchableOpacity>
           </View>
           {language === 'it' && sight.name_it?.trim() && (
-            <Text style={styles.subtitle} numberOfLines={1}>{sight.name}</Text>
+            <Text style={styles.subtitle} numberOfLines={1}>
+              {sight.name}
+            </Text>
           )}
-          <Text style={styles.description} numberOfLines={2}>{sight.description}</Text>
+          <Text style={styles.description} numberOfLines={2}>
+            {sight.description}
+          </Text>
         </View>
 
         {isDownloaded ? (
           <View style={styles.playerWrapper}>
-             <BlurView intensity={80} tint="light" style={styles.blurContainer}>
-                <AudioPlayer sight={sight} />
-             </BlurView>
+            <BlurView intensity={80} tint="light" style={styles.blurContainer}>
+              <AudioPlayer sight={sight} />
+            </BlurView>
           </View>
         ) : (
-          <TouchableOpacity 
-            style={styles.downloadButton} 
+          <TouchableOpacity
+            style={styles.downloadButton}
             onPress={handleDownloadPress}
             disabled={isDownloading}
             activeOpacity={0.8}
           >
             <BlurView intensity={50} tint="dark" style={styles.downloadBlur}>
-              <Ionicons name={isDownloading ? "cloud-download" : "cloud-download-outline"} size={24} color="#fff" style={{ marginRight: 8 }} />
+              <Ionicons
+                name={isDownloading ? 'cloud-download' : 'cloud-download-outline'}
+                size={24}
+                color="#fff"
+                style={{ marginRight: 8 }}
+              />
               <Text style={styles.downloadText}>
                 {isDownloading ? 'Downloading...' : 'Get Audio Pack'}
               </Text>
@@ -112,17 +134,27 @@ export const SightCard: React.FC<SightCardProps> = ({ sight, onDownload, isDownl
           <BlurView intensity={85} tint="dark" style={styles.detailsOverlay}>
             <View style={styles.detailsHeader}>
               <Text style={styles.detailsTitle}>Details</Text>
-              <TouchableOpacity onPress={handleToggleDetails} style={styles.detailsClose} activeOpacity={0.8}>
+              <TouchableOpacity
+                onPress={handleToggleDetails}
+                style={styles.detailsClose}
+                activeOpacity={0.8}
+              >
                 <Ionicons name="close" size={20} color="#fff" />
               </TouchableOpacity>
             </View>
-            <ScrollView contentContainerStyle={styles.detailsContent} showsVerticalScrollIndicator={false}>
+            <ScrollView
+              contentContainerStyle={styles.detailsContent}
+              showsVerticalScrollIndicator={false}
+            >
               <Text style={styles.detailsText}>{sight.description}</Text>
               {tips.length > 0 && (
                 <View style={styles.detailsSection}>
                   <Text style={styles.detailsSectionTitle}>Tips</Text>
                   {tips.map((t, idx) => (
-                    <Text key={`${sight.id}-tip-${idx}`} style={styles.detailsBullet}>{`• ${t}`}</Text>
+                    <Text
+                      key={`${sight.id}-tip-${idx}`}
+                      style={styles.detailsBullet}
+                    >{`• ${t}`}</Text>
                   ))}
                 </View>
               )}
@@ -253,7 +285,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 14,
-    backgroundColor: 'rgba(0,0,0,0.3)', 
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   downloadText: {
     color: '#fff',

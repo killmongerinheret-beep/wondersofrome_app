@@ -1,40 +1,15 @@
-import { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
-import { playAudioForSight, notifyUser } from '../services/audio';
-import sights from '../data/sights.json';
+import { useEffect, useState, useCallback } from 'react';
+import { Platform } from 'react-native';
 
-const GEOFENCE_TASK = 'rome-geofence-task';
-const LAST_ENTER_BY_ID: Record<string, number> = {};
+import fallbackSights from '../data/sights.json';
+import { getCachedSights, getSetting, setSetting } from '../services/sqlite';
+import { GEOFENCE_TASK } from '../services/geofencingTask';
+import { Sight } from '../types';
 
-// Define the task in the global scope
-TaskManager.defineTask(GEOFENCE_TASK, async ({ data, error }) => {
-  if (error) {
-    console.error('Geofencing task error:', error);
-    return;
-  }
-  
-  const { eventType, region } = data as {
-    eventType: Location.GeofencingEventType;
-    region: Location.LocationRegion;
-  };
-
-  if (eventType === Location.GeofencingEventType.Enter) {
-    if (!region?.identifier) return;
-    const now = Date.now();
-    const last = LAST_ENTER_BY_ID[region.identifier] ?? 0;
-    if (now - last < 1000 * 60 * 10) return;
-    LAST_ENTER_BY_ID[region.identifier] = now;
-
-    const sight = sights.find(s => s.id === region.identifier);
-    if (sight) {
-      await notifyUser(`Welcome to ${sight.name}`, 'Starting audio tour...');
-      // Default to 'quick' variant for auto-play, or check user settings
-      const url = sight.audioFiles?.en?.quick?.url;
-      await playAudioForSight(sight.id, 'en_quick', url);
-    }
-  }
-});
+const SETTING_KEY = 'geofencing_enabled';
+const MIN_RADIUS = 100; // Meters for reliability
 
 export const useGeofencing = () => {
   const [isGeofencing, setIsGeofencing] = useState(false);
@@ -47,14 +22,13 @@ export const useGeofencing = () => {
   const checkPermissions = async (): Promise<boolean> => {
     const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
     if (foregroundStatus !== Location.PermissionStatus.GRANTED) {
-      console.log('Foreground location permission denied');
       setPermissionStatus(foregroundStatus);
       return false;
     }
 
     const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
     setPermissionStatus(backgroundStatus);
-    
+
     if (backgroundStatus === Location.PermissionStatus.GRANTED) {
       const isRegistered = await TaskManager.isTaskRegisteredAsync(GEOFENCE_TASK);
       setIsGeofencing(isRegistered);
@@ -64,34 +38,75 @@ export const useGeofencing = () => {
   };
 
   const startGeofencing = async () => {
+    // Small delay to ensure native modules are fully initialized
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    // Check if user disabled it in settings
+    const enabledSetting = await getSetting(SETTING_KEY, 'true');
+    if (enabledSetting === 'false') return;
+
     const granted =
       permissionStatus === Location.PermissionStatus.GRANTED ? true : await checkPermissions();
     if (!granted) return;
 
     try {
-      const regions = sights.map(sight => ({
-        identifier: sight.id,
-        latitude: sight.lat,
-        longitude: sight.lng,
-        radius: sight.radius,
-        notifyOnEnter: true,
-        notifyOnExit: false,
-      }));
+      const allSights = (await getCachedSights<Sight>()) ?? (fallbackSights as Sight[]);
+
+      let sightsToWatch = allSights;
+
+      // iOS has a limit of 20 geofence regions.
+      // For a better implementation, we should sort by proximity to user.
+      if (Platform.OS === 'ios' && allSights.length > 20) {
+        const userLoc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        sightsToWatch = [...allSights]
+          .sort((a, b) => {
+            const distA =
+              Math.pow(a.lat - userLoc.coords.latitude, 2) +
+              Math.pow(a.lng - userLoc.coords.longitude, 2);
+            const distB =
+              Math.pow(b.lat - userLoc.coords.latitude, 2) +
+              Math.pow(b.lng - userLoc.coords.longitude, 2);
+            return distA - distB;
+          })
+          .slice(0, 20);
+      }
+
+      const regions = sightsToWatch
+        .filter((s) => s.lat != null && s.lng != null)
+        .map((sight) => ({
+          identifier: sight.id,
+          latitude: Number(sight.lat),
+          longitude: Number(sight.lng),
+          radius: Math.max(sight.radius || 0, MIN_RADIUS),
+          notifyOnEnter: true,
+          notifyOnExit: false,
+        }));
+
+      if (regions.length === 0) {
+        console.log('No valid regions for geofencing');
+        return;
+      }
 
       await Location.startGeofencingAsync(GEOFENCE_TASK, regions);
       setIsGeofencing(true);
-      console.log('Geofencing started');
+      await setSetting(SETTING_KEY, 'true');
+      console.log(`Geofencing started with ${regions.length} regions`);
     } catch (error) {
       console.error('Error starting geofencing:', error);
     }
   };
 
-  const stopGeofencing = async () => {
+  const stopGeofencing = async (userDisabled: boolean = false) => {
     try {
       const isRegistered = await TaskManager.isTaskRegisteredAsync(GEOFENCE_TASK);
       if (isRegistered) {
         await Location.stopGeofencingAsync(GEOFENCE_TASK);
         setIsGeofencing(false);
+        if (userDisabled) {
+          await setSetting(SETTING_KEY, 'false');
+        }
         console.log('Geofencing stopped');
       }
     } catch (error) {
@@ -99,10 +114,23 @@ export const useGeofencing = () => {
     }
   };
 
+  const toggleGeofencing = useCallback(
+    async (enable: boolean) => {
+      if (enable) {
+        await setSetting(SETTING_KEY, 'true');
+        await startGeofencing();
+      } else {
+        await stopGeofencing(true);
+      }
+    },
+    [permissionStatus, startGeofencing]
+  );
+
   return {
     isGeofencing,
     permissionStatus,
     startGeofencing,
-    stopGeofencing
+    stopGeofencing,
+    toggleGeofencing,
   };
 };

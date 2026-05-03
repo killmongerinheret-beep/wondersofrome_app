@@ -1,6 +1,7 @@
+import Mapbox from '@rnmapbox/maps';
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
-import Mapbox from '@rnmapbox/maps';
+
 import sights from '../data/sights.json';
 import { theme } from '../ui/theme';
 
@@ -20,14 +21,10 @@ export const OfflineMap: React.FC<OfflineMapProps> = ({ onSightPress }) => {
   return (
     <View style={styles.container}>
       <Mapbox.MapView style={styles.map}>
-        <Mapbox.Camera
-          ref={cameraRef}
-          zoomLevel={14}
-          centerCoordinate={ROME_CENTER}
-        />
-        
+        <Mapbox.Camera ref={cameraRef} zoomLevel={14} centerCoordinate={ROME_CENTER} />
+
         {/* User Location */}
-        <Mapbox.UserLocation visible={true} showsUserHeadingIndicator={true} />
+        <Mapbox.UserLocation visible showsUserHeadingIndicator />
 
         {/* Sights Markers */}
         {sights.map((sight) => (

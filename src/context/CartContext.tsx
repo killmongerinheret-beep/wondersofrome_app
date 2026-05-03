@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+
 import { CartItem, Product } from '../types';
 
 type CartState = { items: CartItem[] };
@@ -16,38 +17,37 @@ function reducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'ADD': {
       const k = key(action.product.id, action.variantId);
-      const existing = state.items.find(
-        i => key(i.product.id, i.variantId) === k
-      );
+      const existing = state.items.find((i) => key(i.product.id, i.variantId) === k);
       if (existing) {
         return {
-          items: state.items.map(i =>
-            key(i.product.id, i.variantId) === k
-              ? { ...i, quantity: i.quantity + 1 }
-              : i
+          items: state.items.map((i) =>
+            key(i.product.id, i.variantId) === k ? { ...i, quantity: i.quantity + 1 } : i
           ),
         };
       }
       return {
-        items: [...state.items, { product: action.product, variantId: action.variantId, quantity: 1 }],
+        items: [
+          ...state.items,
+          { product: action.product, variantId: action.variantId, quantity: 1 },
+        ],
       };
     }
     case 'REMOVE':
       return {
         items: state.items.filter(
-          i => key(i.product.id, i.variantId) !== key(action.productId, action.variantId)
+          (i) => key(i.product.id, i.variantId) !== key(action.productId, action.variantId)
         ),
       };
     case 'SET_QTY': {
       if (action.qty <= 0) {
         return {
           items: state.items.filter(
-            i => key(i.product.id, i.variantId) !== key(action.productId, action.variantId)
+            (i) => key(i.product.id, i.variantId) !== key(action.productId, action.variantId)
           ),
         };
       }
       return {
-        items: state.items.map(i =>
+        items: state.items.map((i) =>
           key(i.product.id, i.variantId) === key(action.productId, action.variantId)
             ? { ...i, quantity: action.qty }
             : i
@@ -76,28 +76,36 @@ const CartContext = createContext<CartContextValue | null>(null);
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, { items: [] });
 
-  const addItem = useCallback((product: Product, variantId?: string) =>
-    dispatch({ type: 'ADD', product, variantId }), []);
-  const removeItem = useCallback((productId: string, variantId?: string) =>
-    dispatch({ type: 'REMOVE', productId, variantId }), []);
-  const setQty = useCallback((productId: string, qty: number, variantId?: string) =>
-    dispatch({ type: 'SET_QTY', productId, variantId, qty }), []);
+  const addItem = useCallback(
+    (product: Product, variantId?: string) => dispatch({ type: 'ADD', product, variantId }),
+    []
+  );
+  const removeItem = useCallback(
+    (productId: string, variantId?: string) => dispatch({ type: 'REMOVE', productId, variantId }),
+    []
+  );
+  const setQty = useCallback(
+    (productId: string, qty: number, variantId?: string) =>
+      dispatch({ type: 'SET_QTY', productId, variantId, qty }),
+    []
+  );
   const clear = useCallback(() => dispatch({ type: 'CLEAR' }), []);
 
   const totalItems = useMemo(() => state.items.reduce((s, i) => s + i.quantity, 0), [state.items]);
-  const totalPrice = useMemo(() =>
-    state.items.reduce((s, i) => {
-      const variant = i.variantId
-        ? i.product.variants?.find(v => v.id === i.variantId)
-        : null;
-      const price = variant?.price ?? i.product.price;
-      return s + price * i.quantity;
-    }, 0),
+  const totalPrice = useMemo(
+    () =>
+      state.items.reduce((s, i) => {
+        const variant = i.variantId ? i.product.variants?.find((v) => v.id === i.variantId) : null;
+        const price = variant?.price ?? i.product.price;
+        return s + price * i.quantity;
+      }, 0),
     [state.items]
   );
 
   return (
-    <CartContext.Provider value={{ items: state.items, totalItems, totalPrice, addItem, removeItem, setQty, clear }}>
+    <CartContext.Provider
+      value={{ items: state.items, totalItems, totalPrice, addItem, removeItem, setQty, clear }}
+    >
       {children}
     </CartContext.Provider>
   );

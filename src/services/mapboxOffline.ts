@@ -9,22 +9,26 @@ export const downloadRomeMap = async (
   onError: (error: Error) => void
 ) => {
   try {
-    const progressListener = (offlineRegion: any, status: any) => {
+    const progressListener = (_offlineRegion: any, status: any) => {
       onProgress(status.percentage);
     };
 
-    const errorListener = (offlineRegion: any, error: any) => {
+    const errorListener = (_offlineRegion: any, error: any) => {
       console.error('Map download error:', error);
       onError(error);
     };
 
-    await Mapbox.offlineManager.createPack({
-      name: PACK_NAME,
-      styleURL: Mapbox.StyleURL.Street,
-      minZoom: 14,
-      maxZoom: 22,
-      bounds: [ROME_BOUNDS_SW, ROME_BOUNDS_NE],
-    }, progressListener, errorListener);
+    await Mapbox.offlineManager.createPack(
+      {
+        name: PACK_NAME,
+        styleURL: Mapbox.StyleURL.Street,
+        minZoom: 13,
+        maxZoom: 16,
+        bounds: [ROME_BOUNDS_SW, ROME_BOUNDS_NE],
+      },
+      progressListener,
+      errorListener
+    );
   } catch (error) {
     onError(error as Error);
   }

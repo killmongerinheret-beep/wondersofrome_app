@@ -34,4 +34,3 @@ module.exports = ({ config }) => ({
     EXPO_PUBLIC_SITE_ID: SITE_ID,
   },
 });
-

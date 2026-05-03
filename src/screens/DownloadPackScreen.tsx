@@ -1,14 +1,22 @@
+import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  ActivityIndicator, Alert, Image,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  Image,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
-import { useSights } from '../hooks/useSights';
+
 import { useOfflineContent } from '../hooks/useOfflineContent';
+import { useSights } from '../hooks/useSights';
 import { getAudioStorageUsage, clearAudioStorage } from '../services/filesystem';
+import { getSightImage } from '../services/images';
 import { checkMapPackStatus, deleteMapPack, downloadRomeMap } from '../services/mapboxOffline';
 import { Sight, AudioLang, AudioVariant } from '../types';
 import { theme } from '../ui/theme';
@@ -86,7 +94,7 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
             await loadStorage();
           },
         },
-      ],
+      ]
     );
   };
 
@@ -162,7 +170,12 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
 
         {/* Progress bar */}
         <View style={styles.overallTrack}>
-          <View style={[styles.overallFill, { width: `${totalCount > 0 ? (downloadedCount / totalCount) * 100 : 0}%` }]} />
+          <View
+            style={[
+              styles.overallFill,
+              { width: `${totalCount > 0 ? (downloadedCount / totalCount) * 100 : 0}%` },
+            ]}
+          />
         </View>
       </View>
 
@@ -175,9 +188,9 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
           disabled={downloadingAll || downloadedCount === totalCount}
         >
           {downloadingAll ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color="#000" size="small" />
           ) : (
-            <Ionicons name="download-outline" size={18} color="#fff" />
+            <Ionicons name="download-outline" size={18} color="#000" />
           )}
           <Text style={styles.downloadAllText}>
             {downloadedCount === totalCount ? 'All Downloaded ✓' : 'Download All'}
@@ -186,23 +199,28 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
 
         {storage.usedBytes > 0 && (
           <TouchableOpacity onPress={handleClearAll} style={styles.clearBtn} activeOpacity={0.8}>
-            <Ionicons name="trash-outline" size={18} color="#FF3B30" />
+            <Ionicons name="trash-outline" size={18} color="#E91E63" />
           </TouchableOpacity>
         )}
       </View>
 
       <View style={styles.mapCard}>
         <View style={styles.mapRow}>
-          <Ionicons name="map-outline" size={20} color="#34C759" />
+          <Ionicons name="map-outline" size={20} color="#1DB954" />
           <View style={styles.mapText}>
             <Text style={styles.mapTitle}>Offline Map (Rome)</Text>
             <Text style={styles.mapSubtitle}>
-              {hasOfflineMap ? 'Downloaded' : 'Not downloaded'}{mapDownloading ? ` · ${Math.round(mapPercent)}%` : ''}
+              {hasOfflineMap ? 'Downloaded' : 'Not downloaded'}
+              {mapDownloading ? ` · ${Math.round(mapPercent)}%` : ''}
             </Text>
           </View>
           {hasOfflineMap ? (
-            <TouchableOpacity onPress={handleDeleteMap} activeOpacity={0.85} style={styles.mapAction}>
-              <Ionicons name="trash-outline" size={18} color="#FF3B30" />
+            <TouchableOpacity
+              onPress={handleDeleteMap}
+              activeOpacity={0.85}
+              style={styles.mapAction}
+            >
+              <Ionicons name="trash-outline" size={18} color="#E91E63" />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
@@ -220,7 +238,12 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
           )}
         </View>
         <View style={styles.mapTrack}>
-          <View style={[styles.mapFill, { width: `${hasOfflineMap ? 100 : Math.max(0, Math.min(100, mapPercent))}%` }]} />
+          <View
+            style={[
+              styles.mapFill,
+              { width: `${hasOfflineMap ? 100 : Math.max(0, Math.min(100, mapPercent))}%` },
+            ]}
+          />
         </View>
       </View>
 
@@ -239,9 +262,11 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
 
           return (
             <View key={sight.id} style={styles.sightRow}>
-              <Image source={{ uri: sight.thumbnail }} style={styles.sightThumb} />
+              <Image source={{ uri: getSightImage(sight.id, sight.thumbnail) }} style={styles.sightThumb} />
               <View style={styles.sightInfo}>
-                <Text style={styles.sightName} numberOfLines={1}>{sight.name}</Text>
+                <Text style={styles.sightName} numberOfLines={1}>
+                  {sight.name}
+                </Text>
                 <Text style={styles.sightMeta}>
                   {hasAudio ? fmtBytes(size) : 'Audio coming soon'}
                   {' · '}
@@ -258,16 +283,19 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
                 <ActivityIndicator size="small" color={BRAND} />
               ) : isDownloaded ? (
                 <View style={styles.doneIcon}>
-                  <Ionicons name="checkmark-circle" size={26} color="#34C759" />
+                  <Ionicons name="checkmark-circle" size={26} color="#1DB954" />
                 </View>
               ) : (
                 <TouchableOpacity
-                  onPress={() => { Haptics.selectionAsync(); downloadSight(sight.id); }}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    downloadSight(sight.id);
+                  }}
                   activeOpacity={0.8}
                   style={[styles.dlBtn, !hasAudio && styles.dlBtnDisabled]}
                   disabled={!hasAudio}
                 >
-                  <Ionicons name="download-outline" size={18} color={hasAudio ? BRAND : '#555'} />
+                  <Ionicons name="download-outline" size={18} color={hasAudio ? BRAND : '#444'} />
                 </TouchableOpacity>
               )}
             </View>
@@ -279,7 +307,7 @@ export const DownloadPackScreen: React.FC<{ onClose: () => void }> = ({ onClose 
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0B0B0B' },
+  container: { flex: 1, backgroundColor: '#000' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -288,37 +316,58 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   closeBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   title: { color: '#fff', fontSize: 17, fontWeight: '900' },
   storageCard: {
-    marginHorizontal: 16, marginBottom: 12,
+    marginHorizontal: 16,
+    marginBottom: 12,
     backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 16, padding: 14, gap: 10,
+    borderRadius: 16,
+    padding: 14,
+    gap: 10,
   },
   storageRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   storageText: { flex: 1 },
   storageLabel: { color: '#fff', fontSize: 14, fontWeight: '800' },
-  storageSubLabel: { color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: '600', marginTop: 2 },
+  storageSubLabel: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 2,
+  },
   overallTrack: {
-    height: 4, borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden',
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
   },
   overallFill: { height: '100%', borderRadius: 2, backgroundColor: BRAND },
   actions: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, marginBottom: 16 },
   downloadAllBtn: {
-    flex: 1, height: 48, borderRadius: 14,
+    flex: 1,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: BRAND,
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   btnDisabled: { opacity: 0.5 },
-  downloadAllText: { color: '#fff', fontSize: 15, fontWeight: '900' },
+  downloadAllText: { color: '#000', fontSize: 15, fontWeight: '900' },
   clearBtn: {
-    width: 48, height: 48, borderRadius: 14,
-    backgroundColor: 'rgba(255,59,48,0.12)',
-    alignItems: 'center', justifyContent: 'center',
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    backgroundColor: 'rgba(233,30,99,0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   mapCard: {
     marginHorizontal: 16,
@@ -346,28 +395,36 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
   },
-  mapFill: { height: '100%', borderRadius: 2, backgroundColor: '#34C759' },
+  mapFill: { height: '100%', borderRadius: 2, backgroundColor: '#1DB954' },
   list: { flex: 1, paddingHorizontal: 16 },
   sightRow: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(255,255,255,0.08)',
   },
-  sightThumb: { width: 52, height: 52, borderRadius: 10, backgroundColor: '#222' },
+  sightThumb: { width: 52, height: 52, borderRadius: 10, backgroundColor: '#111' },
   sightInfo: { flex: 1, gap: 3 },
   sightName: { color: '#fff', fontSize: 14, fontWeight: '800' },
   sightMeta: { color: 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: '600' },
   sightTrack: {
-    marginTop: 4, height: 3, borderRadius: 2,
-    backgroundColor: 'rgba(255,255,255,0.1)', overflow: 'hidden',
+    marginTop: 4,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    overflow: 'hidden',
   },
   sightFill: { height: '100%', borderRadius: 2, backgroundColor: BRAND },
   doneIcon: { width: 36, alignItems: 'center' },
   dlBtn: {
-    width: 36, height: 36, borderRadius: 10,
-    backgroundColor: 'rgba(0,122,255,0.12)',
-    alignItems: 'center', justifyContent: 'center',
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dlBtnDisabled: { opacity: 0.3 },
 });

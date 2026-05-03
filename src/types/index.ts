@@ -1,13 +1,23 @@
 export type AudioVariant = 'quick' | 'deep' | 'kids';
 
 export type AudioLang =
-  | 'en' | 'it' | 'es' | 'fr' | 'de'
-  | 'zh' | 'ja' | 'pt' | 'pl' | 'ru' | 'ar' | 'ko';
+  | 'en'
+  | 'it'
+  | 'es'
+  | 'fr'
+  | 'de'
+  | 'zh'
+  | 'ja'
+  | 'pt'
+  | 'pl'
+  | 'ru'
+  | 'ar'
+  | 'ko';
 
 export interface AudioTrack {
-  url: string;       // Remote URL for download
-  duration: number;  // seconds
-  size: number;      // bytes
+  url: string; // Remote URL for download
+  duration: number; // seconds
+  size: number; // bytes
 }
 
 export type LangAudioFiles = {
@@ -51,22 +61,22 @@ export interface Sight {
 export type ProductCategory = 'souvenir' | 'book' | 'food' | 'apparel' | 'other';
 
 export interface Product {
-  id: string;           // Sanity slug
+  id: string; // Sanity slug
   name: string;
   description: string;
-  price: number;        // EUR
-  images: string[];     // CDN URLs
+  price: number; // EUR
+  images: string[]; // CDN URLs
   category: ProductCategory;
   inStock: boolean;
   stockCount?: number;
-  weight?: number;      // grams, for shipping calc
+  weight?: number; // grams, for shipping calc
   variants?: ProductVariant[];
 }
 
 export interface ProductVariant {
   id: string;
-  label: string;        // e.g. "S", "M", "Red"
-  price?: number;       // override if different from base
+  label: string; // e.g. "S", "M", "Red"
+  price?: number; // override if different from base
   inStock: boolean;
 }
 

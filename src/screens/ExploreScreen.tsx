@@ -1,3 +1,8 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRoute } from '@react-navigation/native';
+import Mapbox from '@rnmapbox/maps';
+import { BlurView } from 'expo-blur';
+import * as Haptics from 'expo-haptics';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
@@ -16,27 +21,24 @@ import {
   Modal,
   Platform,
 } from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import Mapbox from '@rnmapbox/maps';
-import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Sight } from '../types';
-import { getMapboxAccessToken } from '../config/mapbox';
-import { useSights } from '../hooks/useSights';
-import { useAudioPlayer } from '../hooks/useAudioPlayer';
-import { AudioPlayer } from '../components/AudioPlayer';
+
+import { AudioToursScreen } from './AudioToursScreen';
 import { DownloadPackScreen } from './DownloadPackScreen';
+import { AudioPlayer } from '../components/AudioPlayer';
+import { TourSheet } from '../components/TourSheet';
+import { UpNextSheet } from '../components/UpNextSheet';
+import { getMapboxAccessToken } from '../config/mapbox';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
+import { useAudioTours } from '../hooks/useAudioTours';
+import { useContinueListening } from '../hooks/useContinueListening';
+import { useSights } from '../hooks/useSights';
+import { AudioTour } from '../services/content';
+import { getSightImage } from '../services/images';
+import { Sight } from '../types';
 import { AnimatedPressable } from '../ui/AnimatedPressable';
 import { Skeleton } from '../ui/Skeleton';
 import { theme } from '../ui/theme';
-import { useContinueListening } from '../hooks/useContinueListening';
-import { useAudioTours } from '../hooks/useAudioTours';
-import { TourSheet } from '../components/TourSheet';
-import { UpNextSheet } from '../components/UpNextSheet';
-import { AudioToursScreen } from './AudioToursScreen';
-import { AudioTour } from '../services/content';
 
 type ExploreFilter = 'all' | 'ancient' | 'religious' | 'museum' | 'piazza' | 'other';
 
@@ -68,7 +70,6 @@ const SightSwipeCard: React.FC<{
   onPress: () => void;
 }> = ({ sight, isSelected, distance, onPress }) => {
   const scale = useRef(new Animated.Value(isSelected ? 1 : 0.94)).current;
-  const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
     Animated.spring(scale, {
@@ -87,25 +88,21 @@ const SightSwipeCard: React.FC<{
     other: 'sparkles-outline',
   };
 
+  const hasAudio = !!sight.audioFiles?.en?.quick?.url?.trim() &&
+                   !sight.audioFiles.en.quick.url.includes('example.com');
+
   return (
-    <Animated.View style={[styles.swipeCard, { transform: [{ scale }] }]}>
+    <Animated.View style={[styles.swipeCard, { transform: [{ scale }] }, !hasAudio && styles.swipeCardDisabled]}>
       <TouchableOpacity onPress={onPress} activeOpacity={0.92} style={styles.swipeCardInner}>
-        {sight.thumbnail?.trim() && !imageFailed ? (
-          <Image
-            source={{ uri: sight.thumbnail }}
-            style={styles.swipeCardImage}
-            resizeMode="cover"
-            onError={() => setImageFailed(true)}
-          />
-        ) : (
-          <View style={styles.swipeCardImageFallback}>
-            <Ionicons name="image-outline" size={26} color="rgba(255,255,255,0.7)" />
-          </View>
-        )}
+        <Image
+          source={{ uri: getSightImage(sight.id, sight.thumbnail) }}
+          style={[styles.swipeCardImage, !hasAudio && styles.swipeCardImageDisabled]}
+          resizeMode="cover"
+        />
         <View style={styles.swipeCardOverlay} />
         {isSelected && (
           <View style={styles.swipeCardSelectedBadge}>
-            <Ionicons name="checkmark" size={12} color="#fff" />
+            <Ionicons name="checkmark" size={12} color="#000" />
           </View>
         )}
         <View style={styles.swipeCardContent}>
@@ -113,37 +110,26 @@ const SightSwipeCard: React.FC<{
             <Ionicons
               name={CATEGORY_ICONS[sight.category] ?? 'location-outline'}
               size={11}
-              color="rgba(255,255,255,0.8)"
+              color={hasAudio ? theme.colors.brand : "rgba(255,255,255,0.4)"}
             />
-            <Text style={styles.swipeCardCategory}>
-              {sight.category.toUpperCase()}
-            </Text>
+            <Text style={[styles.swipeCardCategory, !hasAudio && styles.swipeCardTextDisabled]}>{sight.category.toUpperCase()}</Text>
           </View>
-          <Text style={styles.swipeCardTitle} numberOfLines={2}>{sight.name}</Text>
+          <Text style={[styles.swipeCardTitle, !hasAudio && styles.swipeCardTextDisabled]} numberOfLines={2}>
+            {sight.name}
+          </Text>
           <View style={styles.swipeCardMeta}>
             {distance != null && (
               <View style={styles.swipeCardPill}>
-                <Ionicons name="navigate-outline" size={10} color="rgba(255,255,255,0.8)" />
-                <Text style={styles.swipeCardPillText}>{distance < 1000 ? `${distance}m` : `${(distance / 1000).toFixed(1)}km`}</Text>
-              </View>
-            )}
-            {!!sight.audioFiles?.en?.quick?.url?.trim() && !sight.audioFiles.en.quick.url.includes('example.com') && (
-              <View style={[styles.swipeCardPill, styles.swipeCardPillBlue]}>
-                <Ionicons name="headset-outline" size={10} color="#fff" />
-                <Text style={styles.swipeCardPillText}>Audio</Text>
-              </View>
-            )}
-            {sight.pack === 'essential' && (
-              <View style={[styles.swipeCardPill, styles.swipeCardPillGold]}>
-                <Text style={styles.swipeCardPillTextGold}>Essential</Text>
-              </View>
-            )}
-            {sight.linkedTour && (
-              <View style={[styles.swipeCardPill, styles.swipeCardPillBlue]}>
-                <Ionicons name="ticket-outline" size={10} color="#fff" />
-                <Text style={styles.swipeCardPillText}>
-                  {sight.linkedTour.price ? `From €${sight.linkedTour.price}` : 'Tour'}
+                <Ionicons name="navigate-outline" size={10} color={hasAudio ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.3)"} />
+                <Text style={[styles.swipeCardPillText, !hasAudio && styles.swipeCardTextDisabled]}>
+                  {distance < 1000 ? `${distance}m` : `${(distance / 1000).toFixed(1)}km`}
                 </Text>
+              </View>
+            )}
+            {hasAudio && (
+              <View style={[styles.swipeCardPill, styles.swipeCardPillBlue]}>
+                <Ionicons name="headset-outline" size={10} color="#000" />
+                <Text style={styles.swipeCardPillTextDark}>Audio</Text>
               </View>
             )}
           </View>
@@ -161,7 +147,16 @@ export const ExploreScreen: React.FC = () => {
   const shapeSourceRef = useRef<any>(null);
   const carouselRef = useRef<FlatList>(null);
   const windowHeight = Dimensions.get('window').height;
-  const { sightId: playingSightId, isPlaying, play, startQueue, queue, queueIndex, queueTitle, jumpToIndex } = useAudioPlayer();
+  const {
+    sightId: playingSightId,
+    isPlaying,
+    play,
+    startQueue,
+    queue,
+    queueIndex,
+    queueTitle,
+    jumpToIndex,
+  } = useAudioPlayer();
   const isMiniPlayerVisible = !!playingSightId;
 
   const drawerMaxHeight = Math.min(Math.max(520, Math.round(windowHeight * 0.7)), 680);
@@ -187,26 +182,43 @@ export const ExploreScreen: React.FC = () => {
 
   const filteredSights = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return sights.filter((s) => {
+    const list = sights.filter((s) => {
       if (filter !== 'all' && s.category !== filter) return false;
       if (!q) return true;
-      return (s.name ?? '').toLowerCase().includes(q) || (s.name_it ?? '').toLowerCase().includes(q);
+      return (
+        (s.name ?? '').toLowerCase().includes(q) || (s.name_it ?? '').toLowerCase().includes(q)
+      );
     });
+
+    // Sort: Available audio first
+    list.sort((a, b) => {
+      const hasA = !!a.audioFiles?.en?.quick?.url?.trim() && !a.audioFiles.en.quick.url.includes('example.com');
+      const hasB = !!b.audioFiles?.en?.quick?.url?.trim() && !b.audioFiles.en.quick.url.includes('example.com');
+      if (hasA && !hasB) return -1;
+      if (!hasA && hasB) return 1;
+      return 0;
+    });
+
+    return list;
   }, [filter, query, sights]);
 
   const selectedSight = useMemo(
-    () => (selectedSightId ? sights.find((s) => s.id === selectedSightId) ?? null : null),
+    () => (selectedSightId ? (sights.find((s) => s.id === selectedSightId) ?? null) : null),
     [selectedSightId, sights]
   );
 
-  const sightsGeojson = useMemo(() => ({
-    type: 'FeatureCollection',
-    features: filteredSights.map((s) => ({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [s.lng, s.lat] },
-      properties: { id: s.id, category: s.category, name: s.name },
-    })),
-  } as any), [filteredSights]);
+  const sightsGeojson = useMemo(
+    () =>
+      ({
+        type: 'FeatureCollection',
+        features: filteredSights.map((s) => ({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [s.lng, s.lat] },
+          properties: { id: s.id, category: s.category, name: s.name },
+        })),
+      }) as any,
+    [filteredSights]
+  );
 
   const topResults = useMemo(() => {
     if (!query.trim()) return [];
@@ -270,36 +282,56 @@ export const ExploreScreen: React.FC = () => {
   // ── Drawer helpers ──────────────────────────────────────────────────────────
   const animateDrawerTo = (y: number, velocity?: number) => {
     Animated.spring(drawerTranslate, {
-      toValue: y, useNativeDriver: true, speed: 28, bounciness: 6, velocity,
+      toValue: y,
+      useNativeDriver: true,
+      speed: 28,
+      bounciness: 6,
+      velocity,
     }).start();
   };
   const openDrawer = () => animateDrawerTo(drawerCollapsedY);
   const expandDrawer = () => animateDrawerTo(0);
   const closeDrawer = () => {
-    Animated.timing(drawerTranslate, { toValue: drawerHiddenY, duration: 170, useNativeDriver: true })
-      .start(() => setSelectedSightId(null));
+    Animated.timing(drawerTranslate, {
+      toValue: drawerHiddenY,
+      duration: 170,
+      useNativeDriver: true,
+    }).start(() => setSelectedSightId(null));
   };
 
   const onHandleDrag = (_: any, g: PanResponderGestureState) => {
     drawerTranslate.setValue(Math.max(0, Math.min(drawerHiddenY, drawerDragStart.current + g.dy)));
   };
   const onHandleRelease = (_: any, g: PanResponderGestureState) => {
-    if (g.vy > 0.75 || drawerDragStart.current + g.dy > drawerMaxHeight * 0.7) { closeDrawer(); return; }
+    if (g.vy > 0.75 || drawerDragStart.current + g.dy > drawerMaxHeight * 0.7) {
+      closeDrawer();
+      return;
+    }
     const projected = drawerDragStart.current + g.dy + g.vy * 80;
-    if (projected < drawerMaxHeight * 0.35) { expandDrawer(); return; }
+    if (projected < drawerMaxHeight * 0.35) {
+      expandDrawer();
+      return;
+    }
     animateDrawerTo(drawerCollapsedY);
   };
 
-  const drawerPanResponder = useMemo(() => PanResponder.create({
-    onStartShouldSetPanResponder: () => false,
-    onMoveShouldSetPanResponder: (_evt, g) => Math.abs(g.dy) > 4 && Math.abs(g.dy) > Math.abs(g.dx),
-    onPanResponderGrant: () => {
-      drawerTranslate.stopAnimation((v) => { drawerDragStart.current = typeof v === 'number' ? v : 0; });
-    },
-    onPanResponderMove: onHandleDrag,
-    onPanResponderRelease: onHandleRelease,
-    onPanResponderTerminate: onHandleRelease,
-  }), [drawerCollapsedY, drawerHiddenY, drawerMaxHeight]);
+  const drawerPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => false,
+        onMoveShouldSetPanResponder: (_evt, g) =>
+          Math.abs(g.dy) > 4 && Math.abs(g.dy) > Math.abs(g.dx),
+        onPanResponderGrant: () => {
+          drawerTranslate.stopAnimation((v) => {
+            drawerDragStart.current = typeof v === 'number' ? v : 0;
+          });
+        },
+        onPanResponderMove: onHandleDrag,
+        onPanResponderRelease: onHandleRelease,
+        onPanResponderTerminate: onHandleRelease,
+      }),
+    [drawerCollapsedY, drawerHiddenY, drawerMaxHeight]
+  );
 
   // ── Select sight ────────────────────────────────────────────────────────────
   const handleSelectSight = (sightId: string) => {
@@ -354,7 +386,11 @@ export const ExploreScreen: React.FC = () => {
         const zoom = await shapeSourceRef.current?.getClusterExpansionZoom(feature);
         const coords = feature.geometry?.coordinates;
         if (Array.isArray(coords) && coords.length === 2) {
-          cameraRef.current?.setCamera({ centerCoordinate: coords, zoomLevel: zoom ?? 15, animationDuration: 420 });
+          cameraRef.current?.setCamera({
+            centerCoordinate: coords,
+            zoomLevel: zoom ?? 15,
+            animationDuration: 420,
+          });
         }
       } catch {}
       return;
@@ -392,7 +428,11 @@ export const ExploreScreen: React.FC = () => {
   }, [sights]);
 
   const chips = useMemo(() => {
-    const config: Array<{ label: string; value: Exclude<ExploreFilter, 'all'>; icon: keyof typeof Ionicons.glyphMap }> = [
+    const config: {
+      label: string;
+      value: Exclude<ExploreFilter, 'all'>;
+      icon: keyof typeof Ionicons.glyphMap;
+    }[] = [
       { label: 'Ancient', value: 'ancient', icon: 'business-outline' },
       { label: 'Churches', value: 'religious', icon: 'library-outline' },
       { label: 'Museums', value: 'museum', icon: 'color-palette-outline' },
@@ -406,7 +446,9 @@ export const ExploreScreen: React.FC = () => {
     return (
       <View style={styles.noTokenContainer}>
         <Text style={styles.noTokenTitle}>Mapbox token needed</Text>
-        <Text style={styles.noTokenBody}>Set EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN in your .env file, then rebuild.</Text>
+        <Text style={styles.noTokenBody}>
+          Set EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN in your .env file, then rebuild.
+        </Text>
         <Text style={styles.noTokenStep}>npx expo run:android</Text>
       </View>
     );
@@ -420,7 +462,8 @@ export const ExploreScreen: React.FC = () => {
           visible
           showsUserHeadingIndicator
           onUpdate={(loc) => {
-            if (loc?.coords) setUserLocation({ lat: loc.coords.latitude, lng: loc.coords.longitude });
+            if (loc?.coords)
+              setUserLocation({ lat: loc.coords.latitude, lng: loc.coords.longitude });
           }}
         />
 
@@ -471,46 +514,84 @@ export const ExploreScreen: React.FC = () => {
           <Mapbox.CircleLayer
             id="clusters"
             filter={['has', 'point_count']}
-            style={{ circleColor: 'rgba(0,122,255,0.9)', circleOpacity: 0.95, circleRadius: ['step', ['get', 'point_count'], 18, 10, 22, 30, 28] }}
+            style={{
+              circleColor: theme.colors.brand,
+              circleOpacity: 0.95,
+              circleRadius: ['step', ['get', 'point_count'], 18, 10, 22, 30, 28],
+            }}
           />
           <Mapbox.SymbolLayer
             id="cluster-count"
             filter={['has', 'point_count']}
-            style={{ textField: ['get', 'point_count'], textSize: 12, textColor: '#fff', textFont: ['System Bold'] }}
+            style={{
+              textField: ['get', 'point_count'],
+              textSize: 12,
+              textColor: '#000',
+              textFont: ['System Bold'],
+            }}
           />
           <Mapbox.CircleLayer
             id="sight-selected"
-            filter={['all', ['!', ['has', 'point_count']], ['==', ['get', 'id'], selectedSightId ?? '']]}
-            style={{ circleColor: '#111', circleOpacity: 1, circleStrokeColor: '#fff', circleStrokeWidth: 2, circleRadius: 12 }}
+            filter={[
+              'all',
+              ['!', ['has', 'point_count']],
+              ['==', ['get', 'id'], selectedSightId ?? ''],
+            ]}
+            style={{
+              circleColor: '#fff',
+              circleOpacity: 1,
+              circleStrokeColor: theme.colors.brand,
+              circleStrokeWidth: 3,
+              circleRadius: 14,
+            }}
           />
           <Mapbox.CircleLayer
             id="sight-points"
-            filter={['all', ['!', ['has', 'point_count']], ['!=', ['get', 'id'], selectedSightId ?? '']]}
-            style={{ circleColor: '#fff', circleOpacity: 1, circleStrokeColor: BRAND, circleStrokeWidth: 2, circleRadius: 10 }}
+            filter={[
+              'all',
+              ['!', ['has', 'point_count']],
+              ['!=', ['get', 'id'], selectedSightId ?? ''],
+            ]}
+            style={{
+              circleColor: '#fff',
+              circleOpacity: 1,
+              circleStrokeColor: '#111',
+              circleStrokeWidth: 2,
+              circleRadius: 10,
+            }}
           />
         </Mapbox.ShapeSource>
       </Mapbox.MapView>
 
       {/* Recenter */}
       <View style={[styles.recenterWrap, { top: insets.top + 12 }]}>
-        <AnimatedPressable onPress={handleRecenter} haptics="light" disabled={!userLocation}
+        <AnimatedPressable
+          onPress={handleRecenter}
+          haptics="light"
+          disabled={!userLocation}
           accessibilityRole="button"
           accessibilityLabel="Recenter map"
-          style={[styles.mapBtn, !userLocation && styles.mapBtnDisabled]} pressedStyle={{ opacity: 0.85 }}>
-          <BlurView intensity={90} tint="light" style={styles.mapBtnBlur}>
-            <Ionicons name="locate-outline" size={18} color="#111" />
+          style={[styles.mapBtn, !userLocation && styles.mapBtnDisabled]}
+          pressedStyle={{ opacity: 0.85 }}
+        >
+          <BlurView intensity={20} tint="dark" style={styles.mapBtnBlur}>
+            <Ionicons name="locate" size={20} color="#fff" />
           </BlurView>
         </AnimatedPressable>
       </View>
 
       {/* Download pack */}
       <View style={[styles.downloadBtnWrap, { top: insets.top + 12 }]}>
-        <AnimatedPressable onPress={() => setShowDownloadPack(true)} haptics="light"
+        <AnimatedPressable
+          onPress={() => setShowDownloadPack(true)}
+          haptics="light"
           accessibilityRole="button"
           accessibilityLabel="Open offline downloads"
-          style={styles.mapBtn} pressedStyle={{ opacity: 0.85 }}>
-          <BlurView intensity={90} tint="light" style={styles.mapBtnBlur}>
-            <Ionicons name="cloud-download-outline" size={18} color="#111" />
+          style={styles.mapBtn}
+          pressedStyle={{ opacity: 0.85 }}
+        >
+          <BlurView intensity={20} tint="dark" style={styles.mapBtnBlur}>
+            <Ionicons name="cloud-download" size={20} color="#fff" />
           </BlurView>
         </AnimatedPressable>
       </View>
@@ -525,7 +606,7 @@ export const ExploreScreen: React.FC = () => {
           },
         ]}
       >
-        <BlurView intensity={80} tint="light" style={styles.controlsCard}>
+        <BlurView intensity={30} tint="dark" style={styles.controlsCard}>
           {loading && (
             <View style={styles.loadingRow}>
               <Skeleton style={styles.loadingPill} />
@@ -542,15 +623,21 @@ export const ExploreScreen: React.FC = () => {
             >
               <View style={styles.tourNowRow}>
                 <View style={styles.tourNowIcon}>
-                  <Ionicons name="walk-outline" size={16} color="#fff" />
+                  <Ionicons name="walk" size={16} color="#000" />
                 </View>
                 <View style={styles.tourNowText}>
-                  <Text style={styles.tourNowLabel} numberOfLines={1}>Tour playing</Text>
-                  <Text style={styles.tourNowTitle} numberOfLines={1}>{queueTitle?.trim() ? queueTitle : 'Walking tour'}</Text>
+                  <Text style={styles.tourNowLabel} numberOfLines={1}>
+                    Tour playing
+                  </Text>
+                  <Text style={styles.tourNowTitle} numberOfLines={1}>
+                    {queueTitle?.trim() ? queueTitle : 'Walking tour'}
+                  </Text>
                 </View>
                 <View style={styles.tourNowPill}>
-                  <Text style={styles.tourNowPillText}>{queueIndex + 1}/{queue.length}</Text>
-                  <Ionicons name="chevron-up" size={14} color="rgba(255,255,255,0.85)" />
+                  <Text style={styles.tourNowPillText}>
+                    {queueIndex + 1}/{queue.length}
+                  </Text>
+                  <Ionicons name="chevron-up" size={14} color="#000" />
                 </View>
               </View>
             </AnimatedPressable>
@@ -571,13 +658,10 @@ export const ExploreScreen: React.FC = () => {
             >
               <View style={styles.continueRow}>
                 <View style={styles.continueThumbWrap}>
-                  {continueTop.sight.thumbnail?.trim() ? (
-                    <Image source={{ uri: continueTop.sight.thumbnail }} style={styles.continueThumb} />
-                  ) : (
-                    <View style={styles.continueThumbFallback}>
-                      <Ionicons name="headset-outline" size={18} color="rgba(0,0,0,0.6)" />
-                    </View>
-                  )}
+                  <Image
+                    source={{ uri: getSightImage(continueTop.sight.id, continueTop.sight.thumbnail) }}
+                    style={styles.continueThumb}
+                  />
                 </View>
                 <View style={styles.continueText}>
                   <Text style={styles.continueLabel}>Continue listening</Text>
@@ -586,7 +670,7 @@ export const ExploreScreen: React.FC = () => {
                   </Text>
                 </View>
                 <View style={styles.continueBtn}>
-                  <Ionicons name="play" size={16} color="#fff" />
+                  <Ionicons name="play" size={16} color="#000" />
                 </View>
               </View>
             </AnimatedPressable>
@@ -596,15 +680,20 @@ export const ExploreScreen: React.FC = () => {
             <View style={styles.toursBlock}>
               <View style={styles.toursHeader}>
                 <Text style={styles.toursTitle}>Walking tours</Text>
-                <View style={styles.toursHeaderRight}>
-                  <Text style={styles.toursHint}>Auto-play stops</Text>
-                  <TouchableOpacity onPress={() => setToursHubOpen(true)} activeOpacity={0.85} style={styles.seeAllBtn} accessibilityRole="button" accessibilityLabel="See all tours">
-                    <Text style={styles.seeAllText}>See all</Text>
-                    <Ionicons name="chevron-forward" size={14} color="rgba(60,60,67,0.55)" />
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  onPress={() => setToursHubOpen(true)}
+                  activeOpacity={0.85}
+                  style={styles.seeAllBtn}
+                >
+                  <Text style={styles.seeAllText}>See all</Text>
+                  <Ionicons name="chevron-forward" size={14} color="#fff" />
+                </TouchableOpacity>
               </View>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.toursRow}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.toursRow}
+              >
                 {playableTours.slice(0, 8).map((t) => (
                   <AnimatedPressable
                     key={t.id}
@@ -616,11 +705,11 @@ export const ExploreScreen: React.FC = () => {
                       setSelectedTour(t);
                     }}
                   >
-                    {t.thumbnail ? (
-                      <Image source={{ uri: t.thumbnail }} style={styles.tourCardImage} resizeMode="cover" />
-                    ) : (
-                      <View style={styles.tourCardImageFallback} />
-                    )}
+                    <Image
+                      source={{ uri: getSightImage(t.id, t.thumbnail) }}
+                      style={styles.tourCardImage}
+                      resizeMode="cover"
+                    />
                     <View style={styles.tourCardOverlay} />
                     <View style={styles.tourCardContent}>
                       <Text style={styles.tourCardLabel} numberOfLines={1}>
@@ -631,9 +720,6 @@ export const ExploreScreen: React.FC = () => {
                         {t.title}
                       </Text>
                     </View>
-                    <View style={styles.tourCardPlay}>
-                      <Ionicons name="play" size={14} color="#fff" />
-                    </View>
                   </AnimatedPressable>
                 ))}
               </ScrollView>
@@ -642,63 +728,47 @@ export const ExploreScreen: React.FC = () => {
 
           {/* Search */}
           <View style={styles.searchRow}>
-            <Ionicons name="search" size={18} color="rgba(60,60,67,0.75)" />
+            <Ionicons name="search" size={18} color="rgba(255,255,255,0.6)" />
             <TextInput
               onChangeText={setQuery}
               placeholder="Search sights…"
-              placeholderTextColor="rgba(60,60,67,0.55)"
+              placeholderTextColor="rgba(255,255,255,0.4)"
               style={styles.searchInput}
               autoCorrect={false}
             />
-            {query.length > 0 && (
-              <TouchableOpacity onPress={() => setQuery('')} activeOpacity={0.8} style={styles.clearButton}>
-                <Ionicons name="close-circle" size={18} color="rgba(60,60,67,0.55)" />
-              </TouchableOpacity>
-            )}
           </View>
 
-          {/* Search results dropdown */}
-          {topResults.length > 0 && (
-            <Animated.View style={[styles.resultsWrap, {
-              opacity: resultsAnim,
-              transform: [{ translateY: resultsAnim.interpolate({ inputRange: [0, 1], outputRange: [8, 0] }) }],
-            }]}>
-              <ScrollView style={styles.resultsList} contentContainerStyle={styles.resultsContent} showsVerticalScrollIndicator={false}>
-                {topResults.map((s) => (
-                  <AnimatedPressable key={s.id} onPress={() => handlePickResult(s)} haptics="light"
-                    style={styles.resultRow} pressedStyle={styles.resultRowPressed}>
-                    <View style={styles.resultInner}>
-                      <View style={styles.resultText}>
-                        <Text style={styles.resultTitle} numberOfLines={1}>{s.name}</Text>
-                        <Text style={styles.resultSub} numberOfLines={1}>{s.category.toUpperCase()}</Text>
-                      </View>
-                      <Ionicons name="arrow-forward" size={16} color="rgba(60,60,67,0.75)" />
-                    </View>
-                  </AnimatedPressable>
-                ))}
-              </ScrollView>
-            </Animated.View>
-          )}
-
           {/* Category chips */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipsRow}>
-            <AnimatedPressable onPress={() => setFilter('all')} haptics="light"
-              style={[styles.chip, filter === 'all' && styles.chipActive]} pressedStyle={styles.chipPressed}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.chipsRow}
+          >
+            <AnimatedPressable
+              onPress={() => setFilter('all')}
+              haptics="light"
+              style={[styles.chip, filter === 'all' && styles.chipActive]}
+              pressedStyle={styles.chipPressed}
+            >
               <Text style={[styles.chipText, filter === 'all' && styles.chipTextActive]}>All</Text>
-              <View style={[styles.chipCount, filter === 'all' && styles.chipCountActive]}>
-                <Text style={[styles.chipCountText, filter === 'all' && styles.chipCountTextActive]}>{sights.length}</Text>
-              </View>
             </AnimatedPressable>
             {chips.map((c) => (
-              <AnimatedPressable key={c.value} onPress={() => setFilter((v) => v === c.value ? 'all' : c.value)}
-                haptics="light" style={[styles.chip, filter === c.value && styles.chipActive]} pressedStyle={styles.chipPressed}>
-                <Ionicons name={c.icon} size={14} color={filter === c.value ? '#fff' : theme.colors.textMuted} style={{ marginRight: 4 }} />
-                <Text style={[styles.chipText, filter === c.value && styles.chipTextActive]}>{c.label}</Text>
-                <View style={[styles.chipCount, filter === c.value && styles.chipCountActive]}>
-                  <Text style={[styles.chipCountText, filter === c.value && styles.chipCountTextActive]}>
-                    {categoryCounts[c.value]}
-                  </Text>
-                </View>
+              <AnimatedPressable
+                key={c.value}
+                onPress={() => setFilter((v) => (v === c.value ? 'all' : c.value))}
+                haptics="light"
+                style={[styles.chip, filter === c.value && styles.chipActive]}
+                pressedStyle={styles.chipPressed}
+              >
+                <Ionicons
+                  name={c.icon}
+                  size={14}
+                  color={filter === c.value ? '#000' : 'rgba(255,255,255,0.6)'}
+                  style={{ marginRight: 4 }}
+                />
+                <Text style={[styles.chipText, filter === c.value && styles.chipTextActive]}>
+                  {c.label}
+                </Text>
               </AnimatedPressable>
             ))}
           </ScrollView>
@@ -715,12 +785,15 @@ export const ExploreScreen: React.FC = () => {
             snapToInterval={CARD_W + CARD_GAP}
             decelerationRate="fast"
             contentContainerStyle={styles.carouselContent}
-            onScrollToIndexFailed={() => {}}
             renderItem={({ item }) => (
               <SightSwipeCard
                 sight={item}
                 isSelected={selectedSightId === item.id}
-                distance={userLocation ? distanceMeters(userLocation, { lat: item.lat, lng: item.lng }) : null}
+                distance={
+                  userLocation
+                    ? distanceMeters(userLocation, { lat: item.lat, lng: item.lng })
+                    : null
+                }
                 onPress={() => handleSelectSight(item.id)}
               />
             )}
@@ -728,7 +801,6 @@ export const ExploreScreen: React.FC = () => {
         )}
       </View>
 
-      {/* Offline download modal */}
       <Modal visible={showDownloadPack} animationType="slide" presentationStyle="fullScreen">
         <DownloadPackScreen onClose={() => setShowDownloadPack(false)} />
       </Modal>
@@ -747,7 +819,6 @@ export const ExploreScreen: React.FC = () => {
       <TourSheet
         visible={!!selectedTour}
         tour={selectedTour}
-        userLocation={userLocation}
         onClose={() => setSelectedTour(null)}
         onStartAt={(index, lang, variant) => {
           const t = selectedTour;
@@ -756,7 +827,12 @@ export const ExploreScreen: React.FC = () => {
           const key = `${lang}_${variant}`;
           const items = stops
             .filter((s) => s?.id)
-            .map((s) => ({ sightId: s.id, variant: key, remoteUrl: s.audioFiles?.[lang]?.[variant]?.url, title: s.name }));
+            .map((s) => ({
+              sightId: s.id,
+              variant: key,
+              remoteUrl: s.audioFiles?.[lang]?.[variant]?.url,
+              title: s.name,
+            }));
           if (items.length < 1) return;
           const startAt = Math.max(0, Math.min(items.length - 1, index));
           startQueue(items, startAt, t.title);
@@ -783,55 +859,82 @@ export const ExploreScreen: React.FC = () => {
 
       {/* Detail drawer */}
       {selectedSight && (
-        <Animated.View style={[styles.drawer, {
-          paddingBottom: Math.max(16, insets.bottom + 12),
-          height: drawerMaxHeight,
-          transform: [{ translateY: drawerTranslate }],
-        }]}>
-          <BlurView intensity={90} tint="light" style={styles.drawerCard}>
+        <Animated.View
+          style={[
+            styles.drawer,
+            {
+              paddingBottom: Math.max(16, insets.bottom + 12),
+              height: drawerMaxHeight,
+              transform: [{ translateY: drawerTranslate }],
+            },
+          ]}
+        >
+          <BlurView intensity={40} tint="dark" style={styles.drawerCard}>
             <View style={styles.drawerHandleHit} {...drawerPanResponder.panHandlers}>
               <View style={styles.drawerHandle} />
             </View>
             <View style={styles.drawerHeader}>
               <View style={styles.drawerTitleWrap}>
-                <Text style={styles.drawerTitle} numberOfLines={1}>{selectedSight.name}</Text>
+                <Text style={styles.drawerTitle} numberOfLines={1}>
+                  {selectedSight.name}
+                </Text>
                 <Text style={styles.drawerMeta}>
-                  {currentDistance != null ? `${currentDistance < 1000 ? `${currentDistance}m` : `${(currentDistance / 1000).toFixed(1)}km`} away` : 'Audio guide available'}
+                  {currentDistance != null
+                    ? `${currentDistance < 1000 ? `${currentDistance}m` : `${(currentDistance / 1000).toFixed(1)}km`} away`
+                    : 'Audio guide available'}
                 </Text>
               </View>
-              <TouchableOpacity onPress={closeDrawer} style={styles.drawerClose} activeOpacity={0.8}>
-                <Ionicons name="close" size={18} color="#fff" />
+              <TouchableOpacity
+                onPress={closeDrawer}
+                style={styles.drawerClose}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="close" size={20} color="#fff" />
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.drawerBody} contentContainerStyle={styles.drawerBodyContent} showsVerticalScrollIndicator={false}>
-              <Image source={{ uri: selectedSight.thumbnail }} style={styles.drawerImage} resizeMode="cover" />
+            <ScrollView
+              style={styles.drawerBody}
+              contentContainerStyle={styles.drawerBodyContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <Image
+                source={{ uri: getSightImage(selectedSight.id, selectedSight.thumbnail) }}
+                style={styles.drawerImage}
+                resizeMode="cover"
+              />
 
               {/* Audio guide section */}
               <View style={styles.drawerSection}>
                 <View style={styles.drawerSectionHeader}>
-                  <Ionicons name="headset-outline" size={14} color="rgba(255,255,255,0.7)" />
+                  <Ionicons name="headset" size={14} color={theme.colors.brand} />
                   <Text style={styles.drawerSectionLabel}>AUDIO GUIDE</Text>
                 </View>
                 <AudioPlayer sight={selectedSight} />
               </View>
 
-              {/* Book tour section — only if linked */}
+              {/* Book tour section */}
               {selectedSight.linkedTour && (
                 <View style={styles.drawerSection}>
                   <View style={styles.drawerSectionHeader}>
-                    <Ionicons name="ticket-outline" size={14} color="rgba(255,255,255,0.7)" />
+                    <Ionicons name="ticket" size={14} color={theme.colors.brand} />
                     <Text style={styles.drawerSectionLabel}>GUIDED TOUR</Text>
                   </View>
-                  <TouchableOpacity onPress={handleBookNow} activeOpacity={0.9} style={styles.bookButton}>
-                    <Ionicons name="ticket-outline" size={18} color="#fff" />
+                  <TouchableOpacity
+                    onPress={handleBookNow}
+                    activeOpacity={0.9}
+                    style={styles.bookButton}
+                  >
                     <Text style={styles.bookText}>
-                      {selectedSight.linkedTour.title?.trim() ? selectedSight.linkedTour.title : 'Book Tour'}
-                      {selectedSight.linkedTour.price ? ` · €${selectedSight.linkedTour.price}` : ''}
+                      {selectedSight.linkedTour.title?.trim()
+                        ? selectedSight.linkedTour.title
+                        : 'Book Tour'}
+                      {selectedSight.linkedTour.price
+                        ? ` · €${selectedSight.linkedTour.price}`
+                        : ''}
                     </Text>
-                    <Ionicons name="arrow-forward" size={16} color="rgba(255,255,255,0.7)" />
+                    <Ionicons name="arrow-forward" size={18} color="#000" />
                   </TouchableOpacity>
-                  <Text style={styles.tourNote}>Opens booking page in browser</Text>
                 </View>
               )}
 
@@ -840,7 +943,7 @@ export const ExploreScreen: React.FC = () => {
               {!!selectedSight.tips?.length && (
                 <View style={styles.drawerSection}>
                   <View style={styles.drawerSectionHeader}>
-                    <Ionicons name="bulb-outline" size={14} color="rgba(255,255,255,0.7)" />
+                    <Ionicons name="bulb" size={14} color={theme.colors.brand} />
                     <Text style={styles.drawerSectionLabel}>TIPS</Text>
                   </View>
                   <View style={styles.tipsWrap}>
@@ -853,16 +956,6 @@ export const ExploreScreen: React.FC = () => {
                   </View>
                 </View>
               )}
-
-              {!!selectedSight.kidsMyth?.trim() && (
-                <View style={styles.drawerSection}>
-                  <View style={styles.drawerSectionHeader}>
-                    <Ionicons name="happy-outline" size={14} color="rgba(255,255,255,0.7)" />
-                    <Text style={styles.drawerSectionLabel}>KIDS STORY</Text>
-                  </View>
-                  <Text style={styles.kidsText}>{selectedSight.kidsMyth}</Text>
-                </View>
-              )}
             </ScrollView>
           </BlurView>
         </Animated.View>
@@ -872,211 +965,310 @@ export const ExploreScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: BG },
-  noTokenContainer: { flex: 1, padding: 24, justifyContent: 'center', backgroundColor: BG },
+  container: { flex: 1, backgroundColor: '#000' },
+  noTokenContainer: { flex: 1, padding: 24, justifyContent: 'center', backgroundColor: '#000' },
   noTokenTitle: { color: '#fff', fontSize: 22, fontWeight: '900' },
-  noTokenBody: { marginTop: 10, color: 'rgba(255,255,255,0.78)', fontSize: 14, lineHeight: 20, fontWeight: '700' },
-  noTokenStep: { marginTop: 14, color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: '800' },
+  noTokenBody: {
+    marginTop: 10,
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '700',
+  },
+  noTokenStep: { marginTop: 14, color: '#fff', fontSize: 13, fontWeight: '800' },
   map: { flex: 1 },
 
-  // Map overlay buttons
   recenterWrap: { position: 'absolute', left: 16 },
   downloadBtnWrap: { position: 'absolute', right: 16 },
   mapBtn: { borderRadius: 22, overflow: 'hidden' },
   mapBtnDisabled: { opacity: 0.4 },
-  mapBtnBlur: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.4)' },
+  mapBtnBlur: {
+    width: 44,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.35)',
+  },
 
-  // Bottom controls
   bottomControls: { position: 'absolute', left: 0, right: 0, bottom: 0 },
   controlsCard: {
-    marginHorizontal: 12,
-    borderRadius: 18,
+    marginHorizontal: 10,
+    borderRadius: 24,
     overflow: 'hidden',
-    padding: 12,
-    backgroundColor: 'rgba(255,255,255,0.76)',
+    padding: 14,
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0,0,0,0.08)',
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 10,
+    borderColor: 'rgba(255,255,255,0.1)',
   },
   continueCard: {
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: 'rgba(0,0,0,0.06)',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0,0,0,0.08)',
-    marginBottom: 10,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    marginBottom: 12,
   },
-  continueCardPressed: {
-    opacity: 0.92,
-  },
+  continueCardPressed: { opacity: 0.92 },
   tourNowCard: {
     borderRadius: 16,
     overflow: 'hidden',
     backgroundColor: BRAND,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   tourNowCardPressed: { opacity: 0.92 },
-  tourNowRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 10, gap: 10 },
-  tourNowIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
+  tourNowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  tourNowIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   tourNowText: { flex: 1, gap: 2 },
-  tourNowLabel: { fontSize: 11, fontWeight: '900', color: 'rgba(255,255,255,0.75)', letterSpacing: 0.5 },
-  tourNowTitle: { fontSize: 13, fontWeight: '900', color: '#fff' },
-  tourNowPill: { height: 34, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.18)', paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  tourNowPillText: { color: '#fff', fontSize: 12, fontWeight: '900' },
+  tourNowLabel: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: 'rgba(0,0,0,0.5)',
+    letterSpacing: 0.5,
+  },
+  tourNowTitle: { fontSize: 14, fontWeight: '900', color: '#000' },
+  tourNowPill: {
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  tourNowPillText: { color: '#000', fontSize: 13, fontWeight: '900' },
   continueRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 10,
     paddingVertical: 10,
-    gap: 10,
+    gap: 12,
   },
-  continueThumbWrap: { width: 44, height: 44, borderRadius: 12, overflow: 'hidden' },
+  continueThumbWrap: { width: 44, height: 44, borderRadius: 8, overflow: 'hidden' },
   continueThumb: { width: '100%', height: '100%' },
-  continueThumbFallback: {
-    flex: 1,
-    backgroundColor: 'rgba(118,118,128,0.18)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   continueText: { flex: 1, gap: 2 },
-  continueLabel: { fontSize: 11, fontWeight: '900', color: 'rgba(60,60,67,0.55)', letterSpacing: 0.5 },
-  continueTitle: { fontSize: 13, fontWeight: '900', color: theme.colors.text },
+  continueLabel: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: 'rgba(255,255,255,0.5)',
+    letterSpacing: 0.5,
+  },
+  continueTitle: { fontSize: 14, fontWeight: '900', color: '#fff' },
   continueBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: BRAND,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  toursBlock: { marginBottom: 10 },
-  toursHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, paddingHorizontal: 2 },
-  toursHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  toursTitle: { fontSize: 13, fontWeight: '900', color: theme.colors.text },
-  toursHint: { fontSize: 11, fontWeight: '800', color: 'rgba(60,60,67,0.55)' },
-  seeAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 6, borderRadius: 12, backgroundColor: 'rgba(0,0,0,0.05)' },
-  seeAllText: { fontSize: 11, fontWeight: '900', color: theme.colors.text },
-  toursRow: { gap: 10, paddingHorizontal: 2, paddingVertical: 2 },
+  toursBlock: { marginBottom: 14 },
+  toursHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  toursTitle: { fontSize: 15, fontWeight: '900', color: '#fff' },
+  seeAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  seeAllText: { fontSize: 12, fontWeight: '900', color: theme.colors.brand },
+  toursRow: { gap: 12 },
   tourCard: {
-    width: 210,
-    height: 110,
-    borderRadius: 18,
+    width: 220,
+    height: 120,
+    borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#fff',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0,0,0,0.08)',
-    shadowColor: '#000',
-    shadowOpacity: 0.14,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
+    backgroundColor: '#181818',
   },
   tourCardPressed: { opacity: 0.92 },
   tourCardImage: { ...StyleSheet.absoluteFillObject },
-  tourCardImageFallback: { ...StyleSheet.absoluteFillObject, backgroundColor: '#111' },
-  tourCardOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.22)' },
-  tourCardContent: { position: 'absolute', left: 12, right: 44, bottom: 12, gap: 4 },
-  tourCardLabel: { fontSize: 10, fontWeight: '900', color: 'rgba(255,255,255,0.78)', letterSpacing: 0.5 },
-  tourCardTitle: { fontSize: 14, fontWeight: '900', color: '#fff', lineHeight: 17 },
-  tourCardPlay: { position: 'absolute', right: 10, bottom: 10, width: 30, height: 30, borderRadius: 12, backgroundColor: BRAND, alignItems: 'center', justifyContent: 'center' },
+  tourCardOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
+  tourCardContent: { position: 'absolute', left: 12, right: 12, bottom: 12, gap: 4 },
+  tourCardLabel: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: theme.colors.brand,
+    letterSpacing: 0.5,
+  },
+  tourCardTitle: { fontSize: 15, fontWeight: '900', color: '#fff', lineHeight: 18 },
   loadingRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
   loadingPill: { height: 16, borderRadius: 999, flex: 1 },
   loadingPillSmall: { height: 16, borderRadius: 999, width: 84 },
 
-  // Search
-  searchRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(118,118,128,0.16)', borderRadius: 14, paddingHorizontal: 12, height: 44 },
-  searchInput: { flex: 1, marginLeft: 8, fontSize: 15, fontWeight: '600', color: theme.colors.text },
-  clearButton: { paddingLeft: 8, paddingVertical: 6 },
-
-  // Search results
-  resultsWrap: { marginTop: 10, borderRadius: 16, overflow: 'hidden', backgroundColor: 'rgba(255,255,255,0.9)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.06)' },
-  resultsList: { maxHeight: 210 },
-  resultsContent: { paddingVertical: 6 },
-  resultRow: { borderRadius: 12, overflow: 'hidden', marginHorizontal: 6, marginVertical: 4, backgroundColor: 'rgba(118,118,128,0.12)' },
-  resultRowPressed: { opacity: 0.92 },
-  resultInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, paddingVertical: 10, gap: 10 },
-  resultText: { flex: 1, gap: 2 },
-  resultTitle: { fontSize: 13, fontWeight: '900', color: theme.colors.text },
-  resultSub: { fontSize: 11, fontWeight: '800', color: 'rgba(60,60,67,0.7)', letterSpacing: 0.4 },
-
-  // Category chips
-  chipsRow: { gap: 8, paddingTop: 10, paddingBottom: 2, paddingHorizontal: 2, alignItems: 'center' },
-  chip: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(118,118,128,0.16)', paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, gap: 6 },
-  chipPressed: { opacity: 0.86 },
-  chipActive: { backgroundColor: theme.colors.text },
-  chipText: { fontSize: 12, fontWeight: '800', color: theme.colors.textMuted },
-  chipTextActive: { color: '#fff' },
-  chipCount: {
-    minWidth: 22,
-    height: 18,
-    paddingHorizontal: 6,
-    borderRadius: 999,
-    backgroundColor: 'rgba(0,0,0,0.08)',
+  searchRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 46,
   },
-  chipCountActive: {
-    backgroundColor: 'rgba(255,255,255,0.16)',
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#fff',
   },
-  chipCountText: { fontSize: 11, fontWeight: '900', color: 'rgba(60,60,67,0.7)' },
-  chipCountTextActive: { color: '#fff' },
+  chipsRow: {
+    gap: 10,
+    paddingTop: 14,
+    paddingBottom: 2,
+    alignItems: 'center',
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    gap: 6,
+  },
+  chipPressed: { opacity: 0.86 },
+  chipActive: { backgroundColor: '#fff' },
+  chipText: { fontSize: 13, fontWeight: '800', color: 'rgba(255,255,255,0.6)' },
+  chipTextActive: { color: '#000' },
 
-  // Swipe carousel
-  carouselContent: { paddingHorizontal: 12, paddingTop: 10, paddingBottom: 4, gap: CARD_GAP },
-  swipeCard: { width: CARD_W, height: 130, borderRadius: 18, overflow: 'hidden' },
+  carouselContent: { paddingHorizontal: 12, paddingTop: 14, paddingBottom: 6, gap: CARD_GAP },
+  swipeCard: { width: CARD_W, height: 140, borderRadius: 14, overflow: 'hidden' },
+  swipeCardDisabled: { opacity: 0.8 },
   swipeCardInner: { flex: 1 },
   swipeCardImage: { ...StyleSheet.absoluteFillObject },
-  swipeCardImageFallback: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255,255,255,0.12)',
+  swipeCardImageDisabled: { opacity: 0.35 },
+  swipeCardOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  swipeCardSelectedBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  swipeCardOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.38)' },
-  swipeCardSelectedBadge: {
-    position: 'absolute', top: 10, right: 10,
-    width: 22, height: 22, borderRadius: 11,
-    backgroundColor: BRAND,
-    alignItems: 'center', justifyContent: 'center',
+  swipeCardContent: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 14, gap: 4 },
+  swipeCardCategoryRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  swipeCardCategory: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#fff',
+    letterSpacing: 0.8,
   },
-  swipeCardContent: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 12, gap: 4 },
-  swipeCardCategoryRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  swipeCardCategory: { fontSize: 9, fontWeight: '900', color: 'rgba(255,255,255,0.8)', letterSpacing: 0.6 },
-  swipeCardTitle: { fontSize: 15, fontWeight: '900', color: '#fff', lineHeight: 18 },
-  swipeCardMeta: { flexDirection: 'row', gap: 6, flexWrap: 'wrap' },
-  swipeCardPill: { flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: 'rgba(255,255,255,0.18)', paddingHorizontal: 7, paddingVertical: 3, borderRadius: 999 },
-  swipeCardPillGold: { backgroundColor: 'rgba(255,214,10,0.25)' },
-  swipeCardPillBlue: { backgroundColor: 'rgba(0,122,255,0.4)' },
-  swipeCardPillText: { fontSize: 9, fontWeight: '800', color: '#fff' },
-  swipeCardPillTextGold: { fontSize: 9, fontWeight: '800', color: '#FFD60A' },
+  swipeCardTitle: { fontSize: 16, fontWeight: '900', color: '#fff', lineHeight: 20 },
+  swipeCardTextDisabled: { color: 'rgba(255,255,255,0.3)' },
+  swipeCardMeta: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  swipeCardPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  swipeCardPillBlue: { backgroundColor: theme.colors.brand },
+  swipeCardPillText: { fontSize: 10, fontWeight: '800', color: '#fff' },
+  swipeCardPillTextDark: { fontSize: 10, fontWeight: '900', color: '#000' },
 
-  // Detail drawer
   drawer: { position: 'absolute', left: 0, right: 0, bottom: 0 },
-  drawerCard: { marginHorizontal: 12, borderRadius: 24, overflow: 'hidden', paddingHorizontal: 16, paddingTop: 10, paddingBottom: 14, backgroundColor: 'rgba(255,255,255,0.75)' },
-  drawerHandleHit: { alignItems: 'center', justifyContent: 'center', paddingVertical: 10, marginTop: -4, marginBottom: 2 },
-  drawerHandle: { alignSelf: 'center', width: 44, height: 5, borderRadius: 999, backgroundColor: 'rgba(0,0,0,0.18)' },
+  drawerCard: {
+    marginHorizontal: 10,
+    borderRadius: 24,
+    overflow: 'hidden',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 14,
+    backgroundColor: 'rgba(0,0,0,0.65)',
+  },
+  drawerHandleHit: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    marginTop: -4,
+    marginBottom: 2,
+  },
+  drawerHandle: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
   drawerHeader: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   drawerTitleWrap: { flex: 1, paddingRight: 12 },
-  drawerTitle: { color: '#111', fontSize: 18, fontWeight: '900' },
-  drawerMeta: { marginTop: 2, color: 'rgba(255,255,255,0.75)', fontSize: 13, fontWeight: '700' },
-  drawerClose: { width: 34, height: 34, borderRadius: 17, backgroundColor: 'rgba(255,255,255,0.14)', alignItems: 'center', justifyContent: 'center' },
-  drawerBody: { marginTop: 12 },
-  drawerBodyContent: { gap: 14, paddingBottom: 10 },
-  drawerImage: { width: '100%', height: 140, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.08)' },
-  drawerSection: { gap: 8 },
-  drawerSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  drawerSectionLabel: { fontSize: 10, fontWeight: '900', color: 'rgba(255,255,255,0.6)', letterSpacing: 0.8 },
-  drawerDescription: { color: 'rgba(60,60,67,0.9)', fontSize: 13, lineHeight: 18, fontWeight: '600' },
-  bookButton: { height: 46, borderRadius: 16, backgroundColor: BRAND, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, paddingHorizontal: 14 },
-  bookText: { color: '#fff', fontSize: 15, fontWeight: '900' },
-  tourNote: { fontSize: 11, fontWeight: '700', color: 'rgba(255,255,255,0.45)', textAlign: 'center' },
-  tipsWrap: { gap: 8, marginTop: 2 },
-  tipRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-  tipDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.35)', marginTop: 6 },
-  tipText: { flex: 1, color: 'rgba(255,255,255,0.88)', fontSize: 13, lineHeight: 18, fontWeight: '600' },
-  kidsText: { color: 'rgba(255,255,255,0.88)', fontSize: 13, lineHeight: 18, fontWeight: '600' },
+  drawerTitle: { color: '#fff', fontSize: 22, fontWeight: '900' },
+  drawerMeta: { marginTop: 2, color: 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: '700' },
+  drawerClose: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  drawerBody: { marginTop: 14 },
+  drawerBodyContent: { gap: 18, paddingBottom: 10 },
+  drawerImage: {
+    width: '100%',
+    height: 180,
+    borderRadius: 16,
+    backgroundColor: '#111',
+  },
+  drawerSection: { gap: 12 },
+  drawerSectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  drawerSectionLabel: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: 'rgba(255,255,255,0.4)',
+    letterSpacing: 1,
+  },
+  drawerDescription: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '600',
+  },
+  bookButton: {
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: theme.colors.brand,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    paddingHorizontal: 20,
+  },
+  bookText: { color: '#000', fontSize: 16, fontWeight: '900' },
+  tipsWrap: { gap: 12, marginTop: 2 },
+  tipRow: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
+  tipDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: theme.colors.brand,
+    marginTop: 7,
+  },
+  tipText: {
+    flex: 1,
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '600',
+  },
 });

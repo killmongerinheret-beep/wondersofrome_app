@@ -9,4 +9,3 @@ export const getMapboxAccessToken = (): string | null => {
   if (!trimmed) return null;
   return trimmed;
 };
-

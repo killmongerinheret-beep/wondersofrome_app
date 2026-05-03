@@ -1,7 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleProp, ViewStyle } from 'react-native';
 
-export const Skeleton: React.FC<{ style?: StyleProp<ViewStyle>; backgroundColor?: string }> = ({ style, backgroundColor }) => {
+export const Skeleton: React.FC<{ style?: StyleProp<ViewStyle>; backgroundColor?: string }> = ({
+  style,
+  backgroundColor,
+}) => {
   const opacity = useRef(new Animated.Value(0.55)).current;
 
   useEffect(() => {

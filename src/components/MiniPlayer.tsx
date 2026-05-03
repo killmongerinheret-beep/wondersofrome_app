@@ -1,12 +1,13 @@
+import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Platform, StyleSheet, Text, View } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AnimatedPressable } from '../ui/AnimatedPressable';
-import { useAudioPlayer } from '../hooks/useAudioPlayer';
-import { UpNextSheet } from './UpNextSheet';
+
 import { NowPlayingSheet } from './NowPlayingSheet';
+import { UpNextSheet } from './UpNextSheet';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
+import { AnimatedPressable } from '../ui/AnimatedPressable';
 
 export const MINI_PLAYER_HEIGHT = 86;
 
@@ -37,19 +38,20 @@ export const MiniPlayer: React.FC = () => {
   const [nowPlayingOpen, setNowPlayingOpen] = useState(false);
   const visible = !!sightId;
 
-  if (!visible) return null;
-
   const bottomTabHeight = Platform.OS === 'ios' ? 88 : 60;
   const translateY = useRef(new Animated.Value(18)).current;
 
   useEffect(() => {
+    if (!visible) return;
     Animated.spring(translateY, {
       toValue: 0,
       useNativeDriver: true,
       speed: 22,
       bounciness: 7,
     }).start();
-  }, [translateY]);
+  }, [translateY, visible]);
+
+  if (!visible) return null;
 
   const progress = durationMs > 0 ? Math.max(0, Math.min(1, positionMs / durationMs)) : 0;
   const qLen = queue?.length ?? 0;

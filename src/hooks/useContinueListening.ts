@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { getRecentProgress, ProgressRecord } from '../services/sqlite';
 import { Sight } from '../types';
 
@@ -29,4 +30,3 @@ export const useContinueListening = (sights: Sight[]) => {
 
   return { items, top, refresh };
 };
-

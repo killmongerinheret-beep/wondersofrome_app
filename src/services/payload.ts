@@ -1,5 +1,5 @@
-import { getPayloadConfig } from '../config/payload';
 import { getAudioCdnBaseUrl } from '../config/audioCdn';
+import { getPayloadConfig } from '../config/payload';
 import { AudioLang, AudioVariant, LangAudioFiles, Product, Sight } from '../types';
 
 const LANGS: AudioLang[] = ['en', 'it', 'es', 'fr', 'de', 'zh', 'ja', 'pt', 'pl', 'ru', 'ar', 'ko'];
@@ -17,20 +17,22 @@ const mapCategory = (cat?: string): Sight['category'] => {
 };
 
 const asSlug = (v: any): string => {
-  const s = (typeof v === 'string' ? v : v?.current ?? v?.slug ?? '').toString().trim();
+  const s = (typeof v === 'string' ? v : (v?.current ?? v?.slug ?? '')).toString().trim();
   return s;
 };
 
 const asUrl = (v: any): string => {
-  const s = (typeof v === 'string' ? v : v?.url ?? '').toString().trim();
+  const s = (typeof v === 'string' ? v : (v?.url ?? '')).toString().trim();
   return s;
 };
 
-const joinUrl = (base: string, path: string) => `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
+const joinUrl = (base: string, path: string) =>
+  `${base.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
 
 const fetchPayload = async (path: string) => {
   const cfg = getPayloadConfig();
-  if (!cfg.isConfigured) throw new Error('Payload is not configured. Set EXPO_PUBLIC_PAYLOAD_BASE_URL.');
+  if (!cfg.isConfigured)
+    throw new Error('Payload is not configured. Set EXPO_PUBLIC_PAYLOAD_BASE_URL.');
   const url = joinUrl(cfg.baseUrl, path);
   const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
   if (!res.ok) throw new Error(`Payload fetch failed: ${res.status}`);
@@ -75,7 +77,7 @@ const mapSightDoc = (doc: any): Sight | null => {
     radius: Number.isFinite(Number(doc?.radius)) ? Number(doc.radius) : 70,
     category: mapCategory(doc?.category),
     has_tips: Array.isArray(doc?.tips) && doc.tips.length > 0,
-    pack: (doc?.pack === 'essential' || doc?.pack === 'full') ? doc.pack : undefined,
+    pack: doc?.pack === 'essential' || doc?.pack === 'full' ? doc.pack : undefined,
     thumbnail: thumb || '',
     description: description || '',
     tips: Array.isArray(doc?.tips) ? doc.tips.map((t: any) => String(t)) : undefined,
@@ -96,7 +98,11 @@ export type AudioTour = {
 export const fetchSightsFromPayload = async (): Promise<Sight[]> => {
   const cfg = getPayloadConfig();
   const json = await fetchPayload(`/api/${cfg.sightsCollection}?limit=250&depth=2`);
-  const docs: any[] = Array.isArray(json?.docs) ? json.docs : Array.isArray(json?.result) ? json.result : [];
+  const docs: any[] = Array.isArray(json?.docs)
+    ? json.docs
+    : Array.isArray(json?.result)
+      ? json.result
+      : [];
   return docs.map(mapSightDoc).filter(Boolean) as Sight[];
 };
 
@@ -109,7 +115,9 @@ export const fetchAudioToursFromPayload = async (): Promise<AudioTour[]> => {
       const id = asSlug(d?.slug ?? d?.id ?? d?._id);
       if (!id) return null;
       const stopsRaw = (d?.stops ?? d?.sights ?? d?.route ?? d?.itinerary ?? []) as any[];
-      const stops = (Array.isArray(stopsRaw) ? stopsRaw : []).map(mapSightDoc).filter(Boolean) as Sight[];
+      const stops = (Array.isArray(stopsRaw) ? stopsRaw : [])
+        .map(mapSightDoc)
+        .filter(Boolean) as Sight[];
       return {
         id,
         title: (d?.title ?? d?.name ?? id).toString(),
@@ -143,7 +151,12 @@ export const fetchProductsFromPayload = async (): Promise<Product[]> => {
         stockCount: d?.stockCount ? Number(d.stockCount) : undefined,
         weight: d?.weight ? Number(d.weight) : undefined,
         variants: Array.isArray(d?.variants)
-          ? d.variants.map((v: any) => ({ id: String(v?.id ?? v?._id ?? ''), label: String(v?.label ?? ''), price: v?.price != null ? Number(v.price) : undefined, inStock: Boolean(v?.inStock ?? true) }))
+          ? d.variants.map((v: any) => ({
+              id: String(v?.id ?? v?._id ?? ''),
+              label: String(v?.label ?? ''),
+              price: v?.price != null ? Number(v.price) : undefined,
+              inStock: Boolean(v?.inStock ?? true),
+            }))
           : undefined,
       } as Product;
     })

@@ -11,6 +11,7 @@
     "build:ios:wonders": "eas build -p ios --profile wondersofrome",
     "build:android:tickets": "eas build -p android --profile ticketsinrome",
     "build:ios:tickets": "eas build -p ios --profile ticketsinrome",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "postinstall": "patch-package"
   },
   "dependencies": {
@@ -46,8 +47,16 @@
     "react-native-svg": "15.15.3"
   },
   "devDependencies": {
+    "@expo/ngrok": "^4.1.3",
     "@types/react": "~19.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
+    "eslint": "^8.57.0",
+    "eslint-config-universe": "^15.0.3",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "patch-package": "^8.0.1",
+    "prettier": "^3.8.3",
     "typescript": "~5.9.2"
   },
   "private": true

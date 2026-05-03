@@ -1,22 +1,29 @@
 import { Directory, File, Paths } from 'expo-file-system';
-import { saveDownload, getAllDownloads, getDownload, clearDownloads, clearProgress } from './sqlite';
+
+import {
+  saveDownload,
+  getAllDownloads,
+  getDownload,
+  clearDownloads,
+  clearProgress,
+} from './sqlite';
 
 const AUDIO_DIR = new Directory(Paths.document, 'audio');
 
 export const ensureAudioDirectory = async () => {
   if (!AUDIO_DIR.exists) {
-    AUDIO_DIR.create({ intermediates: true, idempotent: true });
+    await AUDIO_DIR.create({ intermediates: true, idempotent: true });
   }
 };
 
 export const downloadAudioPack = async (
-  sightId: string, 
-  variant: string, 
+  sightId: string,
+  variant: string,
   url: string,
   onProgress?: (progress: number) => void
 ): Promise<string> => {
   await ensureAudioDirectory();
-  const fileName = `${sightId}-${variant}.m4a`;
+  const fileName = `${sightId}-${variant}.mp3`;
   const destination = new File(AUDIO_DIR, fileName);
 
   try {
@@ -31,11 +38,14 @@ export const downloadAudioPack = async (
   }
 };
 
-export const getLocalAudioUri = async (sightId: string, variant: string): Promise<string | null> => {
+export const getLocalAudioUri = async (
+  sightId: string,
+  variant: string
+): Promise<string | null> => {
   const record = await getDownload(sightId, variant);
   if (record) {
-    const info = Paths.info(record.local_uri);
-    if (info.exists) {
+    const file = new File(record.local_uri);
+    if (file.exists) {
       return record.local_uri;
     }
   }
@@ -54,7 +64,7 @@ export const getAudioStorageUsage = async (): Promise<{
     try {
       const file = new File(d.local_uri);
       if (file.exists) {
-        const info = file.info();
+        const info = await file.info();
         usedBytes += info.size ?? 0;
       }
     } catch {
@@ -74,8 +84,7 @@ export const clearAudioStorage = async () => {
     if (AUDIO_DIR.exists) {
       AUDIO_DIR.delete();
     }
-  } catch {
-  }
+  } catch {}
   await clearDownloads();
   await clearProgress();
 };

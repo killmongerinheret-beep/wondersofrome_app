@@ -63,6 +63,21 @@ const initDatabase = async (db: SQLite.SQLiteDatabase) => {
         data TEXT NOT NULL,
         cached_at INTEGER NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      );
+
+      CREATE TABLE IF NOT EXISTS player_queue (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sight_id TEXT NOT NULL,
+        variant TEXT NOT NULL,
+        remote_url TEXT,
+        title TEXT,
+        queue_title TEXT,
+        queue_index INTEGER NOT NULL
+      );
     `);
     const cols = await db.getAllAsync<{ name: string }>('PRAGMA table_info(progress)');
     const hasLastUpdated = (cols ?? []).some((c) => c.name === 'last_updated');
@@ -111,7 +126,12 @@ export const clearProgress = async () => {
   await db.runAsync('DELETE FROM progress');
 };
 
-export const updateProgress = async (sightId: string, completed: boolean, lastPlayedVariant: string, lastPosition: number) => {
+export const updateProgress = async (
+  sightId: string,
+  completed: boolean,
+  lastPlayedVariant: string,
+  lastPosition: number
+) => {
   const db = await getDatabase();
   await db.runAsync(
     'INSERT OR REPLACE INTO progress (sight_id, completed, last_played_variant, last_position, last_updated) VALUES (?, ?, ?, ?, ?)',
@@ -144,10 +164,16 @@ const CACHE_TTL_MS = 1000 * 60 * 60 * 6; // 6 hours
 export const saveCachedSights = async (sights: unknown[]): Promise<void> => {
   const db = await getDatabase();
   await db.runAsync('DELETE FROM cached_sights');
-  await db.runAsync(
-    'INSERT INTO cached_sights (id, data, cached_at) VALUES (?, ?, ?)',
-    ['all', JSON.stringify(sights), Date.now()]
-  );
+  await db.runAsync('INSERT INTO cached_sights (id, data, cached_at) VALUES (?, ?, ?)', [
+    'all',
+    JSON.stringify(sights),
+    Date.now(),
+  ]);
+};
+
+export const clearCachedSights = async (): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM cached_sights');
 };
 
 export const getCachedSights = async <T>(): Promise<T[] | null> => {
@@ -163,4 +189,65 @@ export const getCachedSights = async <T>(): Promise<T[] | null> => {
   } catch {
     return null;
   }
+};
+
+// ── Settings ─────────────────────────────────────────────────────────────────
+
+export const setSetting = async (key: string, value: string): Promise<void> => {
+  const db = await getDatabase();
+  await db.runAsync('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)', [key, value]);
+};
+
+export const getSetting = async (
+  key: string,
+  defaultValue: string | null = null
+): Promise<string | null> => {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<{ value: string }>(
+    'SELECT value FROM settings WHERE key = ?',
+    [key]
+  );
+  return row ? row.value : defaultValue;
+};
+
+// ── Player Queue ─────────────────────────────────────────────────────────────
+
+export type PersistedQueueItem = {
+  sight_id: string;
+  variant: string;
+  remote_url: string | null;
+  title: string | null;
+  queue_title: string | null;
+  queue_index: number;
+};
+
+export const saveQueue = async (
+  items: PersistedQueueItem[],
+  queueTitle: string | null
+): Promise<void> => {
+  const db = await getDatabase();
+  await db.withTransactionAsync(async () => {
+    await db.runAsync('DELETE FROM player_queue');
+    for (const item of items) {
+      await db.runAsync(
+        'INSERT INTO player_queue (sight_id, variant, remote_url, title, queue_title, queue_index) VALUES (?, ?, ?, ?, ?, ?)',
+        [item.sight_id, item.variant, item.remote_url, item.title, queueTitle, item.queue_index]
+      );
+    }
+  });
+};
+
+export const getQueue = async (): Promise<{
+  items: PersistedQueueItem[];
+  queueTitle: string | null;
+} | null> => {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<PersistedQueueItem>(
+    'SELECT sight_id, variant, remote_url, title, queue_title, queue_index FROM player_queue ORDER BY id ASC'
+  );
+  if (!rows || rows.length === 0) return null;
+  return {
+    items: rows,
+    queueTitle: rows[0].queue_title,
+  };
 };

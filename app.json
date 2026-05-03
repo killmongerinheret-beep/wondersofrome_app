@@ -56,6 +56,13 @@
       ],
       "@rnmapbox/maps",
       "expo-build-properties"
-    ]
+    ],
+    "extra": {
+      "EXPO_PUBLIC_SITE_ID": "wondersofrome",
+      "eas": {
+        "projectId": "5df96f2e-1756-4ead-a0bd-4c1b3c31c28f"
+      }
+    },
+    "owner": "nehru_52"
   }
 }

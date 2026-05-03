@@ -1,20 +1,30 @@
-import React, { useMemo, useState } from 'react';
-import { FlatList, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
-import { theme } from '../ui/theme';
+import React, { useMemo, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { ProductCard } from '../components/ProductCard';
-import { useAudioTours } from '../hooks/useAudioTours';
+import { SettingsSheet } from '../components/SettingsSheet';
 import { TourSheet } from '../components/TourSheet';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
-import { AudioLang, AudioVariant, Sight } from '../types';
-import { useSights } from '../hooks/useSights';
+import { useAudioTours } from '../hooks/useAudioTours';
 import { useContinueListening } from '../hooks/useContinueListening';
-import { Skeleton } from '../ui/Skeleton';
+import { useSights } from '../hooks/useSights';
 import { AudioTour } from '../services/content';
-import { SettingsSheet } from '../components/SettingsSheet';
+import { AudioLang, AudioVariant, Sight } from '../types';
+import { Skeleton } from '../ui/Skeleton';
+import { theme } from '../ui/theme';
 
 type Chip = { key: string; label: string };
 const CHIPS: Chip[] = [
@@ -65,7 +75,7 @@ export const HomeScreen: React.FC = () => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const { tours: audioTours, loading: toursLoading } = useAudioTours();
-  const { sights, loading: sightsLoading } = useSights();
+  const { sights, loading: sightsLoading, source: sightsSource, refresh: refreshSights } = useSights();
   const { startQueue, play } = useAudioPlayer();
   const { items: continueItems, refresh: refreshContinue } = useContinueListening(sights);
   const [query, setQuery] = useState('');
@@ -89,26 +99,47 @@ export const HomeScreen: React.FC = () => {
 
   const hero = tours[0];
   const audioProducts = useMemo(() => {
-    const hasValidTrack = (s: Sight) => {
+    const checkAudio = (s: Sight) => {
       const t = s.audioFiles?.[audioLang]?.[audioVariant];
       const url = (t?.url ?? '').trim();
       return !!url && !url.includes('example.com');
     };
-    const items = (sights ?? []).filter(hasValidTrack);
+
+    const items = [...(sights ?? [])];
     items.sort((a, b) => {
+      const hasA = checkAudio(a);
+      const hasB = checkAudio(b);
+      if (hasA && !hasB) return -1;
+      if (!hasA && hasB) return 1;
+
       const ap = a.pack === 'essential' ? 0 : 1;
       const bp = b.pack === 'essential' ? 0 : 1;
       if (ap !== bp) return ap - bp;
       return a.name.localeCompare(b.name);
     });
-    return items.slice(0, 12);
+    return items.slice(0, 24);
   }, [sights, audioLang, audioVariant]);
 
   return (
     <SafeAreaView style={styles.screen} edges={['top']}>
+      {/* ── DEBUG OVERLAY ─────────────────────────────────────────────────── */}
+      <View style={{ position: 'absolute', top: 50, right: 16, zIndex: 9999, backgroundColor: 'red', padding: 10, borderRadius: 10 }}>
+        <TouchableOpacity onPress={() => refreshSights()}>
+          <Text style={{ color: '#fff', fontSize: 11, fontWeight: '900' }}>REFRESH DATA</Text>
+        </TouchableOpacity>
+        <Text style={{ color: '#fff', fontSize: 9, marginTop: 4 }}>Src: {sightsSource}</Text>
+        <Text style={{ color: '#fff', fontSize: 9 }}>Ready: {audioProducts.filter(p => {
+          const t = p.audioFiles?.[audioLang]?.[audioVariant];
+          return !!t?.url && !t.url.includes('example.com');
+        }).length}</Text>
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: Math.max(10, insets.top + 6), paddingBottom: 140 }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: Math.max(10, insets.top + 6), paddingBottom: 140 },
+        ]}
         onScrollBeginDrag={() => refreshContinue().catch(() => {})}
       >
         <View style={styles.header}>
@@ -116,6 +147,7 @@ export const HomeScreen: React.FC = () => {
             <Text style={styles.hTitle}>Good evening</Text>
             <Text style={styles.hSub}>Pick an audio guide and press play</Text>
           </View>
+
           <TouchableOpacity
             onPress={() => setSettingsOpen(true)}
             activeOpacity={0.85}
@@ -139,7 +171,11 @@ export const HomeScreen: React.FC = () => {
             autoCapitalize="none"
           />
           {!!query && (
-            <TouchableOpacity onPress={() => setQuery('')} activeOpacity={0.8} style={styles.clearBtn}>
+            <TouchableOpacity
+              onPress={() => setQuery('')}
+              activeOpacity={0.8}
+              style={styles.clearBtn}
+            >
               <Ionicons name="close-circle" size={18} color="rgba(60,60,67,0.45)" />
             </TouchableOpacity>
           )}
@@ -167,7 +203,11 @@ export const HomeScreen: React.FC = () => {
               <Text style={styles.sectionTitle}>Jump back in</Text>
               <Text style={styles.sectionSub}>Recent</Text>
             </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.resumeRow}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.resumeRow}
+            >
               {continueItems.map(({ sight, progress }) => {
                 const parsed = parseVariantKey(progress.last_played_variant);
                 const lang = parsed?.lang ?? 'en';
@@ -187,7 +227,7 @@ export const HomeScreen: React.FC = () => {
                     onPress={async () => {
                       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                       if (url) await play(sight.id, `${lang}_${variant}`, url);
-                      navigation.navigate('Explore', { pickSightId: sight.id });
+                      // Removed navigation to Explore
                     }}
                   />
                 );
@@ -209,7 +249,9 @@ export const HomeScreen: React.FC = () => {
             <View style={styles.heroOverlay} />
             <View style={styles.heroContent}>
               <Text style={styles.heroKicker}>{hero.stops?.[0]?.category ?? 'Tour'}</Text>
-              <Text style={styles.heroTitle} numberOfLines={2}>{hero.title}</Text>
+              <Text style={styles.heroTitle} numberOfLines={2}>
+                {hero.title}
+              </Text>
             </View>
           </TouchableOpacity>
         ) : loading ? (
@@ -220,7 +262,9 @@ export const HomeScreen: React.FC = () => {
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Audio guides</Text>
-          <Text style={styles.sectionSub}>{audioVariant.toUpperCase()} · {audioLang.toUpperCase()}</Text>
+          <Text style={styles.sectionSub}>
+            {audioVariant.toUpperCase()} · {audioLang.toUpperCase()}
+          </Text>
         </View>
 
         <View style={styles.audioPicks}>
@@ -230,28 +274,42 @@ export const HomeScreen: React.FC = () => {
               return (
                 <TouchableOpacity
                   key={v.key}
-                  onPress={() => { Haptics.selectionAsync(); setAudioVariant(v.key); }}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setAudioVariant(v.key);
+                  }}
                   activeOpacity={0.85}
                   style={[styles.audioVariantPill, active && styles.audioVariantPillActive]}
                 >
-                  <Text style={[styles.audioVariantText, active && styles.audioVariantTextActive]}>{v.label}</Text>
+                  <Text style={[styles.audioVariantText, active && styles.audioVariantTextActive]}>
+                    {v.label}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
           </View>
 
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.audioLangs}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.audioLangs}
+          >
             {AUDIO_LANGS.map((l) => {
               const active = audioLang === l.code;
               return (
                 <TouchableOpacity
                   key={l.code}
-                  onPress={() => { Haptics.selectionAsync(); setAudioLang(l.code); }}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setAudioLang(l.code);
+                  }}
                   activeOpacity={0.85}
                   style={[styles.audioLangPill, active && styles.audioLangPillActive]}
                 >
                   <Text style={styles.audioLangFlag}>{l.flag}</Text>
-                  <Text style={[styles.audioLangText, active && styles.audioLangTextActive]}>{l.label}</Text>
+                  <Text style={[styles.audioLangText, active && styles.audioLangTextActive]}>
+                    {l.label}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
@@ -267,9 +325,11 @@ export const HomeScreen: React.FC = () => {
           renderItem={({ item }) => {
             const track = item.audioFiles?.[audioLang]?.[audioVariant];
             const url = (track?.url ?? '').trim();
+            const hasAudio = !!url && !url.includes('example.com');
             const durationLabel = track?.duration ? fmtMin(track.duration) : undefined;
             return (
               <ProductCard
+                id={item.id}
                 style={styles.audioCard}
                 title={item.name}
                 subtitle={item.category.toUpperCase()}
@@ -277,10 +337,11 @@ export const HomeScreen: React.FC = () => {
                 durationLabel={durationLabel}
                 stopsLabel={audioVariant === 'kids' ? 'Myths' : 'Audio'}
                 image={item.thumbnail ?? null}
+                hasAudio={hasAudio}
                 onPress={async () => {
                   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-                  if (url) await play(item.id, `${audioLang}_${audioVariant}`, url);
-                  navigation.navigate('Explore', { pickSightId: item.id });
+                  if (url && hasAudio) await play(item.id, `${audioLang}_${audioVariant}`, url);
+                  // Removed navigation to Explore
                 }}
               />
             );
@@ -312,20 +373,41 @@ export const HomeScreen: React.FC = () => {
               <Skeleton backgroundColor="rgba(0,0,0,0.06)" style={styles.tourSkeleton} />
             </>
           ) : filtered.length ? (
-            filtered.slice(0, 12).map((item) => (
-              <ProductCard
-                key={item.id}
-                title={item.title}
-                subtitle={item.stops?.[0]?.category ?? 'Tour'}
-                durationLabel={item.duration ?? undefined}
-                stopsLabel={item.stops?.length ? `${item.stops.length} stops` : undefined}
-                image={item.thumbnail ?? null}
-                onPress={() => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                  setSelectedTour(item);
-                }}
-              />
-            ))
+            [...filtered]
+              .sort((a, b) => {
+                const check = (t: any) => {
+                  const tr = t.stops?.[0]?.audioFiles?.[audioLang]?.[audioVariant];
+                  const u = (tr?.url ?? '').trim();
+                  return !!u && !u.includes('example.com');
+                };
+                const hasA = check(a);
+                const hasB = check(b);
+                if (hasA && !hasB) return -1;
+                if (!hasA && hasB) return 1;
+                return 0;
+              })
+              .slice(0, 12)
+              .map((item) => {
+                const track = item.stops?.[0]?.audioFiles?.[audioLang]?.[audioVariant];
+                const url = (track?.url ?? '').trim();
+                const hasAudio = !!url && !url.includes('example.com');
+                return (
+                  <ProductCard
+                    id={item.id}
+                    key={item.id}
+                    title={item.title}
+                    subtitle={item.stops?.[0]?.category ?? 'Tour'}
+                    durationLabel={item.duration ?? undefined}
+                    stopsLabel={item.stops?.length ? `${item.stops.length} stops` : undefined}
+                    image={item.thumbnail ?? null}
+                    hasAudio={hasAudio}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setSelectedTour(item);
+                    }}
+                  />
+                );
+              })
           ) : (
             <View style={styles.empty}>
               <Ionicons name="sparkles-outline" size={48} color="rgba(60,60,67,0.25)" />
@@ -346,7 +428,12 @@ export const HomeScreen: React.FC = () => {
           const key = `${lang}_${variant}`;
           const items = stops
             .filter((s) => s?.id)
-            .map((s) => ({ sightId: s.id, variant: key, remoteUrl: s.audioFiles?.[lang]?.[variant]?.url, title: s.name }));
+            .map((s) => ({
+              sightId: s.id,
+              variant: key,
+              remoteUrl: s.audioFiles?.[lang]?.[variant]?.url,
+              title: s.name,
+            }));
           if (items.length < 1) return;
           const startAt = Math.max(0, Math.min(items.length - 1, index));
           await startQueue(items, startAt, t.title);
@@ -361,51 +448,125 @@ export const HomeScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#F2F3F7' },
+  screen: { flex: 1, backgroundColor: '#000' },
   scrollContent: { paddingHorizontal: 0 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 10 },
-  hTitle: { fontSize: 28, fontWeight: '900', color: '#111' },
-  hSub: { fontSize: 12, fontWeight: '700', color: 'rgba(60,60,67,0.7)' },
-  hAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', elevation: 2 },
-  searchRow: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff', marginHorizontal: 16, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 8 },
-  searchInput: { flex: 1, fontSize: 14, fontWeight: '700', color: '#111' },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+  },
+  hTitle: { fontSize: 28, fontWeight: '900', color: '#fff' },
+  hSub: { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.6)' },
+  hAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginHorizontal: 16,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  searchInput: { flex: 1, fontSize: 14, fontWeight: '700', color: '#fff' },
   clearBtn: { padding: 2 },
   chipsRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 12 },
-  chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: 'rgba(118,118,128,0.12)' },
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
   chipActive: { backgroundColor: theme.colors.brand },
-  chipLabel: { fontSize: 12, fontWeight: '900', color: 'rgba(60,60,67,0.8)' },
-  chipLabelActive: { color: '#fff' },
-  hero: { height: 220, borderRadius: 26, overflow: 'hidden', marginHorizontal: 16, marginBottom: 14, backgroundColor: '#1C1C1E' },
+  chipLabel: { fontSize: 13, fontWeight: '800', color: '#fff' },
+  chipLabelActive: { color: '#000' },
+  hero: {
+    height: 220,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginHorizontal: 16,
+    marginBottom: 14,
+    backgroundColor: '#1C1C1E',
+  },
   heroImage: { width: '100%', height: '100%' },
-  heroOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.25)' },
+  heroOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.3)' },
   heroContent: { position: 'absolute', left: 16, right: 16, bottom: 16, gap: 6 },
-  heroKicker: { fontSize: 11, fontWeight: '800', color: 'rgba(255,255,255,0.8)', letterSpacing: 0.7, textTransform: 'uppercase' },
-  heroTitle: { fontSize: 22, fontWeight: '900', color: '#fff' },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', paddingHorizontal: 16, marginTop: 6, marginBottom: 10 },
-  sectionTitle: { fontSize: 18, fontWeight: '900', color: '#111' },
-  sectionSub: { fontSize: 12, fontWeight: '800', color: 'rgba(60,60,67,0.6)' },
+  heroKicker: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: theme.colors.brand,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+  },
+  heroTitle: { fontSize: 24, fontWeight: '900', color: '#fff' },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingHorizontal: 16,
+    marginTop: 12,
+    marginBottom: 12,
+  },
+  sectionTitle: { fontSize: 20, fontWeight: '900', color: '#fff' },
+  sectionSub: { fontSize: 12, fontWeight: '800', color: 'rgba(255,255,255,0.5)' },
   resumeRow: { paddingHorizontal: 16, paddingBottom: 6 },
   resumeCard: { width: 240, height: 200, marginRight: 12 },
-  audioPicks: { paddingHorizontal: 16, gap: 10, marginBottom: 10 },
+  audioPicks: { paddingHorizontal: 16, gap: 10, marginBottom: 12 },
   audioVariants: { flexDirection: 'row', gap: 8 },
-  audioVariantPill: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: 'rgba(118,118,128,0.12)' },
-  audioVariantPillActive: { backgroundColor: '#111' },
-  audioVariantText: { fontSize: 12, fontWeight: '900', color: 'rgba(60,60,67,0.75)' },
-  audioVariantTextActive: { color: '#fff' },
-  audioLangs: { gap: 8, paddingRight: 6 },
-  audioLangPill: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999, backgroundColor: 'rgba(118,118,128,0.12)', flexDirection: 'row', alignItems: 'center', gap: 6 },
-  audioLangPillActive: { backgroundColor: theme.colors.brand },
-  audioLangFlag: { fontSize: 13 },
-  audioLangText: { fontSize: 11, fontWeight: '900', color: 'rgba(60,60,67,0.75)' },
-  audioLangTextActive: { color: '#fff' },
+  audioVariantPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  audioVariantPillActive: { backgroundColor: '#fff' },
+  audioVariantText: { fontSize: 12, fontWeight: '800', color: 'rgba(255,255,255,0.7)' },
+  audioVariantTextActive: { color: '#000' },
+  audioLangs: { gap: 10, paddingRight: 6 },
+  audioLangPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  audioLangPillActive: { backgroundColor: 'rgba(255,255,255,0.15)' },
+  audioLangFlag: { fontSize: 14 },
+  audioLangText: { fontSize: 12, fontWeight: '800', color: '#fff' },
+  audioLangTextActive: { color: theme.colors.brand },
   audioRow: { paddingHorizontal: 16, paddingBottom: 4 },
   audioCard: { width: 280, marginRight: 12, marginBottom: 0 },
   audioSkeletonRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 16 },
-  audioSkeletonCard: { width: 280, height: 260, borderRadius: 24 },
-  audioEmpty: { width: 280, height: 260, borderRadius: 24, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 16 },
-  audioEmptyText: { fontSize: 13, fontWeight: '800', color: 'rgba(60,60,67,0.6)', textAlign: 'center' },
-  cardsCol: { paddingHorizontal: 16, gap: 14, paddingBottom: 10 },
-  tourSkeleton: { height: 260, borderRadius: 24 },
+  audioSkeletonCard: { width: 280, height: 260, borderRadius: 12 },
+  audioEmpty: {
+    width: 280,
+    height: 260,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+  },
+  audioEmptyText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: 'rgba(255,255,255,0.4)',
+    textAlign: 'center',
+  },
+  cardsCol: { paddingHorizontal: 16, gap: 16, paddingBottom: 10 },
+  tourSkeleton: { height: 260, borderRadius: 12 },
   empty: { alignItems: 'center', paddingTop: 60, gap: 12 },
-  emptyText: { fontSize: 13, fontWeight: '700', color: 'rgba(60,60,67,0.6)' },
+  emptyText: { fontSize: 14, fontWeight: '700', color: 'rgba(255,255,255,0.4)' },
 });

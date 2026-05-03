@@ -37,12 +37,9 @@
     }
   },
   {
-    "id": "vatican",
+    "id": "vatican-city",
     "name": "Vatican City",
     "name_it": "Città del Vaticano",
-    "pack": "essential",
-    "lat": 41.9029,
-    "lng": 12.4534,
     "radius": 20,
     "category": "religious",
     "has_tips": true,
@@ -735,6 +732,60 @@
           "url": "https://example.com/audio/catacombs-callixtus-kids.m4a",
           "duration": 180,
           "size": 1500000
+        }
+      }
+    }
+  },
+  {
+    "id": "heart",
+    "name": "Heart of Rome",
+    "name_it": "Cuore di Roma",
+    "pack": "essential",
+    "lat": 41.8992,
+    "lng": 12.4769,
+    "radius": 200,
+    "category": "piazza",
+    "has_tips": true,
+    "thumbnail": "https://images.unsplash.com/photo-1525874684015-58379d421a52?q=80&w=1200&auto=format&fit=crop",
+    "description": "A journey through the winding streets of Rome's historic center, connecting iconic landmarks like the Trevi Fountain, the Pantheon, and Piazza Navona.",
+    "kidsMyth": "The center of Rome is like a giant heart made of stone and water. Legend says that as long as the fountains keep flowing, the heart of the city will never stop beating.",
+    "tips": [
+      "Best explored on foot to find hidden alleyways.",
+      "Gelato stops are mandatory on this route."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/heart-quick.m4a",
+          "duration": 120,
+          "size": 1000000
+        }
+      }
+    }
+  },
+  {
+    "id": "vatican-pinacoteca",
+    "name": "Vatican Pinacoteca",
+    "name_it": "Pinacoteca Vaticana",
+    "pack": "full",
+    "lat": 41.9064,
+    "lng": 12.4533,
+    "radius": 20,
+    "category": "museum",
+    "has_tips": true,
+    "thumbnail": "https://images.unsplash.com/photo-1594841763055-66d121c6863d?q=80&w=1200&auto=format&fit=crop",
+    "description": "The Vatican Art Gallery (Pinacoteca) houses one of the world's most significant collections of European masterpieces, from the Middle Ages to the 19th century.",
+    "kidsMyth": "Leonardo da Vinci’s 'St. Jerome' was lost for centuries until it was found in two pieces—one part was used as a shoemaker’s stool and the other as the lid of a wooden box!",
+    "tips": [
+      "Look for Raphael’s 'Transfiguration'—his final masterpiece.",
+      "Room VIII contains the famous Raphael tapestries."
+    ],
+    "audioFiles": {
+      "en": {
+        "quick": {
+          "url": "https://example.com/audio/vatican-pinacoteca-quick.m4a",
+          "duration": 120,
+          "size": 1000000
         }
       }
     }

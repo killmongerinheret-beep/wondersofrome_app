@@ -1,9 +1,20 @@
-import React from 'react';
-import { Linking, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
+import React from 'react';
+import {
+  Linking,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Switch,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { getLegalLinks } from '../config/legal';
+import { useGeofencing } from '../hooks/useGeofencing';
 import { theme } from '../ui/theme';
 
 type Props = {
@@ -14,6 +25,7 @@ type Props = {
 export const SettingsSheet: React.FC<Props> = ({ visible, onClose }) => {
   const insets = useSafeAreaInsets();
   const links = getLegalLinks();
+  const { isGeofencing, toggleGeofencing } = useGeofencing();
 
   const open = async (url: string) => {
     const u = url.trim();
@@ -34,13 +46,39 @@ export const SettingsSheet: React.FC<Props> = ({ visible, onClose }) => {
         <View style={[styles.sheetWrap, { paddingBottom: Math.max(14, insets.bottom + 10) }]}>
           <BlurView intensity={95} tint="light" style={styles.sheet}>
             <View style={styles.header}>
-              <Text style={styles.title}>About</Text>
-              <TouchableOpacity onPress={onClose} activeOpacity={0.85} style={styles.closeBtn} accessibilityRole="button" accessibilityLabel="Close settings">
+              <Text style={styles.title}>Settings</Text>
+              <TouchableOpacity
+                onPress={onClose}
+                activeOpacity={0.85}
+                style={styles.closeBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Close settings"
+              >
                 <Ionicons name="close" size={18} color="#111" />
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.row} activeOpacity={0.85} onPress={() => open(links.privacy)}>
+            <View style={styles.row}>
+              <View style={styles.rowLeft}>
+                <Ionicons name="navigate-outline" size={18} color={theme.colors.brand} />
+                <View>
+                  <Text style={styles.rowText}>Auto-play Audio</Text>
+                  <Text style={styles.rowSubText}>Plays audio when near a sight</Text>
+                </View>
+              </View>
+              <Switch
+                value={isGeofencing}
+                onValueChange={toggleGeofencing}
+                trackColor={{ false: 'rgba(0,0,0,0.1)', true: theme.colors.brand }}
+                thumbColor={Platform.OS === 'ios' ? undefined : '#fff'}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={styles.row}
+              activeOpacity={0.85}
+              onPress={() => open(links.privacy)}
+            >
               <View style={styles.rowLeft}>
                 <Ionicons name="shield-checkmark-outline" size={18} color={theme.colors.brand} />
                 <Text style={styles.rowText}>Privacy Policy</Text>
@@ -48,7 +86,11 @@ export const SettingsSheet: React.FC<Props> = ({ visible, onClose }) => {
               <Ionicons name="chevron-forward" size={16} color="rgba(60,60,67,0.5)" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.row} activeOpacity={0.85} onPress={() => open(links.terms)}>
+            <TouchableOpacity
+              style={styles.row}
+              activeOpacity={0.85}
+              onPress={() => open(links.terms)}
+            >
               <View style={styles.rowLeft}>
                 <Ionicons name="document-text-outline" size={18} color={theme.colors.brand} />
                 <Text style={styles.rowText}>Terms</Text>
@@ -56,7 +98,11 @@ export const SettingsSheet: React.FC<Props> = ({ visible, onClose }) => {
               <Ionicons name="chevron-forward" size={16} color="rgba(60,60,67,0.5)" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.row} activeOpacity={0.85} onPress={() => open(links.support)}>
+            <TouchableOpacity
+              style={styles.row}
+              activeOpacity={0.85}
+              onPress={() => open(links.support)}
+            >
               <View style={styles.rowLeft}>
                 <Ionicons name="help-circle-outline" size={18} color={theme.colors.brand} />
                 <Text style={styles.rowText}>Support</Text>
@@ -78,10 +124,29 @@ export const SettingsSheet: React.FC<Props> = ({ visible, onClose }) => {
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.18)', justifyContent: 'flex-end' },
   sheetWrap: { paddingHorizontal: 12 },
-  sheet: { borderRadius: 24, overflow: 'hidden', paddingHorizontal: 14, paddingTop: 14, paddingBottom: 10, backgroundColor: 'rgba(255,255,255,0.85)' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 },
+  sheet: {
+    borderRadius: 24,
+    overflow: 'hidden',
+    paddingHorizontal: 14,
+    paddingTop: 14,
+    paddingBottom: 10,
+    backgroundColor: 'rgba(255,255,255,0.85)',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
   title: { fontSize: 16, fontWeight: '900', color: '#111' },
-  closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(0,0,0,0.06)', alignItems: 'center', justifyContent: 'center' },
+  closeBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -94,8 +159,8 @@ const styles = StyleSheet.create({
   },
   rowLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   rowText: { fontSize: 14, fontWeight: '800', color: '#111' },
+  rowSubText: { fontSize: 11, fontWeight: '600', color: 'rgba(60,60,67,0.5)', marginTop: 1 },
   footer: { alignItems: 'center', paddingTop: 6, paddingBottom: 4, gap: 4 },
   footerText: { fontSize: 12, fontWeight: '800', color: 'rgba(60,60,67,0.75)' },
   footerSub: { fontSize: 11, fontWeight: '700', color: 'rgba(60,60,67,0.55)' },
 });
-

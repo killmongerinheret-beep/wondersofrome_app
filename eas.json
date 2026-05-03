@@ -23,6 +23,22 @@
       "env": {
         "EXPO_PUBLIC_SITE_ID": "wondersofrome"
       }
+    },
+    "apk-tickets": {
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SITE_ID": "ticketsinrome"
+      }
+    },
+    "apk-wonders": {
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SITE_ID": "wondersofrome"
+      }
     }
   },
   "submit": {
